@@ -1,0 +1,30 @@
+body {
+	min-width: 320px;
+	min-height: 100vh;
+	color: var(--el-text-color-primary);
+	background-color: var(--el-bg-color);
+}
+
+.app {
+	// 解决锚点定位元素被头部栏.≥覆盖的问题
+	scroll-padding-top: 60px;
+}
+
+.container {
+	height: calc(100% - 60px);
+
+	.docCatalogue {
+		height: calc(100% - 60px);
+	}
+
+	.viewer {
+		height: max-content;
+		min-height: 100%;
+		width: calc(100% - 256px);
+	}
+
+	.text {
+		left: calc(100% - 256px);
+		height: calc(100% - 60px);
+	}
+}

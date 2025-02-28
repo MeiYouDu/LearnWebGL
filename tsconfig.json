@@ -1,0 +1,39 @@
+{
+	"compilerOptions": {
+		"target": "esnext",
+		"module": "esnext",
+		"moduleResolution": "node",
+		"allowImportingTsExtensions": true,
+		"emitDeclarationOnly": true,
+		"resolveJsonModule": true,
+		"allowJs": true,
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"alwaysStrict": true,
+		"skipDefaultLibCheck": true,
+		"skipLibCheck": true,
+		"useDefineForClassFields": false,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"isolatedModules": true,
+		"removeComments": false,
+		"lib": ["esnext", "dom"],
+		"jsx": "preserve",
+		"jsxImportSource": "vue"
+	},
+	"include": [
+		"src/**/*", "test/**/*", "."],
+	"exclude": [
+		"node_modules",
+		"src/public",
+		"dist",
+		"eslint.config.mjs",
+	],
+	"ts-node": {
+		"compilerOptions": {
+			"module": "CommonJS"
+		}
+	}
+}
