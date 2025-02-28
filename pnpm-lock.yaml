@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@cesium-drawer/algorithm':
+        specifier: 0.7.0-alpha.11
+        version: 0.7.0-alpha.11(@cesium-drawer/drawer@0.7.0-alpha.11(cesium@1.120.0))(cesium@1.120.0)
+      '@cesium-drawer/drawer':
+        specifier: 0.7.0-alpha.11
+        version: 0.7.0-alpha.11(cesium@1.120.0)
       '@element-plus/icons-vue':
         specifier: ^2.3.1
         version: 2.3.1(vue@3.5.13(typescript@5.7.3))
@@ -972,6 +978,17 @@ packages:
 
   '@bcoe/v8-coverage@0.2.3':
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
+
+  '@cesium-drawer/algorithm@0.7.0-alpha.11':
+    resolution: {integrity: sha512-kpGdSE2JP9FFxmIm7KJ0xQ15/L5QXeQ2RJdFJzkoV0sIr6s7L7GetdtPkiRPoQajnSqaHwx93GdtSY+7wDPhkg==}
+    peerDependencies:
+      '@cesium-drawer/drawer': workspace:^
+      cesium: 1.x
+
+  '@cesium-drawer/drawer@0.7.0-alpha.11':
+    resolution: {integrity: sha512-BBQM5SvLmdScO6YyZkkHVBxz7LITIxLDZuCGX8WoVaL3yl2fsu+vAbLxqR8pHuHbR2U6jQsJQ771uyFfB9l/9Q==}
+    peerDependencies:
+      cesium: 1.x
 
   '@cesium/engine@10.1.0':
     resolution: {integrity: sha512-xwdJEhGYgf6481vhrb80N5DgQZMwWvn08TWE6NXEgOhkZ7WnTCykYoCDNBMj9WQBqTfREk7/e+/RI4Gx2/TlUA==}
@@ -10165,6 +10182,15 @@ snapshots:
       '@babel/helper-validator-identifier': 7.25.9
 
   '@bcoe/v8-coverage@0.2.3': {}
+
+  '@cesium-drawer/algorithm@0.7.0-alpha.11(@cesium-drawer/drawer@0.7.0-alpha.11(cesium@1.120.0))(cesium@1.120.0)':
+    dependencies:
+      '@cesium-drawer/drawer': 0.7.0-alpha.11(cesium@1.120.0)
+      cesium: 1.120.0
+
+  '@cesium-drawer/drawer@0.7.0-alpha.11(cesium@1.120.0)':
+    dependencies:
+      cesium: 1.120.0
 
   '@cesium/engine@10.1.0':
     dependencies:
