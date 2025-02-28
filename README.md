@@ -1,36 +1,12 @@
 ## 介绍
 
-CesiumDrawer 是一个基于 cesium 开发的图形绘制和常用算法库，整个仓库使用 pnpm9.x作为包管理工具。
-
-## 子仓库
-
-- drawer：图形绘制库，包含点线面等基础图形。
-- example：用例，文档。
-- satellite：卫星相关效果库。
-- algorithm：常用算法库。
-- cli：CesiumDrawer仓库中使用的命令行工具
-
-## document
-
-目前没有部署官方的文档，但是可以通过源代码编译编译，下面是具体的步骤
+一个使用webpack作为构建系统，vue作为web框架的基础工程 pnpm9.x || pnpm10.x作为包管理工具。
 
 ```shell
 git clone xx #本仓库地址
 pnpm install #安装依赖
 pnpm serve #启动文档服务
 ```
-
-访问 http://localhost:1888/ 这个地址，就可以看到文档了。
-
-## 贡献
-
-1. 请先联系喻启萌添加仓库权限
-2. git clone仓库后务必使用`pnpm install`进行依赖包的安装
-3. 提交信息需要遵循`git commit -m <type>[optional scope]: <description>`的格式
-   - type：提交的改动类型（如新增、修改、更新等）
-   - optional scope：标识此次提交主要涉及到代码中哪个模块
-   - description：一句话描述此次提交的主要内容
-
 ### 提交规则
 
 | type     | 描述                                                     |
@@ -58,11 +34,11 @@ git commit -m "feat(example): 新增 xxx 用例"
 ```shell
 git commit -e # 该命令将启动 git 的 vim可以增加多条提交
 	# vim
-	feat(drawer): 爆炸效果
+	feat: xxx
+	
+	1. xxx1
 
-		1. 爆炸效果 class
+	2. xxx2
 
-		2. 支持多重爆炸
-
-		3. 爆炸效果 interface
+	3. xxx3
 ```
