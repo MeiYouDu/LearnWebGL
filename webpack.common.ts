@@ -10,6 +10,7 @@ import unPluginAutoImport from "unplugin-auto-import/webpack";
 import unPluginVueComponents from "unplugin-vue-components/webpack";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 import MonacoEditorWebpackPlugin from "monaco-editor-webpack-plugin";
+import { VueLoaderPlugin } from "vue-loader";
 // import unPluginElementPlus from "unplugin-element-plus/webpack";
 import {
 	CONTEXT,
@@ -146,6 +147,7 @@ const config: Configuration = {
 		],
 	},
 	plugins: [
+		new VueLoaderPlugin(),
 		new HtmlWebpackPlugin({
 			title: "CesiumDrawer",
 			filename: "index.html",
