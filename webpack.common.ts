@@ -168,7 +168,6 @@ const config: Configuration = {
 		new NodePolyfillWebpackPlugin(),
 		new EslintWebpackPlugin({
 			configType: "flat",
-			eslintPath: "eslint/use-at-your-own-risk",
 			context: resolve(__dirname, "./"),
 			fixTypes: ["problem", "suggestion", "layout"],
 			extensions: [
