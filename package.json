@@ -116,6 +116,8 @@
 		"@element-plus/icons-vue": "^2.3.1",
 		"@typescript/vfs": "^1.6.1",
 		"@vueuse/core": "^12.7.0",
+		"@wangeditor/editor": "^5.1.23",
+		"@wangeditor/editor-for-vue": "^5.1.12",
 		"axios": "^1.8.1",
 		"cesium": "1.120.0",
 		"core-js": "^3.40.0",
