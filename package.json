@@ -1,11 +1,11 @@
 {
-	"name": "web-template",
+	"name": "LearnWebGL",
 	"version": "0.0.0",
-	"description": "一个使用webpack作为构建系统，vue作为web框架的基础工程",
+	"description": "学习webgl",
 	"private": false,
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/yqm1995/web-template.git"
+		"url": "git+https://github.com/MeiYouDu/LearnWebGl.git"
 	},
 	"keywords": [
 		"cesium",
@@ -13,14 +13,14 @@
 		"satellite"
 	],
 	"author": {
-		"name": "yqm1995",
+		"name": "MeiYouDu",
 		"email": "y836245751@gmail.com"
 	},
 	"license": "ISC",
 	"bugs": {
-		"url": "https://github.com/yqm1995/web-template/issues"
+		"url": "https://github.com/MeiYouDu/LearnWebGl/issues"
 	},
-	"homepage": "https://github.com/yqm1995/web-template#readme",
+	"homepage": "https://github.com/MeiYouDu/LearnWebGl#readme",
 	"scripts": {
 		"prepare": "husky",
 		"serve": "npx cross-env TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\" npx webpack serve -c ./webpack.dev.ts --env development",
