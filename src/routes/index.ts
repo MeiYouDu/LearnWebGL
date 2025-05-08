@@ -10,8 +10,40 @@ import {
 const routes: Array<RouteRecordRaw> = [
 	{
 		path: "/",
-		name: "root",
-		component: () => import("../views/helloWorld.tsx"),
+		name: "welcome",
+		component: () =>
+			import(
+				/* webpackChunkName: "welcome" */
+				/* webpackPrefetch: true */
+				"../views/welcome"
+			),
+	},
+	{
+		path: "/fundamentals",
+		name: "fundamentals",
+		redirect: "/fundamentals/helloWorld",
+		children: [
+			{
+				path: "helloWorld",
+				name: "helloWorld",
+				component: () =>
+					import(
+						/* webpackChunkName: "fundamental" */
+						/* webpackPrefetch: true */
+						"../views/helloWorld/index"
+					),
+			},
+		],
+	},
+	{
+		path: "/imageProcess",
+		name: "imageProcess",
+		children: [],
+	},
+	{
+		path: "/geometry",
+		name: "geometry",
+		children: [],
 	},
 ];
 
