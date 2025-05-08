@@ -119,6 +119,11 @@ const config: Configuration = {
 				},
 			},
 			{
+				test: /\.glsl$/i,
+				type: "asset/source",
+				exclude: EXCLUDE,
+			},
+			{
 				test: /\.md$/,
 				exclude: EXCLUDE,
 				use: [

@@ -36,6 +36,10 @@ declare global {
 		const module: string;
 		export default module;
 	}
+	module "*.glsl" {
+		const module: string;
+		export default module;
+	}
 
 	module "*.mdx" {
 		const MDXComponent: (props: any) => JSX.Element;

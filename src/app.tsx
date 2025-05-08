@@ -13,11 +13,13 @@ import {
 function getNav() {
 	return defineComponent({
 		setup() {
-			const {
-				push,
-				options: { routes },
-			} = useRouter();
+			const router = useRouter();
 			const activeName: Ref<string> = ref("welcome");
+
+			router.afterEach((to) => {
+				activeName.value = to.name as string;
+			});
+
 			function menuItem(routes: readonly RouteRecordRaw[]) {
 				return routes.map((item) => {
 					if (item.children && item.children.length > 0) {
@@ -41,17 +43,18 @@ function getNav() {
 					}
 				});
 			}
+
 			return function () {
 				return (
 					<ElMenu
 						class={"h-full w-[256px]"}
 						defaultActive={activeName.value}
 						onSelect={(name) => {
-							push({
+							router.push({
 								name,
 							});
 						}}>
-						{menuItem(routes)}
+						{menuItem(router.options.routes)}
 					</ElMenu>
 				);
 			};
