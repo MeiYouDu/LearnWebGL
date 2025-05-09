@@ -44,6 +44,17 @@ function createProgram(
 	gl.deleteProgram(program);
 }
 
+function resizeHandle(gl: WebGL2RenderingContext) {
+	// 必须得设置宽高
+	gl.canvas.width = (
+		gl.canvas as HTMLCanvasElement
+	).offsetWidth;
+	gl.canvas.height = (
+		gl.canvas as HTMLCanvasElement
+	).offsetHeight;
+	gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+}
+
 function main(
 	instance: Ref<HTMLCanvasElement | undefined>,
 ) {
@@ -54,19 +65,11 @@ function main(
 			powerPreference: "high-performance",
 		});
 		if (!gl) return;
-		const observer = new ResizeObserver(() => {
-			if (!instance.value) return;
-			// 设置实际像素尺寸
-			// instance.value.width = instance.value.offsetWidth;
-			// instance.value.height = instance.value.offsetHeight;
-			gl?.viewport(
-				0,
-				0,
-				instance.value.offsetWidth,
-				instance.value.offsetHeight,
-			);
-		});
+		const observer = new ResizeObserver(() =>
+			resizeHandle(gl),
+		);
 		observer.observe(instance.value);
+		resizeHandle(gl);
 		const vertexShader = createShader(
 			gl,
 			gl?.VERTEX_SHADER,
@@ -122,7 +125,7 @@ function main(
 			gl.useProgram(program);
 			gl.bindVertexArray(vao);
 			gl.drawArrays(gl.TRIANGLES, 0, vertexes.length / 3);
-			// requestAnimationFrame(render);
+			requestAnimationFrame(render);
 		}
 		render();
 	});
