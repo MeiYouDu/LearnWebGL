@@ -1,3 +1,5 @@
+import { mat4 } from "gl-matrix";
+
 class Shader {
 	constructor(
 		gl: WebGL2RenderingContext,
@@ -95,6 +97,18 @@ class Shader {
 			return this.gl
 				.deref()
 				?.getAttribLocation(this.program, name);
+	}
+
+	public setMatrix4(matrix4: mat4, name: string) {
+		const gl = this.gl.deref();
+		if (!gl) return;
+		if (this.program) {
+			gl.uniformMatrix4fv(
+				gl.getUniformLocation(this.program, name),
+				false,
+				matrix4,
+			);
+		}
 	}
 
 	public use(): void {

@@ -4,6 +4,7 @@ import vertexShaderSource from "./vertex.glsl";
 import fragmentShaderSource from "./fragment.glsl";
 import { Shader } from "../../helper/shader.ts";
 import { random } from "lodash";
+import { mat4 } from "gl-matrix";
 
 function main(
 	instance: Ref<HTMLCanvasElement | undefined>,
@@ -21,15 +22,16 @@ function main(
 			vertexShaderSource,
 			fragmentShaderSource,
 		);
+		shaderInstance.use();
 		const vertexesArr: number[] = [];
 		const indicesArr: number[] = [];
 		for (let i = 0; i < 10; i++) {
 			for (let j = 0; j < 3; j++) {
 				const x = random(-1, 1, true);
 				const y = random(-1, 1, true);
-				const r = random(0, 1, true);
-				const g = random(0, 1, true);
-				const b = random(0, 1, true);
+				const r = j !== 2 ? random(0, 1, true) : 0;
+				const g = j !== 1 ? random(0, 1, true) : 0;
+				const b = j !== 0 ? random(0, 1, true) : 0;
 				vertexesArr.push(x, y, 0, r, g, b);
 				indicesArr.push(i * 3 + j);
 			}
@@ -42,6 +44,7 @@ function main(
 		 * 索引
 		 */
 		const indices = new Uint32Array(indicesArr);
+
 		const vbo = gl.createBuffer(),
 			ebo = gl.createBuffer(),
 			vao = gl.createVertexArray();
@@ -85,6 +88,11 @@ function main(
 			);
 			gl.enableVertexAttribArray(colorAttributeLocation);
 		}
+		let angle = 0;
+		shaderInstance.setMatrix4(
+			mat4.fromZRotation(mat4.create(), angle),
+			"modelTrans",
+		);
 		function render() {
 			if (!gl) return;
 			if (instance.value) resizeHandle(instance.value, gl);
@@ -92,6 +100,11 @@ function main(
 			gl.clear(gl.COLOR_BUFFER_BIT);
 			shaderInstance.use();
 			gl.bindVertexArray(vao);
+			angle += 0.005;
+			shaderInstance.setMatrix4(
+				mat4.fromZRotation(mat4.create(), angle),
+				"modelTrans",
+			);
 			gl.drawElements(
 				gl.TRIANGLES,
 				indicesArr.length,
