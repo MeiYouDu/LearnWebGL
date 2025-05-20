@@ -3,6 +3,7 @@ import { resizeHandle } from "../../helper/resize.ts";
 import vertexShaderSource from "./vertex.glsl";
 import fragmentShaderSource from "./fragment.glsl";
 import { Shader } from "../../helper/shader.ts";
+import { random } from "lodash";
 
 function main(
 	instance: Ref<HTMLCanvasElement | undefined>,
@@ -20,22 +21,46 @@ function main(
 			vertexShaderSource,
 			fragmentShaderSource,
 		);
+		const vertexesArr: number[] = [];
+		const indicesArr: number[] = [];
+		for (let i = 0; i < 10; i++) {
+			for (let j = 0; j < 3; j++) {
+				const x = random(-1, 1, true);
+				const y = random(-1, 1, true);
+				const r = random(0, 1, true);
+				const g = random(0, 1, true);
+				const b = random(0, 1, true);
+				vertexesArr.push(x, y, 0, r, g, b);
+				indicesArr.push(i * 3 + j);
+			}
+		}
 		/**
 		 * 顶点数据
 		 */
-		const vertexes = new Float32Array([
-			-0.5, -0.5, 0, 0.5, -0.5, 0, 0, 0.5, 0,
-		]);
+		const vertexes = new Float32Array(vertexesArr);
+		/**
+		 * 索引
+		 */
+		const indices = new Uint32Array(indicesArr);
 		const vbo = gl.createBuffer(),
+			ebo = gl.createBuffer(),
 			vao = gl.createVertexArray();
 		const positionAttributeLocation =
 			shaderInstance.getAttribLocation("position");
-		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+		const colorAttributeLocation =
+			shaderInstance.getAttribLocation("color");
 		gl.bindVertexArray(vao);
+		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
 		// 传递数据
 		gl.bufferData(
 			gl.ARRAY_BUFFER,
 			vertexes,
+			gl.STATIC_DRAW,
+		);
+		gl.bufferData(
+			gl.ELEMENT_ARRAY_BUFFER,
+			indices,
 			gl.STATIC_DRAW,
 		);
 		if (typeof positionAttributeLocation === "number") {
@@ -44,12 +69,22 @@ function main(
 				3,
 				gl.FLOAT,
 				false,
-				0,
+				24,
 				0,
 			);
 			gl.enableVertexAttribArray(positionAttributeLocation);
 		}
-
+		if (typeof colorAttributeLocation === "number") {
+			gl.vertexAttribPointer(
+				colorAttributeLocation,
+				3,
+				gl.FLOAT,
+				false,
+				24,
+				12,
+			);
+			gl.enableVertexAttribArray(colorAttributeLocation);
+		}
 		function render() {
 			if (!gl) return;
 			if (instance.value) resizeHandle(instance.value, gl);
@@ -57,7 +92,13 @@ function main(
 			gl.clear(gl.COLOR_BUFFER_BIT);
 			shaderInstance.use();
 			gl.bindVertexArray(vao);
-			gl.drawArrays(gl.TRIANGLES, 0, vertexes.length / 3);
+			gl.drawElements(
+				gl.TRIANGLES,
+				indicesArr.length,
+				gl.UNSIGNED_INT,
+				0,
+			);
+			// gl.drawArrays(gl.TRIANGLES, 0, 3);
 			requestAnimationFrame(render);
 		}
 		render();
