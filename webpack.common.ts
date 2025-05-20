@@ -120,8 +120,9 @@ const config: Configuration = {
 			},
 			{
 				test: /\.glsl$/i,
-				type: "asset/source",
-				exclude: EXCLUDE,
+				loader: "webpack-glsl-loader",
+				// type: "asset/source",
+				// exclude: EXCLUDE,
 			},
 			{
 				test: /\.md$/,
