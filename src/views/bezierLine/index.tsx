@@ -1,37 +1,35 @@
 import { defineComponent, onMounted, ref, Ref } from "vue";
 import { resizeHandle } from "../../helper/resize.ts";
+// import "./bezier.glsl";
 import vertexShaderSource from "./vertex.glsl";
 import fragmentShaderSource from "./fragment.glsl";
 import { Shader } from "../../helper/shader.ts";
+import { vec4 } from "gl-matrix";
 import { random } from "lodash";
-import { mat4 } from "gl-matrix";
 
 interface Mesh {
 	vertexes: Float32Array;
 	indices: Uint32Array;
 }
-function getLineMesh(length: number, width: number): Mesh {
-	const vertexesArr: number[] = [];
-	const indicesArr: number[] = [];
-	for (let i = 0; i < length; i++) {
-		for (let j = 0; j < 3; j++) {
-			const x = random(-1, 1, true);
-			const y = random(-1, 1, true);
-			const r = j !== 2 ? random(0, 1, true) : 0;
-			const g = j !== 1 ? random(0, 1, true) : 0;
-			const b = j !== 0 ? random(0, 1, true) : 0;
-			vertexesArr.push(x, y, 0, r, g, b);
-			indicesArr.push(i * 3 + j);
-		}
-	}
+
+function getLineMesh(length: number): Mesh {
 	/**
 	 * 顶点数据
 	 */
-	const vertexes = new Float32Array(vertexesArr);
+	const vertexes = new Float32Array(length * 4);
 	/**
 	 * 索引
 	 */
-	const indices = new Uint32Array(indicesArr);
+	const indices = new Uint32Array(length);
+	for (let i = 0; i < length; i++) {
+		const index = i * 4;
+		vertexes[index] = 0;
+		vertexes[index + 1] = 0;
+		vertexes[index + 2] = 0.0;
+		vertexes[index + 3] = i / length;
+		indices[i] = i;
+	}
+
 	return {
 		vertexes,
 		indices,
@@ -54,15 +52,15 @@ function main(
 			fragmentShaderSource,
 		);
 		shaderInstance.use();
-		const mesh = getLineMesh(8, 4);
+		const mesh = getLineMesh(256);
 
 		const vbo = gl.createBuffer(),
 			ebo = gl.createBuffer(),
 			vao = gl.createVertexArray();
 		const positionAttributeLocation =
 			shaderInstance.getAttribLocation("position");
-		const colorAttributeLocation =
-			shaderInstance.getAttribLocation("color");
+		const tAttributeLocation =
+			shaderInstance.getAttribLocation("t");
 		gl.bindVertexArray(vao);
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
@@ -77,32 +75,41 @@ function main(
 			mesh.indices,
 			gl.STATIC_DRAW,
 		);
-		if (typeof positionAttributeLocation === "number") {
+		if (
+			positionAttributeLocation &&
+			positionAttributeLocation >= 0
+		) {
 			gl.vertexAttribPointer(
 				positionAttributeLocation,
 				3,
 				gl.FLOAT,
 				false,
-				24,
+				16,
 				0,
 			);
 			gl.enableVertexAttribArray(positionAttributeLocation);
 		}
-		if (typeof colorAttributeLocation === "number") {
+		if (tAttributeLocation && tAttributeLocation >= 0) {
 			gl.vertexAttribPointer(
-				colorAttributeLocation,
-				3,
+				tAttributeLocation,
+				1,
 				gl.FLOAT,
 				false,
-				24,
+				16,
 				12,
 			);
-			gl.enableVertexAttribArray(colorAttributeLocation);
+			gl.enableVertexAttribArray(tAttributeLocation);
 		}
-		let angle = 0;
-		shaderInstance.setMatrix4(
-			mat4.fromZRotation(mat4.create(), angle),
-			"modelTrans",
+		shaderInstance.setVec4Array(
+			new Array(4).fill(0).map(() => {
+				return vec4.fromValues(
+					random(-1, 1, true),
+					random(-1, 1, true),
+					0,
+					1,
+				);
+			}),
+			"points",
 		);
 		function render() {
 			if (!gl) return;
@@ -111,13 +118,12 @@ function main(
 			gl.clear(gl.COLOR_BUFFER_BIT);
 			shaderInstance.use();
 			gl.bindVertexArray(vao);
-			angle += 0.005;
-			shaderInstance.setMatrix4(
-				mat4.fromZRotation(mat4.create(), angle),
-				"modelTrans",
+			gl.drawElements(
+				gl.LINE_STRIP,
+				mesh.indices.length,
+				gl.UNSIGNED_INT,
+				0,
 			);
-			gl.drawElements(gl.TRIANGLES, 24, gl.UNSIGNED_INT, 0);
-			// gl.drawArrays(gl.TRIANGLES, 0, 3);
 			requestAnimationFrame(render);
 		}
 		render();

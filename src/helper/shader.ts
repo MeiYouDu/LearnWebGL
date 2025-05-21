@@ -1,4 +1,4 @@
-import { mat4 } from "gl-matrix";
+import { mat4, vec4 } from "gl-matrix";
 
 class Shader {
 	constructor(
@@ -108,6 +108,22 @@ class Shader {
 				false,
 				matrix4,
 			);
+		}
+	}
+
+	public setVec4Array(arr: vec4[], name: string) {
+		const gl = this.gl.deref();
+		if (!gl) return;
+		if (this.program) {
+			arr.forEach((item, index) => {
+				gl.uniform4fv(
+					gl.getUniformLocation(
+						this.program as WebGLProgram,
+						`${name}[${index}]`,
+					),
+					item,
+				);
+			});
 		}
 	}
 

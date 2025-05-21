@@ -28,9 +28,19 @@ const routes: Array<RouteRecordRaw> = [
 				name: "helloWorld",
 				component: () =>
 					import(
-						/* webpackChunkName: "fundamental" */
+						/* webpackChunkName: "helloWorld" */
 						/* webpackPrefetch: true */
 						"../views/helloWorld/index"
+					),
+			},
+			{
+				path: "bezierLine",
+				name: "bezierLine",
+				component: () =>
+					import(
+						/* webpackChunkName: "bezierLine" */
+						/* webpackPrefetch: true */
+						"../views/bezierLine/index"
 					),
 			},
 		],
