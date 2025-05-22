@@ -43,6 +43,16 @@ const routes: Array<RouteRecordRaw> = [
 						"../views/bezierLine/index"
 					),
 			},
+			{
+				path: "points",
+				name: "points",
+				component: () =>
+					import(
+						/* webpackChunkName: "points" */
+						/* webpackPrefetch: true */
+						"../views/points/index"
+					),
+			},
 		],
 	},
 	{

@@ -1,4 +1,4 @@
-import { mat4, vec4 } from "gl-matrix";
+import { mat4, vec2, vec4 } from "gl-matrix";
 
 class Shader {
 	constructor(
@@ -107,6 +107,18 @@ class Shader {
 				gl.getUniformLocation(this.program, name),
 				false,
 				matrix4,
+			);
+		}
+	}
+
+	public setVec2(vec: vec2, name: string) {
+		const gl = this.gl.deref();
+		if (!gl) return;
+		if (this.program) {
+			gl.uniform2f(
+				gl.getUniformLocation(this.program, name),
+				vec[0],
+				vec[1],
 			);
 		}
 	}

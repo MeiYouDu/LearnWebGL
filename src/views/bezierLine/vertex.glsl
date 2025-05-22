@@ -5,7 +5,7 @@ in float t;
 
 uniform vec4[4] points;
 
-out vec4 colorToFragment;
+flat out int isControlPoint;
 
 /**
 	* 贝塞尔曲线计算
@@ -23,7 +23,14 @@ vec4 bezier(vec4 p0, vec4 p1, vec4 p2, vec4 p3, float t) {
 }
 
 void main() {
-	vec4 p0 = points[0], p1 = points[1], p2 = points[2], p3 = points[3];
-	vec4 point = bezier(p0, p1, p2, p3, t);
-	gl_Position = point;
+	if (t <= 0.0) {
+		int index = int(-t) - 1;
+		gl_Position = points[index];
+		isControlPoint = 1;
+	} else {
+		vec4 p0 = points[0], p1 = points[1], p2 = points[2], p3 = points[3];
+		vec4 point = bezier(p0, p1, p2, p3, t);
+		gl_Position = point;
+		isControlPoint = 0;
+	}
 }
