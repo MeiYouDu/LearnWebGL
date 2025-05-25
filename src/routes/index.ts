@@ -48,9 +48,9 @@ const routes: Array<RouteRecordRaw> = [
 				name: "points",
 				component: () =>
 					import(
-						/* webpackChunkName: "points" */
+						/* webpackChunkName: "texture" */
 						/* webpackPrefetch: true */
-						"../views/points/index"
+						"../views/texture/index"
 					),
 			},
 		],
