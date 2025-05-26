@@ -17,6 +17,14 @@ declare global {
 		const styles: Record<string, string>;
 		export default styles;
 	}
+	module "*.jpg" {
+		const content: string;
+		export default content;
+	}
+	module "*.png" {
+		const content: string;
+		export default content;
+	}
 	module "*.vue" {
 		import { DefineComponent } from "vue";
 		const component: DefineComponent<any, any, any>;

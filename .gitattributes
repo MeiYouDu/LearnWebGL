@@ -2,6 +2,7 @@
 *.img -text
 *.png -text
 *.jpeg -text
+*.jpg -text
 *.pdf -text
 *.doc -text
 *.xlsx -text
