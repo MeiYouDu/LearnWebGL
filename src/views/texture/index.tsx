@@ -186,6 +186,17 @@ function main(
 			);
 			gl.enableVertexAttribArray(texCoordAttributeLocation);
 		}
+		let mixFactor = 0.5;
+		document.addEventListener("keydown", (ev) => {
+			if (ev.key === "ArrowUp") mixFactor += 0.05;
+			if (ev.key === "ArrowDown") mixFactor -= 0.05;
+			if (mixFactor >= 1) {
+				mixFactor = 1.0;
+			}
+			if (mixFactor <= 0.0) {
+				mixFactor = 0.0;
+			}
+		});
 		function render() {
 			if (!gl) return;
 			if (instance.value) resizeHandle(instance.value, gl);
@@ -197,6 +208,7 @@ function main(
 				vec2.fromValues(gl.canvas.width, gl.canvas.height),
 				"resolution",
 			);
+			shaderInstance.setFloat(mixFactor, "mixFactor");
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 			requestAnimationFrame(render);
 		}

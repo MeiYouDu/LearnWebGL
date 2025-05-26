@@ -150,6 +150,17 @@ class Shader {
 		}
 	}
 
+	public setFloat(val: number, name: string) {
+		const gl = this.gl.deref();
+		if (!gl) return;
+		if (this.program) {
+			gl.uniform1f(
+				gl.getUniformLocation(this.program, name),
+				val,
+			);
+		}
+	}
+
 	public use(): void {
 		if (this.program)
 			this.gl.deref()?.useProgram(this.program);
