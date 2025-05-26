@@ -16,7 +16,7 @@ export default merge<Config>(common, {
 	mode: "development",
 	devtool: "source-map",
 	devServer: {
-		port: 1888,
+		port: 2000,
 		compress: true,
 		hot: true,
 		historyApiFallback: true,
