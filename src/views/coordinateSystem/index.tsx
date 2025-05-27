@@ -4,10 +4,10 @@ import { resizeHandle } from "../../helper/resize.ts";
 import vertexShaderSource from "./vertex.glsl";
 import fragmentShaderSource from "./fragment.glsl";
 import { Shader } from "../../helper/shader.ts";
-import { mat4, vec2, vec3 } from "gl-matrix";
-import { pi } from "mathjs";
+import { vec2 } from "gl-matrix";
 import smile from "./awesomeface.png";
 import box from "./container.jpg";
+import { useInput } from "../../hook";
 
 function getMesh(): Mesh {
 	/**
@@ -112,6 +112,8 @@ function setTexture(
 function main(
 	instance: Ref<HTMLCanvasElement | undefined>,
 ) {
+	const inputInstance = useInput(instance);
+	const mixFactor = 0.65;
 	onMounted(() => {
 		if (!instance.value) return;
 		const gl = instance.value.getContext("webgl2", {
@@ -178,23 +180,13 @@ function main(
 			);
 			gl.enableVertexAttribArray(texCoordAttributeLocation);
 		}
-		let mixFactor = 0.5;
-		document.addEventListener("keydown", (ev) => {
-			if (ev.key === "ArrowUp") mixFactor += 0.05;
-			if (ev.key === "ArrowDown") mixFactor -= 0.05;
-			if (mixFactor >= 1) {
-				mixFactor = 1.0;
-			}
-			if (mixFactor <= 0.0) {
-				mixFactor = 0.0;
-			}
-		});
-
 		function render() {
 			if (!gl) return;
 			if (instance.value) resizeHandle(instance.value, gl);
+			const { model, view, projection } =
+				inputInstance.render(gl);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-			gl.clearColor(0, 0, 0, 1);
+			gl.clearColor(0.2, 0.2, 0.2, 1);
 			shaderInstance.use();
 			gl.bindVertexArray(vao);
 			shaderInstance.setVec2(
@@ -202,31 +194,9 @@ function main(
 				"resolution",
 			);
 			shaderInstance.setFloat(mixFactor, "mixFactor");
-			shaderInstance.setMatrix4(
-				mat4.fromRotation(
-					mat4.create(),
-					-(55 / 180) * pi * new Date().getTime() * 0.001,
-					vec3.fromValues(1.0, 1.0, 1.0),
-				),
-				"model",
-			);
-			shaderInstance.setMatrix4(
-				mat4.fromTranslation(
-					mat4.create(),
-					vec3.fromValues(0, 0, -3),
-				),
-				"view",
-			);
-			shaderInstance.setMatrix4(
-				mat4.perspective(
-					mat4.create(),
-					pi / 4,
-					gl.canvas.width / gl.canvas.height,
-					1,
-					Number.POSITIVE_INFINITY,
-				),
-				"projection",
-			);
+			shaderInstance.setMatrix4(model, "model");
+			shaderInstance.setMatrix4(view, "view");
+			shaderInstance.setMatrix4(projection, "projection");
 			gl.drawArrays(
 				gl.TRIANGLES,
 				0,
@@ -234,7 +204,7 @@ function main(
 			);
 			requestAnimationFrame(render);
 		}
-		render();
+		requestAnimationFrame(render);
 	});
 }
 
