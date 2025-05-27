@@ -44,13 +44,23 @@ const routes: Array<RouteRecordRaw> = [
 					),
 			},
 			{
-				path: "points",
-				name: "points",
+				path: "texture",
+				name: "texture",
 				component: () =>
 					import(
 						/* webpackChunkName: "texture" */
 						/* webpackPrefetch: true */
 						"../views/texture/index"
+					),
+			},
+			{
+				path: "coordinateSystem",
+				name: "coordinateSystem",
+				component: () =>
+					import(
+						/* webpackChunkName: "coordinateSystem" */
+						/* webpackPrefetch: true */
+						"../views/coordinateSystem/index"
 					),
 			},
 		],
