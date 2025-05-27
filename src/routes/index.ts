@@ -63,6 +63,16 @@ const routes: Array<RouteRecordRaw> = [
 						"../views/coordinateSystem/index"
 					),
 			},
+			{
+				path: "camera",
+				name: "camera",
+				component: () =>
+					import(
+						/* webpackChunkName: "camera" */
+						/* webpackPrefetch: true */
+						"../views/camera/index"
+					),
+			},
 		],
 	},
 	{
