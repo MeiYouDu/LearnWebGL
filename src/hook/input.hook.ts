@@ -3,7 +3,10 @@ import { mat4, vec2, vec3 } from "gl-matrix";
 import { pi } from "mathjs";
 
 interface ReturnType {
-	render(gl: WebGL2RenderingContext): {
+	render(
+		gl: WebGL2RenderingContext,
+		position: vec3,
+	): {
 		// x: number;
 		// y: number;
 		// z: number;
@@ -124,18 +127,22 @@ function useInput(
 		);
 	});
 
-	function render(gl: WebGL2RenderingContext) {
+	function render(
+		gl: WebGL2RenderingContext,
+		position: vec3,
+	) {
 		x += dx;
 		y += dy;
 		z += dz;
-		if (mouseIsDown) {
-			model = mat4.rotate(
-				mat4.create(),
-				modelCache,
-				(degree / 180) * pi,
-				vec3.fromValues(rx, ry, rz),
-			);
-		}
+		let M = mat4.create();
+		const trans = mat4.fromTranslation(model, position);
+		model = mat4.rotate(
+			mat4.create(),
+			modelCache,
+			(degree / 180) * pi,
+			vec3.fromValues(rx, ry, rz),
+		);
+		M = mat4.multiply(M, model, trans);
 		view = mat4.fromTranslation(
 			view,
 			vec3.fromValues(x, y, z),
@@ -148,7 +155,7 @@ function useInput(
 			Number.POSITIVE_INFINITY,
 		);
 		return {
-			model,
+			model: M,
 			view,
 			projection,
 		};

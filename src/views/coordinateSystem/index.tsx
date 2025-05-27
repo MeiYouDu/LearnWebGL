@@ -4,7 +4,7 @@ import { resizeHandle } from "../../helper/resize.ts";
 import vertexShaderSource from "./vertex.glsl";
 import fragmentShaderSource from "./fragment.glsl";
 import { Shader } from "../../helper/shader.ts";
-import { vec2 } from "gl-matrix";
+import { vec2, vec3 } from "gl-matrix";
 import smile from "./awesomeface.png";
 import box from "./container.jpg";
 import { useInput } from "../../hook";
@@ -180,11 +180,22 @@ function main(
 			);
 			gl.enableVertexAttribArray(texCoordAttributeLocation);
 		}
+		const positions = [
+			vec3.fromValues(0, 0, 0),
+			vec3.fromValues(2, 5, -15),
+			vec3.fromValues(-1.5, 2.2, -2.5),
+			vec3.fromValues(-3.8, -2, -12.3),
+			vec3.fromValues(2.4, -0.4, -3.5),
+			vec3.fromValues(-1.7, 3.0, -7.5),
+			vec3.fromValues(1.3, -2.0, -2.5),
+			vec3.fromValues(1.5, 2.0, -2.5),
+			vec3.fromValues(1.5, 0.2, -1.5),
+			vec3.fromValues(-1.3, 1.0, -1.5),
+		];
 		function render() {
 			if (!gl) return;
 			if (instance.value) resizeHandle(instance.value, gl);
-			const { model, view, projection } =
-				inputInstance.render(gl);
+
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 			gl.clearColor(0.2, 0.2, 0.2, 1);
 			shaderInstance.use();
@@ -194,14 +205,18 @@ function main(
 				"resolution",
 			);
 			shaderInstance.setFloat(mixFactor, "mixFactor");
-			shaderInstance.setMatrix4(model, "model");
-			shaderInstance.setMatrix4(view, "view");
-			shaderInstance.setMatrix4(projection, "projection");
-			gl.drawArrays(
-				gl.TRIANGLES,
-				0,
-				mesh.vertexes.length / 5,
-			);
+			positions.forEach((p) => {
+				const { model, view, projection } =
+					inputInstance.render(gl, p);
+				shaderInstance.setMatrix4(model, "model");
+				shaderInstance.setMatrix4(view, "view");
+				shaderInstance.setMatrix4(projection, "projection");
+				gl.drawArrays(
+					gl.TRIANGLES,
+					0,
+					mesh.vertexes.length / 5,
+				);
+			});
 			requestAnimationFrame(render);
 		}
 		requestAnimationFrame(render);
