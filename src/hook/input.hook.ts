@@ -1,5 +1,5 @@
 import { onMounted, onUnmounted, Ref } from "vue";
-import { mat4, vec3 } from "gl-matrix";
+import { mat4, quat, vec3 } from "gl-matrix";
 import { pi } from "mathjs";
 import { debounce } from "lodash";
 
@@ -18,22 +18,23 @@ interface ReturnType {
 function useInput(
 	canvas: Ref<HTMLCanvasElement | undefined>,
 ): ReturnType {
-	// if (!canvas.value) return { render };
-	let cameraPos = vec3.fromValues(0, 0, 3),
-		cameraFront = vec3.fromValues(0, 0, -1),
-		deltaTime = 1,
+	let deltaTime = 1,
 		mouseIsDown: boolean = false,
 		mouseMoveEvent: MouseEvent | undefined,
 		model = mat4.create(),
 		view = mat4.create(),
 		projection = mat4.create(),
-		dPos = vec3.fromValues(0, 0, 0);
-	const speed = 0.01,
+		dPos = vec3.fromValues(0, 0, 0),
+		headingPR = vec3.fromValues(0, 0, 0);
+	const speed = 0.005,
 		maxHeading = (89 / 180) * pi,
 		minHeading = (-89 / 180) * pi,
-		sensitivity = 0.05,
+		sensitivity = 0.01,
+		cameraPos = vec3.fromValues(0, 0, 3),
 		cameraUp = vec3.fromValues(0, 1, 0),
-		headingPR = vec3.fromValues(0, 0, 0);
+		cameraQuat = quat.create(),
+		cameraFront = vec3.fromValues(0, 0, -1),
+		initCameraFront = vec3.copy(vec3.create(), cameraFront);
 	function keydownHandle(ev: KeyboardEvent) {
 		const left = vec3.cross(
 			vec3.create(),
@@ -80,9 +81,7 @@ function useInput(
 	function mouseUpHandle(ev: MouseEvent) {
 		mouseIsDown = false;
 		mouseMoveEvent = undefined;
-		headingPR[0] = 0;
-		headingPR[1] = 0;
-		headingPR[2] = 0;
+		headingPR = vec3.create();
 	}
 	function mouseMoveHandle(ev: MouseEvent) {
 		if (!mouseIsDown) return;
@@ -147,37 +146,24 @@ function useInput(
 		delta: number,
 	) {
 		deltaTime = delta;
-		cameraPos = vec3.add(cameraPos, cameraPos, dPos);
+		vec3.add(cameraPos, cameraPos, dPos);
 		model = mat4.fromTranslation(model, position);
-		const rotationHeading = mat4.fromXRotation(
+		quat.rotateY(cameraQuat, cameraQuat, headingPR[1]);
+		quat.normalize(cameraQuat, cameraQuat);
+		quat.rotateX(cameraQuat, cameraQuat, headingPR[0]); // 直接更新持续的四元数
+		quat.normalize(cameraQuat, cameraQuat); // 每次更新后归一化
+		const transformation = mat4.fromQuat(
 			mat4.create(),
-			headingPR[0],
+			cameraQuat,
 		);
-		const rotationPitch = mat4.fromYRotation(
-			mat4.create(),
-			headingPR[1],
-		);
-		let transformation = mat4.create();
-		// TODO yqm 这里依旧有问题，当相机靠近原点时pitch 变化存在问题，后期如果需要更精细化的处理相机移动问题再优化
-		transformation = mat4.multiply(
-			transformation,
-			rotationPitch,
-			rotationHeading,
-		);
-		cameraFront = vec3.normalize(
+		vec3.normalize(
 			cameraFront,
 			vec3.transformMat4(
 				cameraFront,
-				cameraFront,
+				initCameraFront,
 				transformation,
 			),
 		);
-		// cameraFront[0] =
-		// 	cos(cameraFront[1]) * cos(cameraFront[0]);
-		// cameraFront[1] = sin(cameraFront[0]);
-		// cameraFront[2] =
-		// 	sin(cameraFront[1]) * cos(cameraFront[0]);
-		// cameraFront = vec3.normalize(cameraFront, cameraFront);
 		view = mat4.lookAt(
 			view,
 			cameraPos,
