@@ -1,23 +1,14 @@
 import { onMounted, onUnmounted, Ref } from "vue";
-import { mat4, vec2, vec3 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 import { pi } from "mathjs";
+import { debounce } from "lodash";
 
 interface ReturnType {
 	render(
 		gl: WebGL2RenderingContext,
 		position: vec3,
+		deltaTime: number,
 	): {
-		// x: number;
-		// y: number;
-		// z: number;
-		// dx: number;
-		// dy: number;
-		// dz: number;
-		// rx: number;
-		// ry: number;
-		// rz: number;
-		// degree: number;
-		// speed: number;
 		model: mat4;
 		view: mat4;
 		projection: mat4;
@@ -28,67 +19,90 @@ function useInput(
 	canvas: Ref<HTMLCanvasElement | undefined>,
 ): ReturnType {
 	// if (!canvas.value) return { render };
-	let x = 0,
-		y = 0,
-		z = -3,
-		dx = 0,
-		dy = 0,
-		dz = 0,
-		rx = 0,
-		ry = 0,
-		rz = 1,
-		degree = 0,
+	let cameraPos = vec3.fromValues(0, 0, 3),
+		cameraFront = vec3.fromValues(0, 0, -1),
+		deltaTime = 1,
 		mouseIsDown: boolean = false,
 		mouseMoveEvent: MouseEvent | undefined,
 		model = mat4.create(),
 		view = mat4.create(),
 		projection = mat4.create(),
-		modelCache = mat4.create();
-	const speed = 0.01;
+		dPos = vec3.fromValues(0, 0, 0);
+	const speed = 0.01,
+		maxHeading = (89 / 180) * pi,
+		minHeading = (-89 / 180) * pi,
+		sensitivity = 0.05,
+		cameraUp = vec3.fromValues(0, 1, 0),
+		headingPR = vec3.fromValues(0, 0, 0);
 	function keydownHandle(ev: KeyboardEvent) {
-		if (ev.code === "KeyW") dy = speed;
-		if (ev.code === "KeyS") dy = -speed;
-		if (ev.code === "KeyA") dx = -speed;
-		if (ev.code === "KeyD") dx = speed;
+		const left = vec3.cross(
+			vec3.create(),
+			cameraFront,
+			cameraUp,
+		);
+		if (ev.code === "KeyW")
+			dPos = vec3.scale(
+				dPos,
+				cameraFront,
+				speed * deltaTime * 0.1,
+			);
+		if (ev.code === "KeyS")
+			dPos = vec3.scale(
+				dPos,
+				cameraFront,
+				-speed * deltaTime * 0.1,
+			);
+		if (ev.code === "KeyA")
+			vec3.scale(dPos, left, -speed * deltaTime * 0.1);
+
+		if (ev.code === "KeyD")
+			vec3.scale(dPos, left, speed * deltaTime * 0.1);
 	}
 	function keyupHandle(ev: KeyboardEvent) {
-		if (ev.code === "KeyW") dy = 0.0;
-		if (ev.code === "KeyS") dy = 0.0;
-		if (ev.code === "KeyA") dx = 0.0;
-		if (ev.code === "KeyD") dx = 0.0;
+		if (ev.code === "KeyW") dPos = vec3.fromValues(0, 0, 0);
+		if (ev.code === "KeyS") dPos = vec3.fromValues(0, 0, 0);
+		if (ev.code === "KeyA") dPos = vec3.fromValues(0, 0, 0);
+		if (ev.code === "KeyD") dPos = vec3.fromValues(0, 0, 0);
 	}
+	const setDzZero = debounce(() => {
+		dPos[2] = 0;
+	}, deltaTime * 5);
 	function wheelHandle(ev: WheelEvent) {
-		dz = -ev.deltaY * 0.005;
-		setTimeout(() => {
-			dz = 0;
-		}, 300);
+		dPos[2] = -ev.deltaY * sensitivity;
+		setDzZero();
 		ev.stopPropagation();
 		ev.stopImmediatePropagation();
 		ev.preventDefault();
 	}
 	function mouseDownHandle(ev: MouseEvent) {
 		mouseIsDown = true;
-		if (!mouseMoveEvent) mouseMoveEvent = ev;
 	}
 	function mouseUpHandle(ev: MouseEvent) {
 		mouseIsDown = false;
 		mouseMoveEvent = undefined;
-		modelCache = model;
+		headingPR[0] = 0;
+		headingPR[1] = 0;
+		headingPR[2] = 0;
 	}
 	function mouseMoveHandle(ev: MouseEvent) {
 		if (!mouseIsDown) return;
-		if (!mouseMoveEvent) return;
-		const diffX = ev.clientX - mouseMoveEvent.clientX;
-		const diffY = ev.clientY - mouseMoveEvent.clientY;
-		let dir = vec2.fromValues(diffY, diffX);
-		degree = vec2.len(dir) / 5;
-		dir = vec2.normalize(dir, dir);
-		rx = dir[0];
-		ry = dir[1];
-		rz = 0;
-		if (rx === 0 && ry === 0 && rz === 0) {
-			rz = 1;
+		if (mouseMoveEvent) {
+			const diffX = ev.clientX - mouseMoveEvent.clientX;
+			const diffY = ev.clientY - mouseMoveEvent.clientY;
+			headingPR[0] =
+				((-diffY * sensitivity * deltaTime * 0.1) / 180) *
+				pi;
+			if (headingPR[0] >= maxHeading) {
+				headingPR[0] = maxHeading;
+			}
+			if (headingPR[0] <= minHeading) {
+				headingPR[0] = minHeading;
+			}
+			headingPR[1] =
+				((-diffX * sensitivity * deltaTime * 0.1) / 180) *
+				pi;
 		}
+		mouseMoveEvent = ev;
 	}
 	onMounted(() => {
 		document.addEventListener("keydown", keydownHandle);
@@ -130,22 +144,45 @@ function useInput(
 	function render(
 		gl: WebGL2RenderingContext,
 		position: vec3,
+		delta: number,
 	) {
-		x += dx;
-		y += dy;
-		z += dz;
-		let M = mat4.create();
-		const trans = mat4.fromTranslation(model, position);
-		model = mat4.rotate(
+		deltaTime = delta;
+		cameraPos = vec3.add(cameraPos, cameraPos, dPos);
+		model = mat4.fromTranslation(model, position);
+		const rotationHeading = mat4.fromXRotation(
 			mat4.create(),
-			modelCache,
-			(degree / 180) * pi,
-			vec3.fromValues(rx, ry, rz),
+			headingPR[0],
 		);
-		M = mat4.multiply(M, model, trans);
-		view = mat4.fromTranslation(
+		const rotationPitch = mat4.fromYRotation(
+			mat4.create(),
+			headingPR[1],
+		);
+		let transformation = mat4.create();
+		// TODO yqm 这里依旧有问题，当相机靠近原点时pitch 变化存在问题，后期如果需要更精细化的处理相机移动问题再优化
+		transformation = mat4.multiply(
+			transformation,
+			rotationPitch,
+			rotationHeading,
+		);
+		cameraFront = vec3.normalize(
+			cameraFront,
+			vec3.transformMat4(
+				cameraFront,
+				cameraFront,
+				transformation,
+			),
+		);
+		// cameraFront[0] =
+		// 	cos(cameraFront[1]) * cos(cameraFront[0]);
+		// cameraFront[1] = sin(cameraFront[0]);
+		// cameraFront[2] =
+		// 	sin(cameraFront[1]) * cos(cameraFront[0]);
+		// cameraFront = vec3.normalize(cameraFront, cameraFront);
+		view = mat4.lookAt(
 			view,
-			vec3.fromValues(x, y, z),
+			cameraPos,
+			vec3.add(vec3.create(), cameraPos, cameraFront),
+			cameraUp,
 		);
 		projection = mat4.perspective(
 			projection,
@@ -155,7 +192,7 @@ function useInput(
 			Number.POSITIVE_INFINITY,
 		);
 		return {
-			model: M,
+			model,
 			view,
 			projection,
 		};

@@ -207,7 +207,7 @@ function main(
 			shaderInstance.setFloat(mixFactor, "mixFactor");
 			positions.forEach((p) => {
 				const { model, view, projection } =
-					inputInstance.render(gl, p);
+					inputInstance.render(gl, p, 1);
 				shaderInstance.setMatrix4(model, "model");
 				shaderInstance.setMatrix4(view, "view");
 				shaderInstance.setMatrix4(projection, "projection");

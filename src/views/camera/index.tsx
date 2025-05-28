@@ -34,6 +34,9 @@ function getMesh(): Mesh {
 		1.0, 0.0, 0.5, 0.5, 0.5, 1.0, 0.0, -0.5, 0.5, 0.5, 0.0,
 		0.0, -0.5, 0.5, -0.5, 0.0, 1.0,
 	]);
+	for (let i = 0, u = vertexes.length; i < u; i += 5) {
+		vertexes[i + 4] = -vertexes[i + 4];
+	}
 	/**
 	 * 索引
 	 */
@@ -114,6 +117,8 @@ function main(
 ) {
 	const inputInstance = useInput(instance);
 	const mixFactor = 0.65;
+	let currentTime = new Date().getTime(),
+		deltaTime = 0;
 	onMounted(() => {
 		if (!instance.value) return;
 		const gl = instance.value.getContext("webgl2", {
@@ -195,7 +200,9 @@ function main(
 		function render() {
 			if (!gl) return;
 			if (instance.value) resizeHandle(instance.value, gl);
-
+			deltaTime = currentTime;
+			currentTime = new Date().getTime();
+			deltaTime = currentTime - deltaTime;
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 			gl.clearColor(0.2, 0.2, 0.2, 1);
 			shaderInstance.use();
@@ -207,7 +214,7 @@ function main(
 			shaderInstance.setFloat(mixFactor, "mixFactor");
 			positions.forEach((p) => {
 				const { model, view, projection } =
-					inputInstance.render(gl, p);
+					inputInstance.render(gl, p, deltaTime);
 				shaderInstance.setMatrix4(model, "model");
 				shaderInstance.setMatrix4(view, "view");
 				shaderInstance.setMatrix4(projection, "projection");
@@ -217,6 +224,7 @@ function main(
 					mesh.vertexes.length / 5,
 				);
 			});
+
 			requestAnimationFrame(render);
 		}
 		requestAnimationFrame(render);
