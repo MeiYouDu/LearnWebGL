@@ -76,6 +76,23 @@ const routes: Array<RouteRecordRaw> = [
 		],
 	},
 	{
+		path: "/light",
+		name: "light",
+		redirect: "/light/color",
+		children: [
+			{
+				path: "color",
+				name: "color",
+				component: () =>
+					import(
+						/* webpackChunkName: "color" */
+						/* webpackPrefetch: true */
+						"../views/color/index"
+					),
+			},
+		],
+	},
+	{
 		path: "/imageProcess",
 		name: "imageProcess",
 		children: [],
