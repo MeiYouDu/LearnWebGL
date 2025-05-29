@@ -1,5 +1,8 @@
 import { mat4, vec2, vec4 } from "gl-matrix";
 
+/**
+ * 保存 shader
+ */
 class Shader {
 	constructor(
 		gl: WebGL2RenderingContext,
@@ -25,11 +28,6 @@ class Shader {
 			);
 		}
 	}
-	/**
-	 * gl 引用
-	 * @private
-	 */
-	private gl: WeakRef<WebGL2RenderingContext>;
 	/**
 	 * gl program id
 	 * @private
@@ -89,6 +87,11 @@ class Shader {
 		console.log(gl.getProgramInfoLog(program));
 		gl.deleteProgram(program);
 	}
+	/**
+	 * gl 引用
+	 * @private
+	 */
+	public gl: WeakRef<WebGL2RenderingContext>;
 
 	public getAttribLocation(
 		name: string,

@@ -32,8 +32,8 @@ function useInput(
 		sensitivity = 0.01,
 		cameraPos = vec3.fromValues(0, 0, 3),
 		cameraUp = vec3.fromValues(0, 1, 0),
-		cameraQuat = quat.create(),
 		cameraFront = vec3.fromValues(0, 0, -1),
+		cameraQuat = quat.create(),
 		initCameraFront = vec3.copy(vec3.create(), cameraFront);
 	function keydownHandle(ev: KeyboardEvent) {
 		const left = vec3.cross(
@@ -145,9 +145,9 @@ function useInput(
 		position: vec3,
 		delta: number,
 	) {
+		model = mat4.fromTranslation(model, position);
 		deltaTime = delta;
 		vec3.add(cameraPos, cameraPos, dPos);
-		model = mat4.fromTranslation(model, position);
 		quat.rotateY(cameraQuat, cameraQuat, headingPR[1]);
 		quat.normalize(cameraQuat, cameraQuat);
 		quat.rotateX(cameraQuat, cameraQuat, headingPR[0]); // 直接更新持续的四元数

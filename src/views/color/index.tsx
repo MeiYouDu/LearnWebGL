@@ -224,7 +224,6 @@ function main(
 					mesh.vertexes.length / 5,
 				);
 			});
-
 			requestAnimationFrame(render);
 		}
 		requestAnimationFrame(render);
