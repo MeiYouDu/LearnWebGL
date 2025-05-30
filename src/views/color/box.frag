@@ -9,10 +9,7 @@ uniform vec2 resolution;
 
 out vec4 fragmentColor;
 
-float pi = 3.1415;
 
 void main() {
-	float c = cos(pi);
-	float s = sin(pi);
 	fragmentColor =  mix(texture(texture1, outTexCoord), texture(texture0, outTexCoord) * 1.5, 0.65);
 }

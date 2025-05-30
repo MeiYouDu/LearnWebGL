@@ -108,33 +108,38 @@ function main(
 				},
 			],
 		});
-		// const lightGeometry = new Geometry({
-		// 	shader: lightShader,
-		// 	attributes:attribute,
-		// 	vertexAttribPointer: boxVertexAttribPointer,
-		// });
+		const lightGeometry = new Geometry({
+			shader: lightShader,
+			attributes: attribute,
+			vertexAttribPointer: boxVertexAttribPointer,
+		});
 		const boxGeometryInstance = new GeometryInstance({
 			geometry: boxGeometry,
 			matrix: mat4.fromTranslation(
 				mat4.create(),
-				vec3.fromValues(1, 0, -3),
+				vec3.fromValues(0, 0, -3),
 			),
 		});
-		// const lightGeometryInstance = new GeometryInstance({
-		// 	geometry: lightGeometry,
-		// 	matrix: mat4.fromTranslation(
-		// 		mat4.create(),
-		// 		vec3.fromValues(2, 2, 5),
-		// 	),
-		// });
+		const trans = mat4.fromTranslation(
+			mat4.create(),
+			vec3.fromValues(3, 3, -5),
+		);
+		const scale = mat4.fromScaling(
+			mat4.create(),
+			vec3.fromValues(0.2, 0.2, 0.2),
+		);
+		const lightGeometryInstance = new GeometryInstance({
+			geometry: lightGeometry,
+			matrix: mat4.multiply(mat4.create(), trans, scale),
+		});
 		scene.geometryMap.set(
 			boxGeometryInstance,
 			boxGeometryInstance,
 		);
-		// scene.geometryMap.set(
-		// 	lightGeometryInstance,
-		// 	lightGeometryInstance,
-		// );
+		scene.geometryMap.set(
+			lightGeometryInstance,
+			lightGeometryInstance,
+		);
 	});
 	onUnmounted(() => {
 		scene.dispatch();
