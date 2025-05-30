@@ -138,6 +138,7 @@ class Geometry {
 	) {
 		const imgInstance = new Image(width, height);
 		imgInstance.addEventListener("load", () => {
+			shaderInstance.use();
 			const texture = gl.createTexture();
 			gl.activeTexture(gl.TEXTURE0 + textureUnit);
 			gl.bindTexture(gl.TEXTURE_2D, texture);
