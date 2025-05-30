@@ -48,6 +48,14 @@ declare global {
 		const module: string;
 		export default module;
 	}
+	module "*.vert" {
+		const module: string;
+		export default module;
+	}
+	module "*.frag" {
+		const module: string;
+		export default module;
+	}
 
 	module "*.mdx" {
 		const MDXComponent: (props: any) => JSX.Element;

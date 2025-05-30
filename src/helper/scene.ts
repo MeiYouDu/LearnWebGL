@@ -1,12 +1,8 @@
-import { mat4 } from "gl-matrix";
-import { pi } from "mathjs";
 import { GeometryInstance } from "./geometryInstance.ts";
 import { Camera } from "./camera.ts";
 
 /**
- * 1. cache projection transformation matrix
- * 2. cache geometry instance
- * 3. cache camera
+ * 场景类
  */
 class Scene {
 	constructor(canvas: HTMLCanvasElement) {
@@ -15,8 +11,11 @@ class Scene {
 		if (!gl)
 			throw new Error("fail to create webgl2 context");
 		this.gl = new WeakRef(gl);
+		this.camera = new Camera({
+			scene: this,
+		});
 		gl.enable(gl.DEPTH_TEST);
-		requestAnimationFrame(this.render);
+		requestAnimationFrame(() => this.render());
 	}
 	public canvas: WeakRef<HTMLCanvasElement>;
 	public gl: WeakRef<WebGL2RenderingContext>;
@@ -30,19 +29,26 @@ class Scene {
 	/**
 	 * 相机
 	 */
-	public camera: Camera = new Camera({
-		scene: this,
-	});
-	/**
-	 * 投影矩阵
-	 * @private
-	 */
-	public projection: mat4 = mat4.identity(mat4.create());
+	public camera: Camera;
 	/**
 	 * 延迟时间
 	 * @private
 	 */
 	public deltaTime: number = 0;
+	public dispatch() {
+		this.camera.dispatch();
+	}
+	public resize() {
+		const gl = this.gl.deref();
+		if (!gl) throw new Error("gl is undefined");
+		gl.canvas.width = (
+			gl.canvas as HTMLCanvasElement
+		).offsetWidth;
+		gl.canvas.height = (
+			gl.canvas as HTMLCanvasElement
+		).offsetHeight;
+		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+	}
 	/**
 	 * 当前时间
 	 * @private
@@ -67,34 +73,23 @@ class Scene {
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		gl.clearColor(0.2, 0.2, 0.2, 1);
 	}
+
 	/**
 	 * 渲染函数
 	 * @private
 	 */
 	private render() {
-		const gl = this.gl.deref();
+		const gl = this.gl?.deref();
 		if (!gl) throw new Error("gl is undefined");
 		this.updateDeltaTime();
+		this.resize();
 		this.clearScreen(gl);
-		updateProjection(gl, this.projection);
-		this.camera.render();
+		this.camera.render(gl);
 		this.geometryMap.forEach((item) => {
 			item.render(this);
 		});
-		requestAnimationFrame(this.render);
+		requestAnimationFrame(() => this.render());
 	}
 }
 
-function updateProjection(
-	gl: WebGL2RenderingContext,
-	projection: mat4,
-) {
-	mat4.perspective(
-		projection,
-		pi / 4,
-		gl.canvas.width / gl.canvas.height,
-		1,
-		Number.POSITIVE_INFINITY,
-	);
-}
 export { Scene };

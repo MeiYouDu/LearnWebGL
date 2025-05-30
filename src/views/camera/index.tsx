@@ -5,8 +5,8 @@ import vertexShaderSource from "./vertex.glsl";
 import fragmentShaderSource from "./fragment.glsl";
 import { Shader } from "../../helper/shader.ts";
 import { vec2, vec3 } from "gl-matrix";
-import smile from "./awesomeface.png";
-import box from "./container.jpg";
+import smile from "../../assets/image/awesomeface.png";
+import box from "../../assets/image/container.jpg";
 import { useInput } from "../../hook";
 
 function getMesh(): Mesh {
@@ -137,10 +137,6 @@ function main(
 		const vbo = gl.createBuffer(),
 			ebo = gl.createBuffer(),
 			vao = gl.createVertexArray();
-		const positionAttributeLocation =
-			shaderInstance.getAttribLocation("position");
-		const texCoordAttributeLocation =
-			shaderInstance.getAttribLocation("texCoord");
 		gl.bindVertexArray(vao);
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
@@ -157,6 +153,10 @@ function main(
 		);
 		setTexture(gl, shaderInstance, box, 512, 512, 0);
 		setTexture(gl, shaderInstance, smile, 476, 476, 1);
+		const positionAttributeLocation =
+			shaderInstance.getAttribLocation("position");
+		const texCoordAttributeLocation =
+			shaderInstance.getAttribLocation("texCoord");
 		if (
 			typeof positionAttributeLocation === "number" &&
 			positionAttributeLocation >= 0

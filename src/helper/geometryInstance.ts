@@ -1,26 +1,19 @@
-import { mat4, vec3 } from "gl-matrix";
+import { mat4 } from "gl-matrix";
 import { Geometry } from "./geometry.ts";
 import { Scene } from "./scene.ts";
 
 interface GeometryInstanceConstructorOptions {
-	position: vec3;
 	geometry: Geometry;
 	matrix: mat4;
 }
 /**
- * 1. cache position
- * 2. cache geometry
+ * 几何体实例类
  */
 class GeometryInstance {
 	constructor(options: GeometryInstanceConstructorOptions) {
-		this.position = options.position;
 		this.geometry = options.geometry;
 		this.matrix = options.matrix;
 	}
-	/**
-	 * 位置
-	 */
-	public position: vec3;
 	/**
 	 * 旋转和平移矩阵
 	 */

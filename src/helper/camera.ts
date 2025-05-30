@@ -12,8 +12,7 @@ interface CameraConstructorOptions {
 	scene: Scene;
 }
 /**
- * 1. 保存相机位置，朝向，up 轴
- * 2. 计算 view transform matrix
+ * 相机类
  */
 class Camera {
 	constructor(options: CameraConstructorOptions) {
@@ -22,11 +21,10 @@ class Camera {
 			options.position || vec3.fromValues(0, 0, 3);
 		this.front = options.front || vec3.fromValues(0, 0, -1);
 		this.up = options.up || vec3.fromValues(0, 1, 0);
-		this.speed = options.speed || 0.005;
-		this.sensitivity = options.sensitivity || 0.01;
+		this.speed = options.speed || 0.05;
+		this.sensitivity = options.sensitivity || 0.005;
 		this.initFront = vec3.copy(vec3.create(), this.front);
-		this.updateMatrix();
-		const canvas = this.scene.deref()?.canvas.deref();
+		const canvas = this.scene.deref()?.canvas?.deref();
 		if (!canvas) return this;
 		this.addListener(canvas);
 	}
@@ -36,12 +34,16 @@ class Camera {
 	public position: vec3;
 	public front: vec3;
 	public up: vec3;
-	public matrix: mat4 = mat4.identity(mat4.create());
-	public render() {
+	public viewMatrix: mat4 = mat4.identity(mat4.create());
+	public projectionMatrix: mat4 = mat4.identity(
+		mat4.create(),
+	);
+	public render(gl: WebGL2RenderingContext) {
+		this.updateProjectionMatrix(gl);
 		this.updatePosition();
 		this.updateQuaternion();
 		this.updateFront();
-		this.updateMatrix();
+		this.updateViewMatrix();
 	}
 	/**
 	 * 销毁实例
@@ -70,7 +72,30 @@ class Camera {
 	 * @private
 	 */
 	private readonly initFront: vec3;
+	private updateProjectionMatrix(
+		gl: WebGL2RenderingContext,
+	) {
+		mat4.perspective(
+			this.projectionMatrix,
+			pi / 4,
+			gl.canvas.width / gl.canvas.height,
+			1,
+			Number.POSITIVE_INFINITY,
+		);
+	}
 	private addListener(canvas: HTMLCanvasElement) {
+		const keydownHandle = this.keydownHandle.bind(this);
+		this.keydownHandle = keydownHandle;
+		const mouseMoveHandle = this.mouseMoveHandle.bind(this);
+		this.mouseMoveHandle = mouseMoveHandle;
+		const keyupHandle = this.keyupHandle.bind(this);
+		this.keyupHandle = keyupHandle;
+		const wheelHandle = this.wheelHandle.bind(this);
+		this.wheelHandle = wheelHandle;
+		const mouseDownHandle = this.mouseDownHandle.bind(this);
+		this.mouseDownHandle = mouseDownHandle;
+		const mouseUpHandle = this.mouseUpHandle.bind(this);
+		this.mouseUpHandle = mouseUpHandle;
 		document.addEventListener(
 			"keydown",
 			this.keydownHandle,
@@ -172,21 +197,17 @@ class Camera {
 		this.PYR = vec3.create();
 	}
 	private mouseMoveHandle(ev: MouseEvent) {
-		const scene = this.scene.deref();
-		if (!scene) return;
 		if (!this.mouseIsDown) return;
 		if (this.mouseMoveEvent) {
+			const scene = this.scene.deref();
+			if (!scene) return;
 			const diffX =
 				ev.clientX - this.mouseMoveEvent.clientX;
 			const diffY =
 				ev.clientY - this.mouseMoveEvent.clientY;
 			this.PYR[0] =
-				((-diffY *
-					this.sensitivity *
-					scene.deltaTime *
-					0.1) /
-					180) *
-				pi;
+				(-diffY * this.sensitivity * scene.deltaTime * pi) /
+				180;
 			if (this.PYR[0] >= this.maxPitch) {
 				this.PYR[0] = this.maxPitch;
 			}
@@ -194,12 +215,8 @@ class Camera {
 				this.PYR[0] = this.minPitch;
 			}
 			this.PYR[1] =
-				((-diffX *
-					this.sensitivity *
-					scene.deltaTime *
-					0.1) /
-					180) *
-				pi;
+				(-diffX * this.sensitivity * scene.deltaTime * pi) /
+				180;
 		}
 		this.mouseMoveEvent = ev;
 	}
@@ -230,9 +247,9 @@ class Camera {
 		); // 直接更新持续的四元数
 		quat.normalize(this.quaternion, this.quaternion); // 每次更新后归一化
 	}
-	private updateMatrix() {
+	private updateViewMatrix() {
 		mat4.lookAt(
-			this.matrix,
+			this.viewMatrix,
 			this.position,
 			vec3.add(vec3.create(), this.position, this.front),
 			this.up,

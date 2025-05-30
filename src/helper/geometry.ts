@@ -5,7 +5,6 @@ import { vec2 } from "gl-matrix";
 
 interface GeometryOptions {
 	attributes: Float32Array;
-	indices?: Uint32Array;
 	shader: Shader;
 	/**
 	 * attribute解析方式
@@ -15,7 +14,8 @@ interface GeometryOptions {
 		gl: WebGL2RenderingContext,
 		shader: Shader,
 	): number;
-	texture: Array<{
+	indices?: Uint32Array;
+	texture?: Array<{
 		image: string;
 		width: number;
 		height: number;
@@ -25,12 +25,7 @@ interface GeometryOptions {
 }
 
 /**
- * 1. 保存 attribute
- * 2. 保存 indices
- * 3. 保存 shader
- * 4. 保存参数解析方式
- * 5. 保存texture
- * 6. calculate model transform matrix
+ * 几何体类
  */
 class Geometry {
 	constructor(options: GeometryOptions) {
@@ -59,7 +54,7 @@ class Geometry {
 				this.indices,
 				gl.STATIC_DRAW,
 			);
-		options.texture.forEach((texture, index) => {
+		options.texture?.forEach((texture, index) => {
 			this.resolveTexture(
 				gl,
 				this.shader,
@@ -88,8 +83,11 @@ class Geometry {
 			"resolution",
 		);
 		this.shader.setMatrix4(instance.matrix, "model");
-		this.shader.setMatrix4(scene.camera.matrix, "view");
-		this.shader.setMatrix4(scene.projection, "projection");
+		this.shader.setMatrix4(scene.camera.viewMatrix, "view");
+		this.shader.setMatrix4(
+			scene.camera.projectionMatrix,
+			"projection",
+		);
 		if (this.indices) {
 			gl.drawElements(
 				gl.TRIANGLES,
