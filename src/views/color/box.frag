@@ -29,7 +29,7 @@ void main() {
 	vec4 diffuse = vec4((lightColor * diff * diffuseStrength).rgb, 1.0);
 	vec3 viewDir = normalize(cameraPos - outFragVertexPos);
 	vec3 reflectDir = reflect(-lightDir, norm);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128.0);
 	vec4 specular = vec4((specularStrength * spec * lightColor).rgb, 1.0);
 	fragmentColor = (ambient + diffuse + specular) * textureColor;
 }

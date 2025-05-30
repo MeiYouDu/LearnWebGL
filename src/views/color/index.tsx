@@ -15,6 +15,7 @@ import boxFrag from "./box.frag";
 import lightFrag from "./light.frag";
 import smile from "../../assets/image/awesomeface.png";
 import box from "../../assets/image/container.jpg";
+import { cos, sin } from "mathjs";
 
 let scene: Scene;
 const attribute = new Float32Array([
@@ -106,7 +107,12 @@ function main(
 		scene = new Scene(instance.value);
 		const gl = scene.gl.deref();
 		if (!gl) return;
-		const lightPos = vec3.fromValues(3, 3, 5);
+		let angle = new Date().getTime() * 0.001;
+		const lightPos = vec3.fromValues(
+			sin(angle) * 2,
+			cos(angle) * 2,
+			-3,
+		);
 		const boxShader = new Shader(gl, boxVert, boxFrag);
 		const lightShader = new Shader(gl, boxVert, lightFrag);
 		const boxGeometry = new Geometry({
@@ -132,7 +138,7 @@ function main(
 				shader: Shader,
 			) {
 				shader.setVec4(
-					vec4.fromValues(1.0, 1.0, 1.0, 1.0),
+					vec4.fromValues(1, 1, 1, 1.0),
 					"lightColor",
 				);
 				shader.setVec3(lightPos, "lightPos");
@@ -165,7 +171,7 @@ function main(
 				mat4.fromTranslation(mat4.create(), lightPos),
 				mat4.fromScaling(
 					mat4.create(),
-					vec3.fromValues(0.05, 0.05, 0.05),
+					vec3.fromValues(0.1, 0.1, 0.1),
 				),
 			),
 		});
@@ -177,6 +183,20 @@ function main(
 			lightGeometryInstance,
 			lightGeometryInstance,
 		);
+		setInterval(() => {
+			angle = new Date().getTime() * 0.001;
+			lightPos[1] = 3;
+			lightPos[0] = cos(angle) * 3;
+			lightPos[2] = sin(angle) * 3;
+			lightGeometryInstance.matrix = mat4.multiply(
+				mat4.create(),
+				mat4.fromTranslation(mat4.create(), lightPos),
+				mat4.fromScaling(
+					mat4.create(),
+					vec3.fromValues(0.1, 0.1, 0.1),
+				),
+			);
+		}, 16);
 	});
 	onUnmounted(() => {
 		scene.dispatch();
