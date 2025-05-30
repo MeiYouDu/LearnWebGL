@@ -10,10 +10,20 @@ interface GeometryOptions {
 	 * attribute解析方式
 	 * @param gl
 	 */
-	vertexAttribPointer(
+	vertexAttribPointer?(
 		gl: WebGL2RenderingContext,
 		shader: Shader,
 	): number;
+
+	/**
+	 * 每一帧都会调用
+	 * @param gl
+	 * @param shader
+	 */
+	uniformsSetter?(
+		gl: WebGL2RenderingContext,
+		shader: Shader,
+	): void;
 	indices?: Uint32Array;
 	texture?: Array<{
 		image: string;
@@ -64,20 +74,24 @@ class Geometry {
 				index,
 			);
 		});
-		this.stride = options.vertexAttribPointer(
-			gl,
-			this.shader,
-		);
+		if (options.vertexAttribPointer)
+			this.stride = options.vertexAttribPointer(
+				gl,
+				this.shader,
+			);
+		this.uniformsSetter = options.uniformsSetter;
 	}
 	public attributes: Float32Array;
 	public indices?: Uint32Array;
 	public shader: Shader;
+	public uniformsSetter: GeometryOptions["uniformsSetter"];
 	public vertexAttribPointer: GeometryOptions["vertexAttribPointer"];
 	public render(scene: Scene, instance: GeometryInstance) {
 		const gl = scene.gl.deref();
 		if (!gl) throw new Error("gl is undefined");
 		this.shader.use();
 		gl.bindVertexArray(this.vao);
+		this.uniformsSetter?.(gl, this.shader);
 		this.shader.setVec2(
 			vec2.fromValues(gl.canvas.width, gl.canvas.height),
 			"resolution",
@@ -104,7 +118,7 @@ class Geometry {
 		}
 	}
 	private readonly vao: WebGLVertexArrayObject;
-	private readonly stride: number;
+	private readonly stride: number = 1;
 	private setTextureParams(gl: WebGL2RenderingContext) {
 		gl.texParameteri(
 			gl.TEXTURE_2D,

@@ -1,4 +1,4 @@
-import { mat4, vec2, vec4 } from "gl-matrix";
+import { mat4, vec2, vec3, vec4 } from "gl-matrix";
 
 /**
  * 保存 shader
@@ -139,6 +139,32 @@ class Shader {
 					item,
 				);
 			});
+		}
+	}
+
+	public setVec3(vec: vec3, name: string) {
+		const gl = this.gl.deref();
+		if (!gl) return;
+		if (this.program) {
+			gl.uniform3f(
+				gl.getUniformLocation(this.program, name),
+				vec[0],
+				vec[1],
+				vec[2],
+			);
+		}
+	}
+	public setVec4(vec: vec4, name: string) {
+		const gl = this.gl.deref();
+		if (!gl) return;
+		if (this.program) {
+			gl.uniform4f(
+				gl.getUniformLocation(this.program, name),
+				vec[0],
+				vec[1],
+				vec[2],
+				vec[3],
+			);
 		}
 	}
 
