@@ -5,7 +5,7 @@ import {
 	ref,
 	Ref,
 } from "vue";
-import { mat4, vec3, vec4 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 import { Scene } from "../../helper/scene.ts";
 import { Shader } from "../../helper/shader.ts";
 import { Geometry } from "../../helper/geometry.ts";
@@ -137,12 +137,33 @@ function main(
 				gl: WebGL2RenderingContext,
 				shader: Shader,
 			) {
-				shader.setVec4(
-					vec4.fromValues(1, 1, 1, 1.0),
-					"lightColor",
-				);
-				shader.setVec3(lightPos, "lightPos");
 				shader.setVec3(scene.camera.position, "cameraPos");
+				shader.setVec3(
+					vec3.fromValues(0.2, 0.2, 0.2),
+					"light.ambient",
+				);
+				shader.setVec3(
+					vec3.fromValues(0.9, 0.2, 0.9),
+					"light.diffuse",
+				);
+				shader.setVec3(
+					vec3.fromValues(1, 1, 1),
+					"light.specular",
+				);
+				shader.setVec3(lightPos, "light.position");
+				shader.setVec3(
+					vec3.fromValues(1.0, 0.5, 0.31),
+					"material.ambient",
+				);
+				shader.setVec3(
+					vec3.fromValues(1.0, 0.5, 0.31),
+					"material.diffuse",
+				);
+				shader.setVec3(
+					vec3.fromValues(0.5, 0.5, 0.5),
+					"material.specular",
+				);
+				shader.setFloat(32.0, "material.shininess");
 			},
 		});
 		const lightGeometry = new Geometry({

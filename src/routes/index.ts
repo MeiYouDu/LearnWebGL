@@ -90,6 +90,16 @@ const routes: Array<RouteRecordRaw> = [
 						"../views/color/index"
 					),
 			},
+			{
+				path: "material",
+				name: "material",
+				component: () =>
+					import(
+						/* webpackChunkName: "material" */
+						/* webpackPrefetch: true */
+						"../views/material/index"
+					),
+			},
 		],
 	},
 	{
