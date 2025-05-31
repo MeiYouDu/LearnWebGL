@@ -100,6 +100,16 @@ const routes: Array<RouteRecordRaw> = [
 						"../views/material/index"
 					),
 			},
+			{
+				path: "lightMap",
+				name: "lightMap",
+				component: () =>
+					import(
+						/* webpackChunkName: "lightMap" */
+						/* webpackPrefetch: true */
+						"../views/lightMap/index"
+					),
+			},
 		],
 	},
 	{

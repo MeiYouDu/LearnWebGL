@@ -13,8 +13,9 @@ import { GeometryInstance } from "../../helper/geometryInstance.ts";
 import boxVert from "./box.vert";
 import boxFrag from "./box.frag";
 import lightFrag from "./light.frag";
-import smile from "../../assets/image/awesomeface.png";
-import box from "../../assets/image/container.jpg";
+import boxBorder from "../../assets/textures/container2_specular.png";
+import box from "../../assets/textures/container2.png";
+import code from "../../assets/textures/matrix.jpg";
 import { cos, sin } from "mathjs";
 
 let scene: Scene;
@@ -125,12 +126,21 @@ function main(
 					width: 512,
 					height: 512,
 					textureUnit: 0,
+					textureLocationName: "material.diffuse",
 				},
 				{
-					image: smile,
-					width: 476,
-					height: 476,
-					textureUnit: 0,
+					image: boxBorder,
+					width: 500,
+					height: 500,
+					textureUnit: 1,
+					textureLocationName: "material.specular",
+				},
+				{
+					image: code,
+					width: 512,
+					height: 512,
+					textureUnit: 2,
+					textureLocationName: "code",
 				},
 			],
 			uniformsSetter(
@@ -139,11 +149,11 @@ function main(
 			) {
 				shader.setVec3(scene.camera.position, "cameraPos");
 				shader.setVec3(
-					vec3.fromValues(0.2, 0.2, 0.2),
+					vec3.fromValues(0.1, 0.1, 0.1),
 					"light.ambient",
 				);
 				shader.setVec3(
-					vec3.fromValues(0.9, 0.2, 0.9),
+					vec3.fromValues(0.8, 0.8, 0.8),
 					"light.diffuse",
 				);
 				shader.setVec3(
@@ -155,15 +165,16 @@ function main(
 					vec3.fromValues(1.0, 0.5, 0.31),
 					"material.ambient",
 				);
-				shader.setVec3(
-					vec3.fromValues(1.0, 0.5, 0.31),
-					"material.diffuse",
-				);
-				shader.setVec3(
-					vec3.fromValues(0.5, 0.5, 0.5),
-					"material.specular",
-				);
-				shader.setFloat(32.0, "material.shininess");
+				// shader.setVec3(
+				// 	vec3.fromValues(1.0, 0.5, 0.31),
+				// 	"material.diffuse",
+				// );
+				// shader.setVec3(
+				// 	vec3.fromValues(0.5, 0.5, 0.5),
+				// 	"material.specular",
+				// );
+				shader.setFloat(64.0, "material.shininess");
+				shader.setFloat(cos(new Date().getTime()), "time");
 			},
 		});
 		const lightGeometry = new Geometry({

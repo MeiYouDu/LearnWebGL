@@ -130,7 +130,7 @@ function main(
 					image: smile,
 					width: 476,
 					height: 476,
-					textureUnit: 0,
+					textureUnit: 1,
 				},
 			],
 			uniformsSetter(
