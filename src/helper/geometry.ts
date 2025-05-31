@@ -64,14 +64,15 @@ class Geometry {
 				this.indices,
 				gl.STATIC_DRAW,
 			);
-		options.texture?.forEach((texture, index) => {
+		options.texture?.forEach((texture) => {
 			this.resolveTexture(
 				gl,
 				this.shader,
 				texture.image,
 				texture.width,
 				texture.height,
-				index,
+				texture.textureUnit,
+				texture.textureLocationName,
 			);
 		});
 		if (options.vertexAttribPointer)
