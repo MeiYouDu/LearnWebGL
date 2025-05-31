@@ -196,7 +196,7 @@ function main(
 					vec3.fromValues(0.1, 0.1, 0.1),
 				),
 			);
-		}, 16);
+		}, 1);
 	});
 	onUnmounted(() => {
 		scene.dispatch();
