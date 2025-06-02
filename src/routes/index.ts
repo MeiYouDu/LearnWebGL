@@ -110,6 +110,16 @@ const routes: Array<RouteRecordRaw> = [
 						"../views/lightMap/index"
 					),
 			},
+			{
+				path: "lightCaster",
+				name: "lightCaster",
+				component: () =>
+					import(
+						/* webpackChunkName: "lightCaster" */
+						/* webpackPrefetch: true */
+						"../views/lightCaster/index"
+					),
+			},
 		],
 	},
 	{
