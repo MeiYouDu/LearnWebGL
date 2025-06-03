@@ -134,6 +134,16 @@ const routes: Array<RouteRecordRaw> = [
 								"../views/lightCaster/pointLight/index"
 							),
 					},
+					{
+						path: "spotLight",
+						name: "spotLight",
+						component: () =>
+							import(
+								/* webpackChunkName: "spotLight" */
+								/* webpackPrefetch: true */
+								"../views/lightCaster/spotLight/index"
+							),
+					},
 				],
 			},
 		],
