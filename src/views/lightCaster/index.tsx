@@ -110,8 +110,8 @@ function main(
 		if (!gl) return;
 		let angle = new Date().getTime() * 0.001;
 		const lightPos = vec3.fromValues(
-			sin(angle) * 2,
-			cos(angle) * 2,
+			sin(angle) * 5,
+			cos(angle) * 5,
 			-3,
 		);
 		const boxShader = new Shader(gl, boxVert, boxFrag);
@@ -153,11 +153,14 @@ function main(
 					vec3.fromValues(1, 1, 1),
 					"light.specular",
 				);
-				shader.setVec3(lightPos, "light.position");
 				shader.setVec3(
 					vec3.fromValues(1.0, 0.5, 0.31),
 					"material.ambient",
 				);
+				shader.setVec3(lightPos, "light.position");
+				shader.setFloat(1.0, "light.constant");
+				shader.setFloat(0.07, "light.linear");
+				shader.setFloat(0.017, "light.quadratic");
 				// shader.setVec3(
 				// 	vec3.fromValues(1.0, 0.5, 0.31),
 				// 	"material.diffuse",
@@ -213,8 +216,8 @@ function main(
 		setInterval(() => {
 			angle = new Date().getTime() * 0.001;
 			lightPos[1] = 3;
-			lightPos[0] = cos(angle) * 3;
-			lightPos[2] = sin(angle) * 3;
+			lightPos[0] = cos(angle) * 5;
+			lightPos[2] = sin(angle) * 5;
 			lightGeometryInstance.matrix = mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), lightPos),
