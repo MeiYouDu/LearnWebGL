@@ -27,19 +27,21 @@ uniform vec2 resolution;
 uniform vec3 cameraPos;
 uniform Material material;
 uniform Light light;
+uniform mat4 view;
 
 out vec4 fragmentColor;
 
 
 void main() {
-	float distance = length(light.position - outFragVertexPos);
+	vec3 ligthPosition = vec3(view * vec4(light.position, 1));
+	float distance = length(ligthPosition - outFragVertexPos);
 	float attenuation = 1.0/(light.constant + light.linear * distance + light.quadratic * distance * distance);
 	vec3 texDiffuse = texture(material.diffuse, outTexCoord).rgb;
 	vec3 texSpecular = texture(material.specular, outTexCoord).rgb;
 	// 环境光
 	vec4 ambient = vec4(light.ambient * texDiffuse, 1.0);
 	vec3 norm = normalize(outNormal);
-	vec3 lightDir = normalize(light.position - outFragVertexPos);
+	vec3 lightDir = normalize(ligthPosition - outFragVertexPos);
 	float diff = max(dot(norm, lightDir), 0.0);
 	// 漫反射
 	vec4 diffuse = vec4((light.diffuse * (diff * texDiffuse)), 1.0);

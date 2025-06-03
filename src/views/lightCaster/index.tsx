@@ -5,7 +5,9 @@ import {
 	ref,
 	Ref,
 } from "vue";
+import { cos, sin } from "mathjs";
 import { mat4, vec3 } from "gl-matrix";
+import { random } from "lodash";
 import { Scene } from "../../helper/scene.ts";
 import { Shader } from "../../helper/shader.ts";
 import { Geometry } from "../../helper/geometry.ts";
@@ -15,10 +17,20 @@ import boxFrag from "./box.frag";
 import lightFrag from "./light.frag";
 import boxBorder from "../../assets/textures/container2_specular.png";
 import box from "../../assets/textures/container2.png";
-import { cos, sin } from "mathjs";
-import { random } from "lodash";
 
-let scene: Scene;
+interface Light {
+	position: vec3;
+	ambient: vec3;
+	diffuse: vec3;
+	specular: vec3;
+	constant: number;
+	linear: number;
+	quadratic: number;
+}
+interface Material {
+	shininess: number;
+}
+
 const attribute = new Float32Array([
 	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, 0.5, -0.5, -0.5, 0, 0,
 	-1, 1, 0, 0.5, 0.5, -0.5, 0, 0, -1, 1, -1, 0.5, 0.5, -0.5,
@@ -103,6 +115,7 @@ function boxVertexAttribPointer(
 function main(
 	instance: Ref<HTMLCanvasElement | undefined>,
 ) {
+	let scene: Scene;
 	onMounted(() => {
 		if (!instance.value) return;
 		scene = new Scene(instance.value);
@@ -110,8 +123,8 @@ function main(
 		if (!gl) return;
 		let angle = new Date().getTime() * 0.001;
 		const lightPos = vec3.fromValues(
-			sin(angle) * 8,
-			cos(angle) * 8 - 5,
+			sin(angle) * 6.5,
+			cos(angle) * 6.5 - 5,
 			-3,
 		);
 		const boxShader = new Shader(gl, boxVert, boxFrag);
@@ -179,7 +192,7 @@ function main(
 		});
 		new Array(10).fill(0).forEach((val) => {
 			const x = random(-5, 5, true);
-			const y = random(-5, 0, true);
+			const y = random(-5, 5, true);
 			const z = random(-10, 0, true);
 			const instance = new GeometryInstance({
 				geometry: boxGeometry,
@@ -215,9 +228,9 @@ function main(
 		);
 		setInterval(() => {
 			angle = new Date().getTime() * 0.001;
-			lightPos[1] = 3;
-			lightPos[0] = cos(angle) * 8;
-			lightPos[2] = sin(angle) * 8 - 5;
+			lightPos[1] = 0;
+			lightPos[0] = cos(angle / 3) * 6.5;
+			lightPos[2] = sin(angle / 3) * 6.5 - 5;
 			lightGeometryInstance.matrix = mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), lightPos),
