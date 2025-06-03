@@ -40,7 +40,7 @@ out vec4 fragmentColor;
 
 
 void main() {
-	vec3 ligthPosition = vec3(view * vec4(light.position, 1));
+	vec3 ligthPosition = vec3(vec4(light.position, 1));
 	float distance = length(ligthPosition - outFragVertexPos);
 	float attenuation = 1.0/(light.constant + light.linear * distance + light.quadratic * distance * distance);
 	vec3 norm = normalize(outNormal);
