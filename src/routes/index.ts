@@ -144,6 +144,16 @@ const routes: Array<RouteRecordRaw> = [
 								"../views/lightCaster/spotLight/index"
 							),
 					},
+					{
+						path: "multipleLight",
+						name: "multipleLight",
+						component: () =>
+							import(
+								/* webpackChunkName: "multipleLight" */
+								/* webpackPrefetch: true */
+								"../views/lightCaster/multipleLight/index"
+							),
+					},
 				],
 			},
 		],
