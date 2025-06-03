@@ -8,15 +8,15 @@ import {
 import { cos, sin } from "mathjs";
 import { mat4, vec3 } from "gl-matrix";
 import { random } from "lodash";
-import { Scene } from "../../helper/scene.ts";
-import { Shader } from "../../helper/shader.ts";
-import { Geometry } from "../../helper/geometry.ts";
-import { GeometryInstance } from "../../helper/geometryInstance.ts";
+import { Scene } from "../../../helper/scene.ts";
+import { Shader } from "../../../helper/shader.ts";
+import { Geometry } from "../../../helper/geometry.ts";
+import { GeometryInstance } from "../../../helper/geometryInstance.ts";
 import boxVert from "./box.vert";
 import boxFrag from "./box.frag";
 import lightFrag from "./light.frag";
-import boxBorder from "../../assets/textures/container2_specular.png";
-import box from "../../assets/textures/container2.png";
+import boxBorder from "../../../assets/textures/container2_specular.png";
+import box from "../../../assets/textures/container2.png";
 
 interface Light {
 	position: vec3;

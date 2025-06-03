@@ -113,12 +113,28 @@ const routes: Array<RouteRecordRaw> = [
 			{
 				path: "lightCaster",
 				name: "lightCaster",
-				component: () =>
-					import(
-						/* webpackChunkName: "lightCaster" */
-						/* webpackPrefetch: true */
-						"../views/lightCaster/index"
-					),
+				children: [
+					{
+						path: "parallelLight",
+						name: "parallelLight",
+						component: () =>
+							import(
+								/* webpackChunkName: "parallelLight" */
+								/* webpackPrefetch: true */
+								"../views/lightCaster/parallelLight/index"
+							),
+					},
+					{
+						path: "pointLight",
+						name: "pointLight",
+						component: () =>
+							import(
+								/* webpackChunkName: "pointLight" */
+								/* webpackPrefetch: true */
+								"../views/lightCaster/pointLight/index"
+							),
+					},
+				],
 			},
 		],
 	},

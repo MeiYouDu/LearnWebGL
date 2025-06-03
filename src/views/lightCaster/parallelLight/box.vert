@@ -16,5 +16,5 @@ void main() {
 	gl_Position = projection * view * model * vec4(position, 1.0);
 	outTexCoord = texCoord;
 	outNormal = mat3(transpose(inverse(view * model))) * normal;
-	outFragVertexPos = vec3(model * vec4(position, 1));
+	outFragVertexPos = vec3(view * model * vec4(position, 1));
 }
