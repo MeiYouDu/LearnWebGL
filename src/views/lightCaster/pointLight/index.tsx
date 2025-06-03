@@ -155,11 +155,11 @@ function main(
 			) {
 				shader.setVec3(scene.camera.position, "cameraPos");
 				shader.setVec3(
-					vec3.fromValues(0.2, 0.2, 0.2),
+					vec3.fromValues(0.3, 0.3, 0.3),
 					"light.ambient",
 				);
 				shader.setVec3(
-					vec3.fromValues(0.8, 0.8, 0.8),
+					vec3.fromValues(0.9, 0.9, 0.9),
 					"light.diffuse",
 				);
 				shader.setVec3(
@@ -172,8 +172,8 @@ function main(
 				);
 				shader.setVec3(lightPos, "light.position");
 				shader.setFloat(1.0, "light.constant");
-				shader.setFloat(0.07, "light.linear");
-				shader.setFloat(0.017, "light.quadratic");
+				shader.setFloat(0.045, "light.linear");
+				shader.setFloat(0.0075, "light.quadratic");
 				// shader.setVec3(
 				// 	vec3.fromValues(1.0, 0.5, 0.31),
 				// 	"material.diffuse",
