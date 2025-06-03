@@ -110,8 +110,8 @@ function main(
 		if (!gl) return;
 		let angle = new Date().getTime() * 0.001;
 		const lightPos = vec3.fromValues(
-			sin(angle) * 5,
-			cos(angle) * 5,
+			sin(angle) * 8,
+			cos(angle) * 8 - 5,
 			-3,
 		);
 		const boxShader = new Shader(gl, boxVert, boxFrag);
@@ -178,9 +178,9 @@ function main(
 			vertexAttribPointer: boxVertexAttribPointer,
 		});
 		new Array(10).fill(0).forEach((val) => {
-			const x = random(-3, 3, true);
-			const y = random(-3, 0, true);
-			const z = random(-3, 3, true);
+			const x = random(-5, 5, true);
+			const y = random(-5, 0, true);
+			const z = random(-10, 0, true);
 			const instance = new GeometryInstance({
 				geometry: boxGeometry,
 				matrix: mat4.multiply(
@@ -216,8 +216,8 @@ function main(
 		setInterval(() => {
 			angle = new Date().getTime() * 0.001;
 			lightPos[1] = 3;
-			lightPos[0] = cos(angle) * 5;
-			lightPos[2] = sin(angle) * 5;
+			lightPos[0] = cos(angle) * 8;
+			lightPos[2] = sin(angle) * 8 - 5;
 			lightGeometryInstance.matrix = mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), lightPos),
