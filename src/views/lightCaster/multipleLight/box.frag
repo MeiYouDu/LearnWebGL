@@ -53,7 +53,7 @@ in vec3 outFragVertexPos;
 uniform vec2 resolution;
 uniform mat4 view;
 
-
+uniform sampler2D awesome;
 uniform Camera camera;
 uniform Material material;
 uniform ParallelLight parallelLight;
@@ -133,5 +133,9 @@ vec3 computeFlashLight(FlashLight light, Material material, Camera camera, vec3 
 	vec3 diffuse = light.diffuse * texDiffuse * diffuseFactor * attenuation * spot;
 	// 高光
 	vec3 specular = light.specular * texture(material.specular, outTexCoord).rgb * specularFactor * attenuation * spot;
-	return diffuse + specular;
+	// 投影图
+	vec2 pos = vec2(normalize(view * vec4(vertexPos, 1)))/0.31 + 0.5;
+	pos.y *= -1.0;
+	vec3 diffuseMap = texture(awesome, pos).rgb * diffuseFactor * attenuation * spot;
+	return diffuse + specular + diffuseMap;
 }

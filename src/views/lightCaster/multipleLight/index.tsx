@@ -17,6 +17,7 @@ import boxFrag from "./box.frag";
 import lightFrag from "./light.frag";
 import boxBorder from "../../../assets/textures/container2_specular.png";
 import box from "../../../assets/textures/container2.png";
+import awesome from "../../../assets/textures/awesomeface.png";
 
 interface Light {
 	position: vec3;
@@ -137,14 +138,14 @@ function main(
 		const diffuse = vec3.fromValues(0.6, 0.6, 0.6);
 		const specular = vec3.fromValues(1.0, 1.0, 1.0);
 		const flashLightDiffuse = vec3.fromValues(
-			0.8,
-			0.8,
-			0.8,
+			0.9,
+			0.9,
+			0.9,
 		);
 		const pointLightDiffuse = vec3.fromValues(
-			0.9,
-			0.9,
-			0.9,
+			0.8,
+			0.8,
+			0.8,
 		);
 
 		const boxGeometry = new Geometry({
@@ -165,6 +166,13 @@ function main(
 					height: 500,
 					textureUnit: 1,
 					textureLocationName: "material.specular",
+				},
+				{
+					image: awesome,
+					width: 476,
+					height: 476,
+					textureUnit: 2,
+					textureLocationName: "awesome",
 				},
 			],
 			uniformsSetter(
