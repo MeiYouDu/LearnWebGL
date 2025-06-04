@@ -131,7 +131,6 @@ dist
 
 # ide config
 .idea
-.vscode
 
 # macos file
 .DS_Store
