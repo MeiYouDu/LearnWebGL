@@ -2,21 +2,21 @@
 precision highp float;
 
 struct Material {
-	vec3 ambient;
+//	vec3 ambient;
 	sampler2D specular;
 	sampler2D diffuse;
 	float shininess;
 };
 
-struct Light {
-// 手电筒位置
-	vec3 position;
-// 手电筒朝向
+struct ParallelLight {
 	vec3 direction;
-// 内光切角 cos 值
-	float cutOff;
-// 外光切角 cos 值
-	float outerCutOff;
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+};
+
+struct PointLight {
+	vec3 position;
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
@@ -25,43 +25,113 @@ struct Light {
 	float quadratic;
 };
 
+struct FlashLight {
+	vec3 position;
+	vec3 direction;
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+	float constant;
+	float linear;
+	float quadratic;
+	float cutOff;
+	float outerCutOff;
+};
+
+struct Camera {
+	vec3 position;
+};
+
+vec3 computeParallelLight(ParallelLight light, Material material, Camera camera, vec3 normal, vec3 vertexPos);
+vec3 computePointLight(PointLight light, Material material, Camera camera, vec3 normal, vec3 vertexPos);
+vec3 computeFlashLight(FlashLight light, Material material, Camera camera, vec3 normal, vec3 vertexPos);
+
 in vec2 outTexCoord;
 in vec3 outNormal;
 in vec3 outFragVertexPos;
 
-//uniform sampler2D texture1;
 uniform vec2 resolution;
-uniform vec3 cameraPos;
-uniform Material material;
-uniform Light light;
 uniform mat4 view;
+
+
+uniform Camera camera;
+uniform Material material;
+uniform ParallelLight parallelLight;
+uniform PointLight[4] pointLights;
+uniform FlashLight flashLight;
 
 out vec4 fragmentColor;
 
 
 void main() {
-	vec3 ligthPosition = vec3(vec4(light.position, 1));
-	float distance = length(ligthPosition - outFragVertexPos);
-	float attenuation = 1.0/(light.constant + light.linear * distance + light.quadratic * distance * distance);
-	vec3 norm = normalize(outNormal);
-	vec3 lightDir = normalize(outFragVertexPos - ligthPosition);
-	vec3 viewDir = normalize(cameraPos - outFragVertexPos);
-	vec3 reflectDir = reflect(lightDir, norm);
-	vec3 spotlightDir = light.direction;
-	float theta = dot(lightDir, spotlightDir);
-	// 手电筒覆盖范围
-	float intensity = clamp((theta - light.outerCutOff)/(light.cutOff - light.outerCutOff), 0.0, 1.0);
-	// 纹理贴图
+	vec3 color = vec3(0, 0, 0);
+	color += computeParallelLight(parallelLight, material, camera, outNormal, outFragVertexPos);
+	color += computeFlashLight(flashLight, material, camera, outNormal, outFragVertexPos);
+	for (int i = 0, u = pointLights.length(); i < u; ++i) {
+		color += computePointLight(pointLights[i], material, camera, outNormal, outFragVertexPos);
+	}
+	fragmentColor = vec4(color, 1.0);
+}
+
+/**
+	* 计算平行光源
+	*/
+vec3 computeParallelLight(ParallelLight light, Material material, Camera camera, vec3 normal, vec3 vertexPos) {
+	float diffuseFactor = max(dot(-light.direction, normal), 0.0);
+	vec3 reflectDir = reflect(light.direction, normal);
+	vec3 viewDir = normalize(camera.position - vertexPos);
+	float specularFactor = pow(max(dot(reflectDir, viewDir), 0.0), material.shininess);
 	vec3 texDiffuse = texture(material.diffuse, outTexCoord).rgb;
-	// 高光贴图
-	vec3 texSpecular = texture(material.specular, outTexCoord).rgb;
 	// 环境光
-	vec4 ambient = vec4(light.ambient * texDiffuse, 1.0);
+	vec3 ambient = light.ambient * texDiffuse;
 	// 漫反射
-	float diff = max(dot(norm, -lightDir), 0.0);
-	vec4 diffuse = vec4((light.diffuse * (diff * texDiffuse)), 1.0) * intensity;
+	vec3 diffuse = light.diffuse * texDiffuse * diffuseFactor;
 	// 高光
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-	vec4 specular = vec4(((texSpecular * spec) * light.specular), 1.0) * intensity;
-	fragmentColor = vec4(((ambient + specular + diffuse) * attenuation).rgb, 1.0);
+	vec3 specular = light.specular * texture(material.specular, outTexCoord).rgb * specularFactor;
+	return diffuse + specular + ambient;
+}
+/**
+	* 计算点光源
+	*/
+vec3 computePointLight(PointLight light, Material material, Camera camera, vec3 normal, vec3 vertexPos) {
+	vec3 lightDir = normalize(vertexPos - light.position);
+	float distance = distance(vertexPos, light.position);
+	// 光强度衰减因子
+	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * distance * distance);
+	float diffuseFactor = max(dot(-lightDir, normal), 0.0);
+	vec3 reflectDir = reflect(lightDir, normal);
+	vec3 viewDir = normalize(camera.position - vertexPos);
+	float specularFactor = pow(max(dot(reflectDir, viewDir), 0.0), material.shininess);
+	vec3 texDiffuse = texture(material.diffuse, outTexCoord).rgb;
+	// 环境光
+	vec3 ambient = light.ambient * texDiffuse;
+	// 漫反射
+	vec3 diffuse = light.diffuse * texDiffuse * diffuseFactor * attenuation;
+	// 高光
+	vec3 specular = light.specular * texture(material.specular, outTexCoord).rgb * specularFactor * attenuation;
+	return diffuse + specular;
+}
+/**
+	* 计算手电筒光
+	*/
+vec3 computeFlashLight(FlashLight light, Material material, Camera camera, vec3 normal, vec3 vertexPos) {
+	vec3 lightDir = normalize(vertexPos - light.position);
+	float distance = distance(vertexPos, light.position);
+	float theta = max(dot(light.direction, lightDir), 0.0);
+	// 光强度衰减因子
+	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * distance * distance);
+	// 范围因子
+	float spot = clamp((theta - light.cutOff) / (light.cutOff - light.outerCutOff), 0.0, 1.0);
+	float diffuseFactor = max(dot(-lightDir, normal), 0.0);
+	vec3 reflectDir = reflect(lightDir, normal);
+	vec3 viewDir = normalize(camera.position  - vertexPos);
+	float specularFactor = pow(max(dot(reflectDir, viewDir), 0.0), material.shininess);
+	vec3 texDiffuse = texture(material.diffuse, outTexCoord).rgb;
+	// 环境光
+	vec3 ambient = light.ambient * texDiffuse;
+	// 漫反射
+	vec3 diffuse = light.diffuse * texDiffuse * diffuseFactor * attenuation * spot;
+	// 高光
+	vec3 specular = light.specular * texture(material.specular, outTexCoord).rgb * specularFactor * attenuation * spot;
+	return diffuse + specular;
 }
