@@ -136,6 +136,6 @@ vec3 computeFlashLight(FlashLight light, Material material, Camera camera, vec3 
 	// 投影图
 	vec2 pos = vec2(normalize(view * vec4(vertexPos, 1)))/0.31 + 0.5;
 	pos.y *= -1.0;
-	vec3 diffuseMap = texture(awesome, pos).rgb * diffuseFactor * attenuation * spot;
+	vec3 diffuseMap = texture(awesome, pos).rgb * diffuseFactor * attenuation * spot * 0.3;
 	return diffuse + specular + diffuseMap;
 }
