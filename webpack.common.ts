@@ -276,6 +276,7 @@ const config: Configuration = {
 		type: "filesystem",
 		store: "pack",
 		memoryCacheUnaffected: true,
+		compression: "gzip",
 	},
 };
 

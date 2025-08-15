@@ -112,8 +112,6 @@
 		"webpack-merge": "^6.0.1"
 	},
 	"dependencies": {
-		"@cesium-drawer/algorithm": "^0.8.0",
-		"@cesium-drawer/drawer": "^0.8.0",
 		"@element-plus/icons-vue": "^2.3.1",
 		"@typescript/vfs": "^1.6.1",
 		"@vueuse/core": "^12.8.2",
