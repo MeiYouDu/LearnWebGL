@@ -1,0 +1,127 @@
+default:
+  image: node:lts
+
+stages:          # List of stages for jobs, and their order of execution
+  - prepare
+  - install
+  - test
+  - build
+  - deploy
+
+variables:
+  # 确保 corepack 可用（node:lts 已包含 corepack）
+  PNPM_VERSION: "10"
+  # 本地 pnpm store 放到项目目录，方便缓存
+  PNPM_STORE_DIR: "$CI_PROJECT_DIR/.pnpm-store"
+  # 可缓存的路径（下面会在 cache 中引用）
+  YARN_CACHE_FOLDER: "$CI_PROJECT_DIR/.yarn_cache" # 兼容（不常用）
+  DEPLOY_PACKAGE_PATH: "packages"
+  APP_NAME: "LearnWebgl"
+  # cache / artifact 生命周期
+  CACHE_EXPIRE: "7d"
+  ARTIFACT_EXPIRE: "1h"
+
+# 使用锁文件作为 cache key：锁文件未改就能命中缓存
+cache:
+  key:
+    files:
+      - pnpm-lock.yaml
+  paths:
+    - .pnpm-store/        # pnpm store
+    - node_modules/       # node_modules（包含 .pnpm）
+  policy: pull-push
+
+###############################
+# prepare: 激活 pnpm（corepack）
+###############################
+.prepare-pnpm: &prepare-pnpm |
+  # 启用 corepack（一般 node:lts 已启用，但显式执行更保险）
+  corepack enable
+  # 激活指定 pnpm 版本（不会全局 npm 安装）
+  corepack prepare pnpm@${PNPM_VERSION} --activate
+  # 显示 pnpm 版本以便调试
+  pnpm -v
+  node -v
+
+prepare:
+  stage: prepare
+  script:
+    - echo "prepare stage"
+    - *prepare-pnpm
+  rules:
+    - if: $CI_PIPELINE_SOURCE
+
+################################
+# install: 只在锁文件或依赖相关变更时触发
+################################
+install:
+  stage: install
+  before_script:
+    - *prepare-pnpm
+    - echo "PNPM_STORE_DIR=$PNPM_STORE_DIR"
+    - mkdir -p "$PNPM_STORE_DIR"
+  script:
+    - |
+      # 选择安装命令：pnpm 优先
+      if [ -f pnpm-lock.yaml ]; then
+        echo "Using pnpm (lockfile detected)"
+        # --frozen-lockfile 确保一致性
+        pnpm install --frozen-lockfile --store-dir="$PNPM_STORE_DIR"
+      elif [ -f yarn.lock ]; then
+        echo "Fallback to yarn (lockfile detected)"
+        yarn install --frozen-lockfile
+      else
+        echo "Fallback to npm"
+        npm ci
+      fi
+  artifacts:
+    name: "node-modules-${CI_COMMIT_SHORT_SHA}"
+    paths:
+      - node_modules/
+    expire_in: "1h"
+  rules:
+    # 只在 develop 或 master 或 tag 触发；你可以按需修改
+    - if: '$CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "master"'
+    - when: on_success
+
+test:
+    stage: test
+    before_script:
+        - *prepare-pnpm
+    dependencies:
+      - "install"
+    script:
+        - echo "Test step"
+        - npx eslint ./
+    rules:
+    - if: '$CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "master"'
+    - when: on_success
+
+###############################
+# build (复用 install 的 artifacts/cache)
+###############################
+build:
+  stage: build
+  before_script:
+    - *prepare-pnpm
+  dependencies:
+    - install
+  script:
+    - echo "Build step"
+    - |
+      if [ -f pnpm-lock.yaml ]; then
+        pnpm -s build
+      elif [ -f yarn.lock ]; then
+        yarn build
+      else
+        npm run build
+      fi
+    - mkdir -p $DEPLOY_PACKAGE_PATH
+    - tar -zcf $DEPLOY_PACKAGE_PATH/${APP_NAME}-${CI_COMMIT_SHORT_SHA}.tar.gz -C build .
+  artifacts:
+    paths:
+      - $DEPLOY_PACKAGE_PATH/*.tar.gz
+    expire_in: "1h"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "master"'
+    - when: on_success
