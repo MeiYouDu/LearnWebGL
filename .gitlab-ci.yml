@@ -115,7 +115,7 @@ build:
         npm run build
       fi
     - mkdir -p $DEPLOY_PACKAGE_PATH
-    - tar -zcf $DEPLOY_PACKAGE_PATH/${APP_NAME}-${CI_COMMIT_SHORT_SHA}.tar.gz -C build ./dist
+    - tar -zcf $DEPLOY_PACKAGE_PATH/${APP_NAME}-${CI_COMMIT_SHORT_SHA}.tar.gz -C dist
   artifacts:
     paths:
       - $DEPLOY_PACKAGE_PATH/*.tar.gz
