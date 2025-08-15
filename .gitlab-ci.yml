@@ -86,13 +86,11 @@ install:
 
 test:
     stage: test
-    before_script:
-        - *prepare-pnpm
     dependencies:
       - "install"
     script:
         - echo "Test step"
-        - npx eslint ./
+        - npx eslint -c eslint.config.mjs ./src
     rules:
     - if: '$CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "master"'
     - when: on_success
