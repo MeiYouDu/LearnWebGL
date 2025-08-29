@@ -1,13 +1,3 @@
-default:
-  image: node:lts
-
-stages:          # List of stages for jobs, and their order of execution
-  - prepare
-  - install
-  - test
-  - build
-  - deploy
-
 variables:
   # 确保 corepack 可用（node:lts 已包含 corepack）
   PNPM_VERSION: "10"
@@ -20,6 +10,16 @@ variables:
   # cache / artifact 生命周期
   CACHE_EXPIRE: "7d"
   ARTIFACT_EXPIRE: "1h"
+
+default:
+  image: node:lts
+
+stages:          # List of stages for jobs, and their order of execution
+  - prepare
+  - install
+  - test
+  - build
+  - deploy
 
 # 使用锁文件作为 cache key：锁文件未改就能命中缓存
 cache:
