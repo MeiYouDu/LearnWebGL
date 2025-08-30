@@ -26,9 +26,8 @@
 		"prepare": "husky",
 		"serve": "npx cross-env TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\" npx webpack serve -c ./webpack.dev.ts --env development",
 		"build": "npx cross-env TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\" npx webpack -c ./webpack.prod.ts --env production",
-		"lint": "npx eslint",
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"fix": "eslint --fix ./"
+		"lint-fix": "eslint --fix -c eslint.config.mjs ./"
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.27.2",

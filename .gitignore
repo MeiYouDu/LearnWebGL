@@ -145,5 +145,6 @@ share
 cmake-build-debug
 exampleDist
 temp
-
+.gitlab-ci-local
+*.gz
 .nx/cache
