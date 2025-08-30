@@ -15,7 +15,7 @@ variables:
     DIST_ZIP_FILE_NAME: "dist.tar.gz"
 
 default:
-  image: "node@$NODE_VERSION"
+  image: "node:$NODE_VERSION"
 
 stages:
     - prepare
