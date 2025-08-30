@@ -182,6 +182,4 @@ deploy-to-release:
       if [ -f $DIST_ZIP_FILE_NAME ] ;
       then
         echo "exist $DIST_ZIP_FILE_NAME"
-        git -v
-        git branch -av
       fi
