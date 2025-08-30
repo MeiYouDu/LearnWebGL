@@ -36,8 +36,8 @@ cache:
   yarn -v
 
 .prepare-pnpm: &prepare-pnpm |
-  #  npx corepack enable
-  #  npx corepack prepare pnpm@${PNPM_VERSION} --activate
+  npx corepack enable
+  npx corepack prepare pnpm@${PNPM_VERSION} --activate
   node -v
   pnpm -v
 
