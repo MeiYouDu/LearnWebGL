@@ -140,7 +140,7 @@ build:
       paths:
         - $DIST_ZIP_FILE_NAME
         - dist/
-      expire_in: ${ARTIFACT_EXPIRE}
+      expire_in: 1d
       when: on_success
 
 deploy-to-test:
