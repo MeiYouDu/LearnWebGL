@@ -38,12 +38,16 @@ EXCLUDECSS.pop();
  * 多线程加速
  */
 const THREAD_LOADER_OPTIONS = {
-	workers: Math.floor((cpus().length * 60) / 100),
+	workers: cpus().length - 1,
 	workerParallelJobs: 50,
+	poolRespawn: true,
+	poolTimeout: 1000,
 };
-threadLoader.warmup(THREAD_LOADER_OPTIONS, [
-	"babel-loader",
-]);
+// threadLoader.warmup(THREAD_LOADER_OPTIONS, [
+// 	"babel-loader",
+// 	"vue-loader",
+// 	"sass-loader",
+// ]);
 
 export {
 	EXAMPLE_ENTRY,

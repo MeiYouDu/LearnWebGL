@@ -5,11 +5,9 @@ import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import NodePolyfillWebpackPlugin from "node-polyfill-webpack-plugin";
 import { Configuration, DefinePlugin } from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
-import CopyWebpackPlugin from "copy-webpack-plugin";
 import unPluginAutoImport from "unplugin-auto-import/webpack";
 import unPluginVueComponents from "unplugin-vue-components/webpack";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
-import MonacoEditorWebpackPlugin from "monaco-editor-webpack-plugin";
 import { VueLoaderPlugin } from "vue-loader";
 // import unPluginElementPlus from "unplugin-element-plus/webpack";
 import {
@@ -18,7 +16,6 @@ import {
 	EXAMPLE_OUTPUT_PATH,
 	EXCLUDE,
 	HTML_TEMPLATE,
-	THREAD_LOADER_OPTIONS,
 } from "./constant.ts";
 
 const config: Configuration = {
@@ -52,10 +49,10 @@ const config: Configuration = {
 				test: /\.m?js$/i,
 				exclude: EXCLUDE,
 				use: [
-					{
-						loader: "thread-loader",
-						options: THREAD_LOADER_OPTIONS,
-					},
+					// {
+					// 	loader: "thread-loader",
+					// 	options: THREAD_LOADER_OPTIONS,
+					// },
 					{
 						loader: "babel-loader",
 					},
@@ -65,10 +62,10 @@ const config: Configuration = {
 				test: /\.ts$/,
 				exclude: EXCLUDE,
 				use: [
-					{
-						loader: "thread-loader",
-						options: THREAD_LOADER_OPTIONS,
-					},
+					// {
+					// 	loader: "thread-loader",
+					// 	options: THREAD_LOADER_OPTIONS,
+					// },
 					{
 						loader: "babel-loader",
 					},
@@ -78,10 +75,10 @@ const config: Configuration = {
 				test: /\.[jt]sx$/,
 				exclude: EXCLUDE,
 				use: [
-					{
-						loader: "thread-loader",
-						options: THREAD_LOADER_OPTIONS,
-					},
+					// {
+					// 	loader: "thread-loader",
+					// 	options: THREAD_LOADER_OPTIONS,
+					// },
 					{
 						loader: "babel-loader",
 					},
@@ -139,10 +136,10 @@ const config: Configuration = {
 			{
 				test: /\.vue$/i,
 				use: [
-					{
-						loader: "thread-loader",
-						options: THREAD_LOADER_OPTIONS,
-					},
+					// {
+					// 	loader: "thread-loader",
+					// 	options: THREAD_LOADER_OPTIONS,
+					// },
 					{
 						loader: "vue-loader",
 					},
@@ -159,9 +156,9 @@ const config: Configuration = {
 			chunks: ["index"],
 			template: HTML_TEMPLATE,
 		}),
-		new MonacoEditorWebpackPlugin({
-			filename: "monacoAssets/[name].worker.js",
-		}),
+		// new MonacoEditorWebpackPlugin({
+		// 	filename: "monacoAssets/[name].worker.js",
+		// }),
 		// unPluginElementPlus({}),
 		unPluginAutoImport({
 			resolvers: [ElementPlusResolver()],
@@ -192,46 +189,46 @@ const config: Configuration = {
 			threads: true,
 			context: resolve(__dirname, "./"),
 		}),
-		new CopyWebpackPlugin({
-			patterns: [
-				{
-					from: resolve(
-						__dirname,
-						"./node_modules/cesium/Build/Cesium/Workers",
-					),
-					to: "cesiumAssets/Workers",
-				},
-				{
-					from: resolve(
-						__dirname,
-						"./node_modules/cesium/Source/ThirdParty",
-					),
-					to: "cesiumAssets/ThirdParty",
-				},
-				{
-					from: resolve(
-						__dirname,
-						"./node_modules/cesium/Source/Assets",
-					),
-					to: "cesiumAssets/Assets",
-				},
-				{
-					from: resolve(
-						__dirname,
-						"./node_modules/cesium/Source/Widgets",
-					),
-					to: "cesiumAssets/Widgets",
-				},
-				// {
-				// 	from: resolve(
-				// 		__dirname,
-				// 		"./node_modules/cesium/Source/Cesium.d.ts",
-				// 	),
-				// 	to: "assets/declare",
-				// },
-				// ...PATTERNS,
-			],
-		}),
+		// new CopyWebpackPlugin({
+		// 	patterns: [
+		// 		{
+		// 			from: resolve(
+		// 				__dirname,
+		// 				"./node_modules/cesium/Build/Cesium/Workers",
+		// 			),
+		// 			to: "cesiumAssets/Workers",
+		// 		},
+		// 		{
+		// 			from: resolve(
+		// 				__dirname,
+		// 				"./node_modules/cesium/Source/ThirdParty",
+		// 			),
+		// 			to: "cesiumAssets/ThirdParty",
+		// 		},
+		// 		{
+		// 			from: resolve(
+		// 				__dirname,
+		// 				"./node_modules/cesium/Source/Assets",
+		// 			),
+		// 			to: "cesiumAssets/Assets",
+		// 		},
+		// 		{
+		// 			from: resolve(
+		// 				__dirname,
+		// 				"./node_modules/cesium/Source/Widgets",
+		// 			),
+		// 			to: "cesiumAssets/Widgets",
+		// 		},
+		// 		// {
+		// 		// 	from: resolve(
+		// 		// 		__dirname,
+		// 		// 		"./node_modules/cesium/Source/Cesium.d.ts",
+		// 		// 	),
+		// 		// 	to: "assets/declare",
+		// 		// },
+		// 		// ...PATTERNS,
+		// 	],
+		// }),
 		new DefinePlugin({
 			CESIUM_BASE_URL: JSON.stringify("/cesiumAssets"),
 			__VUE_OPTIONS_API__: true,
