@@ -10,12 +10,14 @@ variables:
     CACHE_EXPIRE: "7d"
     # artifact 过期时间
     ARTIFACT_EXPIRE: "1d"
-    GIT_CLEAN_FLAGS: '-ffdx --exclude=node_modules_4d' # 排除指定目录
     APP_NAME: "LearnWebGL"
     DIST_ZIP_FILE_NAME: "dist.tar.gz"
+    GIT_CLEAN_FLAGS: '-ffdx --exclude=node_modules_4d' # 排除指定目录
+    GIT_DEPTH: "1"
+    GIT_STRATEGY: fetch
 
-default:
-  image: "node:$NODE_VERSION"
+#default:
+#  image: "node:$NODE_VERSION"
 
 stages:
     - prepare
@@ -105,7 +107,7 @@ test:
     stage: test
     extends:
         - .rules-standard
-    dependencies:
+    needs:
         - install
     before_script:
       - *prepare-pnpm
@@ -118,7 +120,7 @@ build:
     stage: build
     extends:
       - .rules-standard
-    dependencies:
+    needs:
       - install
     before_script:
       - *prepare-pnpm
@@ -149,7 +151,7 @@ build:
 deploy-to-test:
   stage: deploy
   extends: .rules-develop
-  dependencies:
+  needs:
     - build
   variables:
     GIT_STRATEGY: none
@@ -169,7 +171,7 @@ deploy-to-test:
 deploy-to-release:
   stage: deploy
   extends: .rules-release
-  dependencies:
+  needs:
     - build
   variables:
     GIT_STRATEGY: none
