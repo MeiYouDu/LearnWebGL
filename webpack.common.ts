@@ -187,6 +187,7 @@ const config: Configuration = {
 		new StylelintWebpackPlugin({
 			cache: true,
 			threads: true,
+			allowEmptyInput: true,
 			context: resolve(__dirname, "./"),
 		}),
 		// new CopyWebpackPlugin({
