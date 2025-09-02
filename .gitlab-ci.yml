@@ -1,4 +1,9 @@
 variables:
+    FF_USE_FASTZIP: 1
+    # 对产物使用快速压缩，结果是较大的归档
+    ARTIFACT_COMPRESSION_LEVEL: "fast"
+    # 对缓存不使用压缩
+    CACHE_COMPRESSION_LEVEL: "fast"
     NODE_VERSION: "20.19.4"
     # 确保 corepack 可用（node:lts 已包含 corepack）
     PNPM_VERSION: "10.14.0"
@@ -12,12 +17,12 @@ variables:
     ARTIFACT_EXPIRE: "1d"
     APP_NAME: "LearnWebGL"
     DIST_ZIP_FILE_NAME: "dist.tar.gz"
-    GIT_CLEAN_FLAGS: '-ffdx --exclude=node_modules_4d' # 排除指定目录
+    GIT_CLEAN_FLAGS: none
     GIT_DEPTH: "1"
     GIT_STRATEGY: fetch
 
-#default:
-#  image: "node:$NODE_VERSION"
+default:
+  image: "node:$NODE_VERSION"
 
 stages:
     - prepare
@@ -28,10 +33,10 @@ stages:
 
 cache:
     key:
-        files:
-          - pnpm-lock.yaml
+      files:
+        - pnpm-lock.yaml
     paths:
-        - node_modules/
+      - node_modules/
     policy: pull-push
 
 .prepare-yarn: &prepare-yarn |
@@ -73,14 +78,14 @@ cache:
       when: on_success
     - when: never
 
-
-
 prepare:
     stage: prepare
+    variables:
+      GIT_STRATEGY: fetch
+    # 此阶段无需获取cache
+    cache: []
     extends:
       - .rules-standard
-    variables:
-        GIT_STRATEGY: clone # 仅此阶段克隆
     script:
         - echo "Prepare stage"
         - echo "CI_PROJECT_DIR=$CI_PROJECT_DIR"
@@ -89,6 +94,8 @@ prepare:
 
 install:
     stage: install
+    variables:
+        GIT_STRATEGY: none
     extends:
         - .rules-standard
     before_script:
@@ -105,6 +112,8 @@ install:
 
 test:
     stage: test
+    variables:
+        GIT_STRATEGY: none
     extends:
         - .rules-standard
     needs:
@@ -114,10 +123,12 @@ test:
       - echo "CI_PROJECT_DIR=$CI_PROJECT_DIR"
     script:
         - echo "Test step"
-        - npx eslint ./src --cache
+        - npx eslint -c ./eslint.config.mjs --cache ./src
 
 build:
     stage: build
+    variables:
+        GIT_STRATEGY: none
     extends:
       - .rules-standard
     needs:
@@ -136,14 +147,14 @@ build:
         if [ -d dist ]
         then
           echo "Create zip file"
-          tar -zcf $DIST_ZIP_FILE_NAME -C dist .
+          tar -zcf $CI_PROJECT_DIR/$DIST_ZIP_FILE_NAME -C dist .
         else
           echo "no project"
         fi
     artifacts:
       name: "${APP_NAME}-${CI_COMMIT_SHORT_SHA}"
       paths:
-        - $DIST_ZIP_FILE_NAME
+        - $CI_PROJECT_DIR/$DIST_ZIP_FILE_NAME
         - dist/
       expire_in: 1d
       when: on_success
@@ -155,17 +166,16 @@ deploy-to-test:
     - build
   variables:
     GIT_STRATEGY: none
+  # 此阶段无需获取cache
+  cache: []
   before_script:
-    - *prepare-pnpm
     - echo "CI_PROJECT_DIR=$CI_PROJECT_DIR"
   script:
     - echo "Deploy to test"
     - |
-      if [ -f $DIST_ZIP_FILE_NAME ] ;
+      if [ -f $CI_PROJECT_DIR/$DIST_ZIP_FILE_NAME ] ;
       then
-        echo "exist $DIST_ZIP_FILE_NAME"
-        git -v
-        git branch -av
+        echo "exist $CI_PROJECT_DIR/$DIST_ZIP_FILE_NAME"
       fi
 
 deploy-to-release:
@@ -175,14 +185,15 @@ deploy-to-release:
     - build
   variables:
     GIT_STRATEGY: none
+  # 此阶段无需获取cache
+  cache: []
   before_script:
-    - *prepare-pnpm
     - echo "CI_PROJECT_DIR=$CI_PROJECT_DIR"
   script:
     - echo "Deploy to test"
     - |
-      if [ -f $DIST_ZIP_FILE_NAME ] ;
+      if [ -f $CI_PROJECT_DIR/$DIST_ZIP_FILE_NAME ] ;
       then
-        echo "exist $DIST_ZIP_FILE_NAME"
-        git branch -av
+        echo "exist $CI_PROJECT_DIR/$DIST_ZIP_FILE_NAME"
       fi
+
