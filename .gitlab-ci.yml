@@ -94,6 +94,7 @@ install:
     stage: install
     extends:
         - .rules-standard
+    cache: []
     before_script:
         - *prepare-pnpm
         - echo "CI_PROJECT_DIR=$CI_PROJECT_DIR"
@@ -112,6 +113,7 @@ test:
         - .rules-standard
     needs:
         - install
+    cache: []
     before_script:
       - *prepare-pnpm
       - echo "CI_PROJECT_DIR=$CI_PROJECT_DIR"
