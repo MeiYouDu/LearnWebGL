@@ -119,6 +119,7 @@ test:
       - echo "CI_PROJECT_DIR=$CI_PROJECT_DIR"
     script:
         - echo "Test step"
+        - pnpm install --frozen-lockfile
         - npx eslint -c ./eslint.config.mjs --cache ./src
 
 build:
@@ -135,6 +136,7 @@ build:
       - |
         if [ -f pnpm-lock.yaml ]
         then
+          pnpm install --frozen-lockfile
           pnpm -s build
         fi
       - |
