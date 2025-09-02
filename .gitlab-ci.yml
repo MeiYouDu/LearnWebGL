@@ -50,6 +50,7 @@ cache:
   npx corepack prepare pnpm@${PNPM_VERSION} --activate
   node -v
   pnpm -v
+  pnpm confit set store-dir ${PNPM_STORE_DIR}
 
 # 常规规则
 .rules-standard: &rules-standard
@@ -87,6 +88,8 @@ prepare:
     script:
         - echo "Prepare stage"
         - echo "CI_PROJECT_DIR=$CI_PROJECT_DIR"
+        - *prepare-pnpm
+        - pnpm fetch --lockfile-only
     rules:
         - if: $CI_PIPELINE_SOURCE
 
@@ -102,7 +105,7 @@ install:
         - |
           if [ -f pnpm-lock.yaml ]; then
             echo "Using pnpm (lockfile detected)"
-            pnpm install --frozen-lockfile --store-dir ${PNPM_STORE_DIR}
+            pnpm install --frozen-lockfile
           fi
 
 
@@ -117,7 +120,7 @@ test:
       - echo "CI_PROJECT_DIR=$CI_PROJECT_DIR"
     script:
         - echo "Test step"
-        - pnpm install --frozen-lockfile --store-dir ${PNPM_STORE_DIR}
+        - pnpm install --frozen-lockfile
         - npx eslint -c ./eslint.config.mjs --cache ./src
 
 build:
@@ -134,7 +137,7 @@ build:
       - |
         if [ -f pnpm-lock.yaml ]
         then
-          pnpm install --frozen-lockfile --store-dir ${PNPM_STORE_DIR}
+          pnpm install --frozen-lockfile
           pnpm -s build
         fi
       - |
@@ -158,6 +161,7 @@ build:
           - pnpm-lock.yaml
       paths:
         - node_modules/.cache
+      policy: pull-push
 
 deploy-to-test:
   stage: deploy
