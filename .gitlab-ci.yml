@@ -37,6 +37,7 @@ cache:
         - pnpm-lock.yaml
     paths:
       - $PNPM_STORE_DIR
+      - node_modules/.cache/webpack/
     policy: pull-push
 
 .prepare-yarn: &prepare-yarn |
@@ -89,7 +90,6 @@ prepare:
         - echo "Prepare stage"
         - echo "CI_PROJECT_DIR=$CI_PROJECT_DIR"
         - *prepare-pnpm
-        - pnpm fetch --lockfile-only
     rules:
         - if: $CI_PIPELINE_SOURCE
 
@@ -155,13 +155,6 @@ build:
         - dist/
       expire_in: 1d
       when: on_success
-    cache:
-      key:
-        files:
-          - pnpm-lock.yaml
-      paths:
-        - node_modules/.cache
-      policy: pull-push
 
 deploy-to-test:
   stage: deploy
