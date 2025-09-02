@@ -36,7 +36,7 @@ cache:
       files:
         - pnpm-lock.yaml
     paths:
-      - node_modules/
+      - node_modules/.cache
     policy: pull-push
 
 .prepare-yarn: &prepare-yarn |
@@ -80,8 +80,6 @@ cache:
 
 prepare:
     stage: prepare
-    variables:
-      GIT_STRATEGY: fetch
     # 此阶段无需获取cache
     cache: []
     extends:
@@ -94,8 +92,6 @@ prepare:
 
 install:
     stage: install
-    variables:
-        GIT_STRATEGY: none
     extends:
         - .rules-standard
     before_script:
@@ -112,8 +108,6 @@ install:
 
 test:
     stage: test
-    variables:
-        GIT_STRATEGY: none
     extends:
         - .rules-standard
     needs:
@@ -127,8 +121,6 @@ test:
 
 build:
     stage: build
-    variables:
-        GIT_STRATEGY: none
     extends:
       - .rules-standard
     needs:
@@ -164,8 +156,6 @@ deploy-to-test:
   extends: .rules-develop
   needs:
     - build
-  variables:
-    GIT_STRATEGY: none
   # 此阶段无需获取cache
   cache: []
   before_script:
@@ -183,8 +173,6 @@ deploy-to-release:
   extends: .rules-release
   needs:
     - build
-  variables:
-    GIT_STRATEGY: none
   # 此阶段无需获取cache
   cache: []
   before_script:
