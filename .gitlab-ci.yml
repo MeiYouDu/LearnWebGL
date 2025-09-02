@@ -50,7 +50,7 @@ cache:
   npx corepack prepare pnpm@${PNPM_VERSION} --activate
   node -v
   pnpm -v
-  pnpm confit set store-dir ${PNPM_STORE_DIR}
+  pnpm config set store-dir ${PNPM_STORE_DIR}
 
 # 常规规则
 .rules-standard: &rules-standard
