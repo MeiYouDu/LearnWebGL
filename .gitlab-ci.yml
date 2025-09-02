@@ -37,6 +37,7 @@ cache:
         - pnpm-lock.yaml
     paths:
       - node_modules/.cache
+      - $PNPM_STORE_DIR
     policy: pull-push
 
 .prepare-yarn: &prepare-yarn |
@@ -103,7 +104,7 @@ install:
         - |
           if [ -f pnpm-lock.yaml ]; then
             echo "Using pnpm (lockfile detected)"
-            pnpm install --frozen-lockfile
+            pnpm install --frozen-lockfile --store-dir $PNPM_STORE_DIR
           fi
 
 
@@ -119,7 +120,7 @@ test:
       - echo "CI_PROJECT_DIR=$CI_PROJECT_DIR"
     script:
         - echo "Test step"
-        - pnpm install --frozen-lockfile
+        - pnpm install --frozen-lockfile --store-dir $PNPM_STORE_DIR
         - npx eslint -c ./eslint.config.mjs --cache ./src
 
 build:
@@ -136,7 +137,7 @@ build:
       - |
         if [ -f pnpm-lock.yaml ]
         then
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --store-dir $PNPM_STORE_DIR
           pnpm -s build
         fi
       - |
