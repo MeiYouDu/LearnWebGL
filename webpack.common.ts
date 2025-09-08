@@ -242,11 +242,11 @@ const config: Configuration = {
 		providedExports: true,
 		sideEffects: true,
 		splitChunks: {
-			chunks: "async",
+			chunks: "all",
 			minSize: 20000,
 			minRemainingSize: 0,
 			minChunks: 1,
-			maxSize: 2000 * 1024,
+			maxSize: 244 * 1024,
 			maxAsyncRequests: 30,
 			maxInitialRequests: 30,
 			enforceSizeThreshold: 50000,
