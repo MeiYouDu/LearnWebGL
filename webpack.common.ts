@@ -1,3 +1,4 @@
+import { env } from "node:process";
 import { resolve } from "node:path";
 import EslintWebpackPlugin from "eslint-webpack-plugin";
 import StylelintWebpackPlugin from "stylelint-webpack-plugin";
@@ -169,6 +170,7 @@ const config: Configuration = {
 		new ForkTsCheckerWebpackPlugin(),
 		new NodePolyfillWebpackPlugin(),
 		new EslintWebpackPlugin({
+			lintDirtyModulesOnly: env.NODE_ENV === "development",
 			configType: "flat",
 			context: resolve(__dirname, "./"),
 			fixTypes: ["problem", "suggestion", "layout"],
@@ -183,12 +185,14 @@ const config: Configuration = {
 				".md",
 			],
 			emitWarning: false,
+			concurrency: "auto",
 		}),
 		new StylelintWebpackPlugin({
 			cache: true,
 			threads: true,
 			allowEmptyInput: true,
 			context: resolve(__dirname, "./"),
+			lintDirtyModulesOnly: env.NODE_ENV === "development",
 		}),
 		// new CopyWebpackPlugin({
 		// 	patterns: [

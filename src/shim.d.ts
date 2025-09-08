@@ -1,4 +1,3 @@
-import type { DefineComponent } from "vue";
 import { Doc } from "../constant.ts";
 
 declare global {

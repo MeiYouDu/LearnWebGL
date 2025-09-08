@@ -109,7 +109,7 @@ class Shader {
 			gl.uniformMatrix4fv(
 				gl.getUniformLocation(this.program, name),
 				false,
-				matrix4,
+				Float32Array.from(matrix4),
 			);
 		}
 	}
@@ -136,7 +136,7 @@ class Shader {
 						this.program as WebGLProgram,
 						`${name}[${index}]`,
 					),
-					item,
+					Float32Array.from(item),
 				);
 			});
 		}

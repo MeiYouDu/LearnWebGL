@@ -37,7 +37,7 @@ cache:
         - pnpm-lock.yaml
     paths:
       - $PNPM_STORE_DIR
-      - node_modules/.cache/webpack/
+      - node_modules/.cache/
     policy: pull-push
 
 .prepare-yarn: &prepare-yarn |
@@ -121,7 +121,7 @@ test:
     script:
         - echo "Test step"
         - pnpm install --frozen-lockfile
-        - npx eslint -c ./eslint.config.mjs --cache ./src
+        - npx eslint ./ -c eslint.config.mjs --cache-location node_modules/.cache/eslint-webpack-plugin/.eslintcache --concurrency auto
 
 build:
     stage: build

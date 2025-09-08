@@ -24,10 +24,10 @@
 	"homepage": "https://github.com/MeiYouDu/LearnWebGl#readme",
 	"scripts": {
 		"prepare": "husky",
-		"serve": "npx cross-env TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\" npx webpack serve -c ./webpack.dev.ts --env development",
-		"build": "npx cross-env TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\" npx webpack -c ./webpack.prod.ts --env production",
+		"serve": "npx cross-env TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\" npx webpack serve -c ./webpack.dev.ts --env development --config-node-env development",
+		"build": "npx cross-env TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\" npx webpack -c ./webpack.prod.ts --env production --config-node-env production",
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"lint-fix": "eslint --fix -c eslint.config.mjs ./"
+		"lint-fix": "eslint ./ --fix -c eslint.config.mjs --cache-location node_modules/.cache/eslint-webpack-plugin/.eslintcache --concurrency auto"
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.27.2",
@@ -56,7 +56,7 @@
 		"cross-env": "^7.0.3",
 		"css-loader": "^7.1.2",
 		"css-minimizer-webpack-plugin": "^7.0.2",
-		"eslint": "9.14.0",
+		"eslint": "9.35.0",
 		"eslint-config-prettier": "^10.1.5",
 		"eslint-plugin-import": "^2.31.0",
 		"eslint-plugin-jsonc": "^2.20.1",
@@ -88,7 +88,7 @@
 		"sass": "^1.89.0",
 		"sass-loader": "^16.0.5",
 		"style-loader": "^4.0.0",
-		"stylelint": "^16.19.1",
+		"stylelint": "^16.24.0",
 		"stylelint-config-recommended-vue": "^1.6.0",
 		"stylelint-config-standard": "^37.0.0",
 		"stylelint-config-standard-scss": "^14.0.0",
@@ -104,7 +104,7 @@
 		"unplugin-element-plus": "^0.9.1",
 		"unplugin-vue-components": "^28.5.0",
 		"vue-loader": "^17.4.2",
-		"webpack": "^5.99.9",
+		"webpack": "^5.101.3",
 		"webpack-bundle-analyzer": "^4.10.2",
 		"webpack-cli": "^6.0.1",
 		"webpack-dev-server": "^5.2.1",
