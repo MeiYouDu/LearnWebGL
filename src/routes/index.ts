@@ -1,176 +1,211 @@
-/**
- * 负责vue-router实例创建
- */
-import {
-	createRouter,
-	createWebHistory,
-	RouteRecordRaw,
-} from "vue-router";
+import type { RouteObject } from "react-router";
+import { createBrowserRouter } from "react-router";
+import HydrateFallback from "@/views/hydrateFallback.tsx";
 
-const routes: Array<RouteRecordRaw> = [
+const fundamentals: RouteObject[] = [
 	{
-		path: "/",
-		name: "welcome",
-		component: () =>
-			import(
-				/* webpackChunkName: "welcome" */
-				/* webpackPrefetch: true */
-				"../views/welcome"
-			),
-	},
-	{
-		path: "/fundamentals",
-		name: "fundamentals",
-		redirect: "/fundamentals/helloWorld",
+		hydrateFallbackElement: HydrateFallback,
 		children: [
 			{
+				index: true,
 				path: "helloWorld",
-				name: "helloWorld",
-				component: () =>
-					import(
-						/* webpackChunkName: "helloWorld" */
-						/* webpackPrefetch: true */
-						"../views/helloWorld/index"
-					),
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "helloWorld" */
+								/* webpackPrefetch: true */
+								"../views/helloWorld/index"
+							)
+						).default,
+					};
+				},
 			},
 			{
 				path: "bezierLine",
-				name: "bezierLine",
-				component: () =>
-					import(
-						/* webpackChunkName: "bezierLine" */
-						/* webpackPrefetch: true */
-						"../views/bezierLine/index"
-					),
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "bezierLine" */
+								/* webpackPrefetch: true */
+								"../views/bezierLine/index"
+							)
+						).default,
+					};
+				},
 			},
 			{
 				path: "texture",
-				name: "texture",
-				component: () =>
-					import(
-						/* webpackChunkName: "texture" */
-						/* webpackPrefetch: true */
-						"../views/texture/index"
-					),
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "texture" */
+								/* webpackPrefetch: true */
+								"../views/texture/index"
+							)
+						).default,
+					};
+				},
 			},
 			{
 				path: "coordinateSystem",
-				name: "coordinateSystem",
-				component: () =>
-					import(
-						/* webpackChunkName: "coordinateSystem" */
-						/* webpackPrefetch: true */
-						"../views/coordinateSystem/index"
-					),
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "coordinateSystem" */
+								/* webpackPrefetch: true */
+								"../views/coordinateSystem/index"
+							)
+						).default,
+					};
+				},
 			},
 			{
 				path: "camera",
-				name: "camera",
-				component: () =>
-					import(
-						/* webpackChunkName: "camera" */
-						/* webpackPrefetch: true */
-						"../views/camera/index"
-					),
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "camera" */
+								/* webpackPrefetch: true */
+								"../views/camera/index"
+							)
+						).default,
+					};
+				},
 			},
 		],
 	},
+];
+const lights = [
 	{
 		path: "/light",
-		name: "light",
-		redirect: "/light/color",
 		children: [
 			{
 				path: "color",
-				name: "color",
-				component: () =>
-					import(
-						/* webpackChunkName: "color" */
-						/* webpackPrefetch: true */
-						"../views/color/index"
-					),
+				index: true,
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "color" */
+								/* webpackPrefetch: true */
+								"../views/color/index"
+							)
+						).default,
+					};
+				},
 			},
 			{
 				path: "material",
-				name: "material",
-				component: () =>
-					import(
-						/* webpackChunkName: "material" */
-						/* webpackPrefetch: true */
-						"../views/material/index"
-					),
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "material" */
+								/* webpackPrefetch: true */
+								"../views/material/index"
+							)
+						).default,
+					};
+				},
 			},
 			{
 				path: "lightMap",
-				name: "lightMap",
-				component: () =>
-					import(
-						/* webpackChunkName: "lightMap" */
-						/* webpackPrefetch: true */
-						"../views/lightMap/index"
-					),
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "lightMap" */
+								/* webpackPrefetch: true */
+								"../views/lightMap/index"
+							)
+						).default,
+					};
+				},
 			},
 			{
 				path: "lightCaster",
-				name: "lightCaster",
 				children: [
 					{
 						path: "parallelLight",
-						name: "parallelLight",
-						component: () =>
-							import(
-								/* webpackChunkName: "parallelLight" */
-								/* webpackPrefetch: true */
-								"../views/lightCaster/parallelLight/index"
-							),
+						lazy: async () => {
+							return {
+								Component: (
+									await import(
+										/* webpackChunkName: "parallelLight" */
+										/* webpackPrefetch: true */
+										"../views/lightCaster/parallelLight/index"
+									)
+								).default,
+							};
+						},
 					},
 					{
 						path: "pointLight",
-						name: "pointLight",
-						component: () =>
-							import(
-								/* webpackChunkName: "pointLight" */
-								/* webpackPrefetch: true */
-								"../views/lightCaster/pointLight/index"
-							),
+						lazy: async () => {
+							return {
+								Component: (
+									await import(
+										/* webpackChunkName: "pointLight" */
+										/* webpackPrefetch: true */
+										"../views/lightCaster/pointLight/index"
+									)
+								).default,
+							};
+						},
 					},
 					{
 						path: "spotLight",
-						name: "spotLight",
-						component: () =>
-							import(
-								/* webpackChunkName: "spotLight" */
-								/* webpackPrefetch: true */
-								"../views/lightCaster/spotLight/index"
-							),
+						lazy: async () => {
+							return {
+								Component: (
+									await import(
+										/* webpackChunkName: "spotLight" */
+										/* webpackPrefetch: true */
+										"../views/lightCaster/spotLight/index"
+									)
+								).default,
+							};
+						},
 					},
 					{
 						path: "multipleLight",
-						name: "multipleLight",
-						component: () =>
-							import(
-								/* webpackChunkName: "multipleLight" */
-								/* webpackPrefetch: true */
-								"../views/lightCaster/multipleLight/index"
-							),
+						lazy: async () => {
+							return {
+								Component: (
+									await import(
+										/* webpackChunkName: "multipleLight" */
+										/* webpackPrefetch: true */
+										"../views/lightCaster/multipleLight/index"
+									)
+								).default,
+							};
+						},
 					},
 				],
 			},
 		],
 	},
+];
+
+const routes: RouteObject[] = [
+	...fundamentals,
+	...lights,
 	{
 		path: "/imageProcess",
-		name: "imageProcess",
 		children: [],
 	},
 	{
 		path: "/geometry",
-		name: "geometry",
 		children: [],
 	},
 ];
 
-export default createRouter({
-	history: createWebHistory(),
-	routes,
-});
+const router = createBrowserRouter(routes);
+
+export { routes };
+export default router;

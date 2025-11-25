@@ -19,11 +19,15 @@ class Camera {
 		this.scene = new WeakRef(options.scene);
 		this.position =
 			options.position || vec3.fromValues(0, 0, 3);
-		this.front = options.front || vec3.fromValues(0, 0, -1);
+		this.front =
+			options.front || vec3.fromValues(0, 0, -1);
 		this.up = options.up || vec3.fromValues(0, 1, 0);
 		this.speed = options.speed || 0.05;
 		this.sensitivity = options.sensitivity || 0.005;
-		this.initFront = vec3.copy(vec3.create(), this.front);
+		this.initFront = vec3.copy(
+			vec3.create(),
+			this.front,
+		);
 		const canvas = this.scene.deref()?.canvas?.deref();
 		if (!canvas) return this;
 		this.addListener(canvas);
@@ -86,13 +90,15 @@ class Camera {
 	private addListener(canvas: HTMLCanvasElement) {
 		const keydownHandle = this.keydownHandle.bind(this);
 		this.keydownHandle = keydownHandle;
-		const mouseMoveHandle = this.mouseMoveHandle.bind(this);
+		const mouseMoveHandle =
+			this.mouseMoveHandle.bind(this);
 		this.mouseMoveHandle = mouseMoveHandle;
 		const keyupHandle = this.keyupHandle.bind(this);
 		this.keyupHandle = keyupHandle;
 		const wheelHandle = this.wheelHandle.bind(this);
 		this.wheelHandle = wheelHandle;
-		const mouseDownHandle = this.mouseDownHandle.bind(this);
+		const mouseDownHandle =
+			this.mouseDownHandle.bind(this);
 		this.mouseDownHandle = mouseDownHandle;
 		const mouseUpHandle = this.mouseUpHandle.bind(this);
 		this.mouseUpHandle = mouseUpHandle;
@@ -100,7 +106,10 @@ class Camera {
 			"keydown",
 			this.keydownHandle,
 		);
-		document.addEventListener("keyup", this.keyupHandle);
+		document.addEventListener(
+			"keyup",
+			this.keyupHandle,
+		);
 		canvas.addEventListener("wheel", this.wheelHandle, {
 			passive: false,
 		});
@@ -108,7 +117,10 @@ class Camera {
 			"mousedown",
 			this.mouseDownHandle,
 		);
-		canvas.addEventListener("mouseup", this.mouseUpHandle);
+		canvas.addEventListener(
+			"mouseup",
+			this.mouseUpHandle,
+		);
 		canvas.addEventListener(
 			"mousemove",
 			this.mouseMoveHandle,
@@ -119,8 +131,14 @@ class Camera {
 			"keydown",
 			this.keydownHandle,
 		);
-		document.removeEventListener("keyup", this.keyupHandle);
-		canvas.removeEventListener("wheel", this.wheelHandle);
+		document.removeEventListener(
+			"keyup",
+			this.keyupHandle,
+		);
+		canvas.removeEventListener(
+			"wheel",
+			this.wheelHandle,
+		);
 		canvas.removeEventListener(
 			"mousedown",
 			this.mouseDownHandle,
@@ -206,7 +224,10 @@ class Camera {
 			const diffY =
 				ev.clientY - this.mouseMoveEvent.clientY;
 			this.PYR[0] =
-				(-diffY * this.sensitivity * scene.deltaTime * pi) /
+				(-diffY *
+					this.sensitivity *
+					scene.deltaTime *
+					pi) /
 				180;
 			if (this.PYR[0] >= this.maxPitch) {
 				this.PYR[0] = this.maxPitch;
@@ -215,13 +236,20 @@ class Camera {
 				this.PYR[0] = this.minPitch;
 			}
 			this.PYR[1] =
-				(-diffX * this.sensitivity * scene.deltaTime * pi) /
+				(-diffX *
+					this.sensitivity *
+					scene.deltaTime *
+					pi) /
 				180;
 		}
 		this.mouseMoveEvent = ev;
 	}
 	private updatePosition() {
-		vec3.add(this.position, this.position, this.dPosition);
+		vec3.add(
+			this.position,
+			this.position,
+			this.dPosition,
+		);
 	}
 	private updateFront() {
 		vec3.normalize(
@@ -229,7 +257,10 @@ class Camera {
 			vec3.transformMat4(
 				this.front,
 				this.initFront,
-				mat4.fromQuat(mat4.create(), this.quaternion),
+				mat4.fromQuat(
+					mat4.create(),
+					this.quaternion,
+				),
 			),
 		);
 	}
@@ -251,7 +282,11 @@ class Camera {
 		mat4.lookAt(
 			this.viewMatrix,
 			this.position,
-			vec3.add(vec3.create(), this.position, this.front),
+			vec3.add(
+				vec3.create(),
+				this.position,
+				this.front,
+			),
 			this.up,
 		);
 	}

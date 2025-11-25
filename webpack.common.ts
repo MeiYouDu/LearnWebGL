@@ -6,11 +6,6 @@ import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import NodePolyfillWebpackPlugin from "node-polyfill-webpack-plugin";
 import { Configuration, DefinePlugin } from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
-import unPluginAutoImport from "unplugin-auto-import/webpack";
-import unPluginVueComponents from "unplugin-vue-components/webpack";
-import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
-import { VueLoaderPlugin } from "vue-loader";
-// import unPluginElementPlus from "unplugin-element-plus/webpack";
 import {
 	CONTEXT,
 	EXAMPLE_ENTRY,
@@ -27,9 +22,14 @@ const config: Configuration = {
 		path: EXAMPLE_OUTPUT_PATH,
 		publicPath: "/",
 		filename: "js/[name].[contenthash:8].bundle.js",
-		chunkFilename: "js/[name].[contenthash:8].bundle.js",
+		chunkFilename:
+			"js/[name].[contenthash:8].bundle.js",
 	},
 	resolve: {
+		alias: {
+			"@": resolve(__dirname, "./src"),
+			"@test": resolve(__dirname, "./test"),
+		},
 		fullySpecified: false,
 		extensions: [
 			".js",
@@ -37,7 +37,6 @@ const config: Configuration = {
 			".mjs",
 			".ts",
 			".tsx",
-			".vue",
 			".scss",
 			".css",
 			".jsx",
@@ -134,50 +133,27 @@ const config: Configuration = {
 					},
 				],
 			},
-			{
-				test: /\.vue$/i,
-				use: [
-					// {
-					// 	loader: "thread-loader",
-					// 	options: THREAD_LOADER_OPTIONS,
-					// },
-					{
-						loader: "vue-loader",
-					},
-				],
-				exclude: EXCLUDE,
-			},
 		],
 	},
 	plugins: [
-		new VueLoaderPlugin(),
 		new HtmlWebpackPlugin({
-			title: "CesiumDrawer",
+			title: "ReactTemplate",
 			filename: "index.html",
 			chunks: ["index"],
 			template: HTML_TEMPLATE,
 		}),
-		// new MonacoEditorWebpackPlugin({
-		// 	filename: "monacoAssets/[name].worker.js",
-		// }),
-		// unPluginElementPlus({}),
-		unPluginAutoImport({
-			resolvers: [ElementPlusResolver()],
-		}),
-		unPluginVueComponents({
-			resolvers: [ElementPlusResolver()],
-		}),
 		new ForkTsCheckerWebpackPlugin(),
 		new NodePolyfillWebpackPlugin(),
 		new EslintWebpackPlugin({
-			lintDirtyModulesOnly: env.NODE_ENV === "development",
+			failOnError: env.NODE_ENV === "production",
+			lintDirtyModulesOnly:
+				env.NODE_ENV === "development",
 			configType: "flat",
 			context: resolve(__dirname, "./"),
 			fixTypes: ["problem", "suggestion", "layout"],
 			extensions: [
 				".js",
 				".ts",
-				".vue",
 				".json",
 				".jsx",
 				".tsx",
@@ -192,7 +168,8 @@ const config: Configuration = {
 			threads: true,
 			allowEmptyInput: true,
 			context: resolve(__dirname, "./"),
-			lintDirtyModulesOnly: env.NODE_ENV === "development",
+			lintDirtyModulesOnly:
+				env.NODE_ENV === "development",
 		}),
 		// new CopyWebpackPlugin({
 		// 	patterns: [
@@ -235,10 +212,8 @@ const config: Configuration = {
 		// 	],
 		// }),
 		new DefinePlugin({
-			CESIUM_BASE_URL: JSON.stringify("/cesiumAssets"),
-			__VUE_OPTIONS_API__: true,
-			__VUE_PROD_DEVTOOLS__: false,
-			__VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
+			CESIUM_BASE_URL:
+				JSON.stringify("/cesiumAssets"),
 		}),
 	],
 	optimization: {

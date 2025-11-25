@@ -42,7 +42,8 @@ class Geometry {
 		this.attributes = options.attributes;
 		this.indices = options.indices;
 		this.shader = options.shader;
-		this.vertexAttribPointer = options.vertexAttribPointer;
+		this.vertexAttribPointer =
+			options.vertexAttribPointer;
 		const gl = this.shader.gl.deref();
 		if (!gl) throw new Error("gl is undefined");
 		this.shader.use();
@@ -87,18 +88,27 @@ class Geometry {
 	public shader: Shader;
 	public uniformsSetter: GeometryOptions["uniformsSetter"];
 	public vertexAttribPointer: GeometryOptions["vertexAttribPointer"];
-	public render(scene: Scene, instance: GeometryInstance) {
+	public render(
+		scene: Scene,
+		instance: GeometryInstance,
+	) {
 		const gl = scene.gl.deref();
 		if (!gl) throw new Error("gl is undefined");
 		this.shader.use();
 		gl.bindVertexArray(this.vao);
 		this.uniformsSetter?.(gl, this.shader);
 		this.shader.setVec2(
-			vec2.fromValues(gl.canvas.width, gl.canvas.height),
+			vec2.fromValues(
+				gl.canvas.width,
+				gl.canvas.height,
+			),
 			"resolution",
 		);
 		this.shader.setMatrix4(instance.matrix, "model");
-		this.shader.setMatrix4(scene.camera.viewMatrix, "view");
+		this.shader.setMatrix4(
+			scene.camera.viewMatrix,
+			"view",
+		);
 		this.shader.setMatrix4(
 			scene.camera.projectionMatrix,
 			"projection",
@@ -159,7 +169,8 @@ class Geometry {
 			gl.bindTexture(gl.TEXTURE_2D, texture);
 			shaderInstance.setInt(
 				textureUnit,
-				textureLocationName || `texture${textureUnit}`,
+				textureLocationName ||
+					`texture${textureUnit}`,
 			);
 			this.setTextureParams(gl);
 			gl.texImage2D(

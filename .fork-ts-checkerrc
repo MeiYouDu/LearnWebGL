@@ -2,12 +2,6 @@
 	"async": true,
 	"typescript": {
 		"configFile": "./tsconfig.json",
-		"extensions": {
-			"vue": {
-				"enabled": true,
-				"compiler": "vue/compiler-sfc"
-			}
-		},
 		"diagnosticOptions": {
 			"syntactic": true,
 			"semantic": true,

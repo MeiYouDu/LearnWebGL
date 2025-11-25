@@ -1,43 +1,25 @@
-import eslint from "@eslint/js";
-import typescriptEslint from "typescript-eslint";
-import eslintPluginVue from "eslint-plugin-vue";
-import json from "eslint-plugin-jsonc";
-import globals from "globals";
-// mdx plugin 支持 lint md 文件的
-// const mdx from"eslint-plugin-mdx";
+import react from "@eslint-react/eslint-plugin";
+import js from "@eslint/js";
 import prettier from "eslint-plugin-prettier/recommended";
+import jsonc from "eslint-plugin-jsonc";
+import globals from "globals";
+import ts from "typescript-eslint";
 
-export default typescriptEslint.config(
-	...json.configs["flat/recommended-with-json"],
-	{ ignores: ["*.d.ts", "**/coverage", "**/dist"] },
+/**
+ * ESLint configuration.
+ * @see https://eslint.org/docs/latest/use/configure/
+ */
+export default ts.config(
+	// Global ignores
 	{
-		extends: [
-			eslint.configs.recommended,
-			...typescriptEslint.configs.recommended,
-			...eslintPluginVue.configs["flat/recommended"],
-		],
-		files: ["**/*.{ts,tsx,jsx,js,vue}"],
-		languageOptions: {
-			ecmaVersion: "latest",
-			sourceType: "module",
-			globals: globals.browser,
-			parserOptions: {
-				parser: typescriptEslint.parser,
-			},
-		},
-		rules: {
-			"no-unused-vars": "warn",
-			"no-undef": "warn",
-			"vue/multi-word-component-names": "warn",
-			"@typescript-eslint/no-empty-function": "warn",
-			"@typescript-eslint/no-var-requires": "warn",
-			"@typescript-eslint/no-unused-vars": "warn",
-			"@typescript-eslint/no-explicit-any": "warn",
-			"@typescript-eslint/no-unused-expressions": "warn",
-			"@typescript-eslint/no-require-imports": "warn",
-		},
 		ignores: [
-			"node_modules",
+			".cache",
+			".venv",
+			"**/.astro/**/*",
+			"**/dist",
+			"**/node_modules",
+			"docs/.vitepress/cache",
+			"docs/.vitepress/dist",
 			"dist",
 			".husky",
 			".idea",
@@ -50,8 +32,57 @@ export default typescriptEslint.config(
 			"lerna-debug.log*",
 			".pnpm-debug.log*",
 			"addons",
-			"eslint.config.mjs",
+			"tsconfig.json",
+			"tsconfig-for-webpack-config.json",
 		],
 	},
+
+	// Base configs for all files
+	js.configs.recommended,
+	...ts.configs.recommended,
+	...jsonc.configs["flat/recommended-with-json"],
 	prettier,
+	{
+		files: ["**/*.ts"],
+		languageOptions: {
+			parser: ts.parser,
+		},
+	},
+	// Node.js environment (servers, scripts, config files)
+	{
+		files: ["*.{js,cjs,mjs}"],
+		languageOptions: {
+			globals: { ...globals.node },
+		},
+	},
+
+	// React/Browser environment (frontend apps)
+	{
+		files: ["**/*.{jsx,tsx}"],
+		...react.configs["recommended-typescript"],
+		rules: {
+			"@eslint-react/dom/no-missing-iframe-sandbox":
+				"off",
+		},
+		languageOptions: {
+			parser: ts.parser,
+			parserOptions: {
+				ecmaVersion: "latest",
+				sourceType: "module",
+				jsxImportSource: "react",
+				ecmaFeatures: {
+					jsx: true,
+				},
+			},
+			globals: {
+				...globals.browser,
+				...globals.es2021,
+			},
+		},
+	},
+	{
+		rules: {
+			"@typescript-eslint/no-require-imports": "warn",
+		},
+	},
 );

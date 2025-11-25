@@ -2,8 +2,7 @@
 	"customSyntax": "postcss-html",
 	"extends": [
 		"stylelint-config-standard",
-		"stylelint-config-standard-scss",
-		"stylelint-config-recommended-vue"
+		"stylelint-config-standard-scss"
 	],
 	"rules": {
 		"selector-class-pattern": null,

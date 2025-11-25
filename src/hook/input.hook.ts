@@ -1,4 +1,4 @@
-import { onMounted, onUnmounted, Ref } from "vue";
+import { RefObject, useEffect } from "react";
 import { mat4, quat, vec3 } from "gl-matrix";
 import { pi } from "mathjs";
 import { debounce } from "lodash";
@@ -16,7 +16,7 @@ interface ReturnType {
 }
 
 function useInput(
-	canvas: Ref<HTMLCanvasElement | undefined>,
+	canvas: RefObject<HTMLCanvasElement | null>,
 ): ReturnType {
 	let deltaTime = 1,
 		mouseIsDown: boolean = false,
@@ -34,7 +34,10 @@ function useInput(
 		cameraUp = vec3.fromValues(0, 1, 0),
 		cameraFront = vec3.fromValues(0, 0, -1),
 		cameraQuat = quat.create(),
-		initCameraFront = vec3.copy(vec3.create(), cameraFront);
+		initCameraFront = vec3.copy(
+			vec3.create(),
+			cameraFront,
+		);
 	function keydownHandle(ev: KeyboardEvent) {
 		const left = vec3.cross(
 			vec3.create(),
@@ -54,16 +57,24 @@ function useInput(
 				-speed * deltaTime * 0.1,
 			);
 		if (ev.code === "KeyA")
-			vec3.scale(dPos, left, -speed * deltaTime * 0.1);
+			vec3.scale(
+				dPos,
+				left,
+				-speed * deltaTime * 0.1,
+			);
 
 		if (ev.code === "KeyD")
 			vec3.scale(dPos, left, speed * deltaTime * 0.1);
 	}
 	function keyupHandle(ev: KeyboardEvent) {
-		if (ev.code === "KeyW") dPos = vec3.fromValues(0, 0, 0);
-		if (ev.code === "KeyS") dPos = vec3.fromValues(0, 0, 0);
-		if (ev.code === "KeyA") dPos = vec3.fromValues(0, 0, 0);
-		if (ev.code === "KeyD") dPos = vec3.fromValues(0, 0, 0);
+		if (ev.code === "KeyW")
+			dPos = vec3.fromValues(0, 0, 0);
+		if (ev.code === "KeyS")
+			dPos = vec3.fromValues(0, 0, 0);
+		if (ev.code === "KeyA")
+			dPos = vec3.fromValues(0, 0, 0);
+		if (ev.code === "KeyD")
+			dPos = vec3.fromValues(0, 0, 0);
 	}
 	const setDzZero = debounce(() => {
 		dPos[2] = 0;
@@ -76,9 +87,11 @@ function useInput(
 		ev.preventDefault();
 	}
 	function mouseDownHandle(ev: MouseEvent) {
+		void ev;
 		mouseIsDown = true;
 	}
 	function mouseUpHandle(ev: MouseEvent) {
+		void ev;
 		mouseIsDown = false;
 		mouseMoveEvent = undefined;
 		headingPR = vec3.create();
@@ -86,10 +99,13 @@ function useInput(
 	function mouseMoveHandle(ev: MouseEvent) {
 		if (!mouseIsDown) return;
 		if (mouseMoveEvent) {
-			const diffX = ev.clientX - mouseMoveEvent.clientX;
-			const diffY = ev.clientY - mouseMoveEvent.clientY;
+			const diffX =
+				ev.clientX - mouseMoveEvent.clientX;
+			const diffY =
+				ev.clientY - mouseMoveEvent.clientY;
 			headingPR[0] =
-				((-diffY * sensitivity * deltaTime * 0.1) / 180) *
+				((-diffY * sensitivity * deltaTime * 0.1) /
+					180) *
 				pi;
 			if (headingPR[0] >= maxHeading) {
 				headingPR[0] = maxHeading;
@@ -98,47 +114,62 @@ function useInput(
 				headingPR[0] = minHeading;
 			}
 			headingPR[1] =
-				((-diffX * sensitivity * deltaTime * 0.1) / 180) *
+				((-diffX * sensitivity * deltaTime * 0.1) /
+					180) *
 				pi;
 		}
 		mouseMoveEvent = ev;
 	}
-	onMounted(() => {
+
+	useEffect(() => {
 		document.addEventListener("keydown", keydownHandle);
 		document.addEventListener("keyup", keyupHandle);
-		canvas.value?.addEventListener("wheel", wheelHandle, {
-			passive: false,
-		});
-		canvas.value?.addEventListener(
+		canvas.current?.addEventListener(
+			"wheel",
+			wheelHandle,
+			{
+				passive: false,
+			},
+		);
+		canvas.current?.addEventListener(
 			"mousedown",
 			mouseDownHandle,
 		);
-		canvas.value?.addEventListener(
+		canvas.current?.addEventListener(
 			"mouseup",
 			mouseUpHandle,
 		);
-		canvas.value?.addEventListener(
+		canvas.current?.addEventListener(
 			"mousemove",
 			mouseMoveHandle,
 		);
-	});
-	onUnmounted(() => {
-		document.removeEventListener("keydown", keydownHandle);
-		document.removeEventListener("keyup", keyupHandle);
-		canvas.value?.removeEventListener("wheel", wheelHandle);
-		canvas.value?.removeEventListener(
-			"mousedown",
-			mouseDownHandle,
-		);
-		canvas.value?.removeEventListener(
-			"mouseup",
-			mouseUpHandle,
-		);
-		canvas.value?.removeEventListener(
-			"mousemove",
-			mouseMoveHandle,
-		);
-	});
+		return function () {
+			document.removeEventListener(
+				"keydown",
+				keydownHandle,
+			);
+			document.removeEventListener(
+				"keyup",
+				keyupHandle,
+			);
+			canvas.current?.removeEventListener(
+				"wheel",
+				wheelHandle,
+			);
+			canvas.current?.removeEventListener(
+				"mousedown",
+				mouseDownHandle,
+			);
+			canvas.current?.removeEventListener(
+				"mouseup",
+				mouseUpHandle,
+			);
+			canvas.current?.removeEventListener(
+				"mousemove",
+				mouseMoveHandle,
+			);
+		};
+	}, []);
 
 	function render(
 		gl: WebGL2RenderingContext,

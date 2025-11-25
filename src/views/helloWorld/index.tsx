@@ -1,28 +1,40 @@
-import { defineComponent, onMounted, ref, Ref } from "vue";
-import { resizeHandle } from "../../helper/resize.ts";
+// WebglTriangles.tsx
+import { useEffect, useRef } from "react";
+import { resizeHandle } from "@/helper/resize.ts"; // 调整为你项目实际路径
 import vertexShaderSource from "./vertex.glsl";
 import fragmentShaderSource from "./fragment.glsl";
-import { Shader } from "../../helper/shader.ts";
+import { Shader } from "@/helper/shader.ts"; // 调整路径
 import { random } from "lodash";
 import { mat4 } from "gl-matrix";
 
-function main(
-	instance: Ref<HTMLCanvasElement | undefined>,
-) {
-	onMounted(() => {
-		if (!instance.value) return;
-		const gl = instance.value.getContext("webgl2", {
+export default function WebglTriangles() {
+	const canvasRef = useRef<HTMLCanvasElement | null>(
+		null,
+	);
+	const rafRef = useRef<number | null>(null);
+
+	useEffect(() => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+
+		const gl = canvas.getContext("webgl2", {
 			antialias: true,
 			powerPreference: "high-performance",
 		});
-		if (!gl) return;
+		if (!gl) {
+			console.error("webgl2 not supported");
+			return;
+		}
 
+		// Shader
 		const shaderInstance = new Shader(
 			gl,
 			vertexShaderSource,
 			fragmentShaderSource,
 		);
 		shaderInstance.use();
+
+		// 构建顶点与索引数据（与原实现一致）
 		const vertexesArr: number[] = [];
 		const indicesArr: number[] = [];
 		for (let i = 0; i < 10; i++) {
@@ -32,30 +44,29 @@ function main(
 				const r = j !== 2 ? random(0, 1, true) : 0;
 				const g = j !== 1 ? random(0, 1, true) : 0;
 				const b = j !== 0 ? random(0, 1, true) : 0;
+				// position(x,y,z) + color(r,g,b)
 				vertexesArr.push(x, y, 0, r, g, b);
 				indicesArr.push(i * 3 + j);
 			}
 		}
-		/**
-		 * 顶点数据
-		 */
+
 		const vertexes = new Float32Array(vertexesArr);
-		/**
-		 * 索引
-		 */
 		const indices = new Uint32Array(indicesArr);
 
-		const vbo = gl.createBuffer(),
-			ebo = gl.createBuffer(),
-			vao = gl.createVertexArray();
+		// Create buffers and vao
+		const vbo = gl.createBuffer();
+		const ebo = gl.createBuffer();
+		const vao = gl.createVertexArray();
+
 		const positionAttributeLocation =
 			shaderInstance.getAttribLocation("position");
 		const colorAttributeLocation =
 			shaderInstance.getAttribLocation("color");
+
 		gl.bindVertexArray(vao);
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
-		// 传递数据
+
 		gl.bufferData(
 			gl.ARRAY_BUFFER,
 			vertexes,
@@ -66,65 +77,108 @@ function main(
 			indices,
 			gl.STATIC_DRAW,
 		);
+
+		const STRIDE = 6 * 4; // 6 floats per vertex * 4 bytes
+
 		if (typeof positionAttributeLocation === "number") {
 			gl.vertexAttribPointer(
 				positionAttributeLocation,
 				3,
 				gl.FLOAT,
 				false,
-				24,
+				STRIDE,
 				0,
 			);
-			gl.enableVertexAttribArray(positionAttributeLocation);
+			gl.enableVertexAttribArray(
+				positionAttributeLocation,
+			);
 		}
+
 		if (typeof colorAttributeLocation === "number") {
 			gl.vertexAttribPointer(
 				colorAttributeLocation,
 				3,
 				gl.FLOAT,
 				false,
-				24,
+				STRIDE,
 				12,
 			);
-			gl.enableVertexAttribArray(colorAttributeLocation);
+			gl.enableVertexAttribArray(
+				colorAttributeLocation,
+			);
 		}
+
+		// 初始变换
 		let angle = 0;
 		shaderInstance.setMatrix4(
 			mat4.fromZRotation(mat4.create(), angle),
 			"modelTrans",
 		);
+
+		// Render loop
 		function render() {
 			if (!gl) return;
-			if (instance.value) resizeHandle(instance.value, gl);
+			// resize canvas -> viewport
+			if (canvas) resizeHandle(canvas, gl);
+
 			gl.clearColor(0, 0, 0, 0);
 			gl.clear(gl.COLOR_BUFFER_BIT);
+
 			shaderInstance.use();
 			gl.bindVertexArray(vao);
+
 			angle += 0.005;
 			shaderInstance.setMatrix4(
 				mat4.fromZRotation(mat4.create(), angle),
 				"modelTrans",
 			);
+
 			gl.drawElements(
 				gl.TRIANGLES,
 				indicesArr.length,
 				gl.UNSIGNED_INT,
 				0,
 			);
-			// gl.drawArrays(gl.TRIANGLES, 0, 3);
-			requestAnimationFrame(render);
-		}
-		render();
-	});
-}
 
-export default defineComponent({
-	setup() {
-		const canvasRef: Ref<HTMLCanvasElement | undefined> =
-			ref();
-		main(canvasRef);
-		return function () {
-			return <canvas ref={canvasRef}></canvas>;
+			rafRef.current = requestAnimationFrame(render);
+		}
+
+		rafRef.current = requestAnimationFrame(render);
+
+		// cleanup on unmount
+		return () => {
+			if (rafRef.current != null) {
+				cancelAnimationFrame(rafRef.current);
+				rafRef.current = null;
+			}
+
+			try {
+				// 解绑 VAO / buffer
+				gl.bindVertexArray(null);
+				gl.bindBuffer(gl.ARRAY_BUFFER, null);
+				gl.bindBuffer(
+					gl.ELEMENT_ARRAY_BUFFER,
+					null,
+				);
+
+				if (vao) gl.deleteVertexArray(vao);
+				if (vbo) gl.deleteBuffer(vbo);
+				if (ebo) gl.deleteBuffer(ebo);
+			} catch (e) {
+				console.log(e);
+			}
 		};
-	},
-});
+	}, []);
+
+	// canvas style 你可以根据需要修改（比如宽高等）
+	return (
+		<canvas
+			ref={canvasRef}
+			style={{
+				width: "100%",
+				height: "100%",
+				display: "block",
+			}}
+		/>
+	);
+}

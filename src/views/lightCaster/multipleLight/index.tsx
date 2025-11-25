@@ -1,17 +1,12 @@
-import {
-	defineComponent,
-	onMounted,
-	onUnmounted,
-	ref,
-	Ref,
-} from "vue";
+// BoxSceneReact.tsx
+import React, { useEffect, useRef } from "react";
 import { cos, pi, sin } from "mathjs";
 import { mat4, vec3 } from "gl-matrix";
 import { random } from "lodash";
-import { Scene } from "../../../helper/scene.ts";
-import { Shader } from "../../../helper/shader.ts";
-import { Geometry } from "../../../helper/geometry.ts";
-import { GeometryInstance } from "../../../helper/geometryInstance.ts";
+import { Scene } from "../../../helper/scene";
+import { Shader } from "../../../helper/shader";
+import { Geometry } from "../../../helper/geometry";
+import { GeometryInstance } from "../../../helper/geometryInstance";
 import boxVert from "./box.vert";
 import boxFrag from "./box.frag";
 import lightFrag from "./light.frag";
@@ -19,41 +14,29 @@ import boxBorder from "../../../assets/textures/container2_specular.png";
 import box from "../../../assets/textures/container2.png";
 import awesome from "../../../assets/textures/awesomeface.png";
 
-interface Light {
-	position: vec3;
-	ambient: vec3;
-	diffuse: vec3;
-	specular: vec3;
-	constant: number;
-	linear: number;
-	quadratic: number;
-}
-interface Material {
-	shininess: number;
-}
-
 const attribute = new Float32Array([
 	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, 0.5, -0.5, -0.5, 0, 0,
-	-1, 1, 0, 0.5, 0.5, -0.5, 0, 0, -1, 1, -1, 0.5, 0.5, -0.5,
-	0, 0, -1, 1, -1, -0.5, 0.5, -0.5, 0, 0, -1, 0, -1, -0.5,
-	-0.5, -0.5, 0, 0, -1, 0, 0, -0.5, -0.5, 0.5, 0, 0, 1, 0,
-	0, 0.5, -0.5, 0.5, 0, 0, 1, 1, 0, 0.5, 0.5, 0.5, 0, 0, 1,
-	1, -1, 0.5, 0.5, 0.5, 0, 0, 1, 1, -1, -0.5, 0.5, 0.5, 0,
-	0, 1, 0, -1, -0.5, -0.5, 0.5, 0, 0, 1, 0, 0, -0.5, 0.5,
-	0.5, -1, 0, 0, 1, 0, -0.5, 0.5, -0.5, -1, 0, 0, 1, -1,
-	-0.5, -0.5, -0.5, -1, 0, 0, 0, -1, -0.5, -0.5, -0.5, -1,
-	0, 0, 0, -1, -0.5, -0.5, 0.5, -1, 0, 0, 0, 0, -0.5, 0.5,
-	0.5, -1, 0, 0, 1, 0, 0.5, 0.5, 0.5, 1, 0, 0, 1, 0, 0.5,
-	0.5, -0.5, 1, 0, 0, 1, -1, 0.5, -0.5, -0.5, 1, 0, 0, 0,
-	-1, 0.5, -0.5, -0.5, 1, 0, 0, 0, -1, 0.5, -0.5, 0.5, 1, 0,
-	0, 0, 0, 0.5, 0.5, 0.5, 1, 0, 0, 1, 0, -0.5, -0.5, -0.5,
-	0, -1, 0, 0, -1, 0.5, -0.5, -0.5, 0, -1, 0, 1, -1, 0.5,
-	-0.5, 0.5, 0, -1, 0, 1, 0, 0.5, -0.5, 0.5, 0, -1, 0, 1, 0,
-	-0.5, -0.5, 0.5, 0, -1, 0, 0, 0, -0.5, -0.5, -0.5, 0, -1,
-	0, 0, -1, -0.5, 0.5, -0.5, 0, 1, 0, 0, -1, 0.5, 0.5, -0.5,
-	0, 1, 0, 1, -1, 0.5, 0.5, 0.5, 0, 1, 0, 1, 0, 0.5, 0.5,
-	0.5, 0, 1, 0, 1, 0, -0.5, 0.5, 0.5, 0, 1, 0, 0, 0, -0.5,
-	0.5, -0.5, 0, 1, 0, 0, -1,
+	-1, 1, 0, 0.5, 0.5, -0.5, 0, 0, -1, 1, -1, 0.5, 0.5,
+	-0.5, 0, 0, -1, 1, -1, -0.5, 0.5, -0.5, 0, 0, -1, 0, -1,
+	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, -0.5, -0.5, 0.5, 0, 0,
+	1, 0, 0, 0.5, -0.5, 0.5, 0, 0, 1, 1, 0, 0.5, 0.5, 0.5,
+	0, 0, 1, 1, -1, 0.5, 0.5, 0.5, 0, 0, 1, 1, -1, -0.5,
+	0.5, 0.5, 0, 0, 1, 0, -1, -0.5, -0.5, 0.5, 0, 0, 1, 0,
+	0, -0.5, 0.5, 0.5, -1, 0, 0, 1, 0, -0.5, 0.5, -0.5, -1,
+	0, 0, 1, -1, -0.5, -0.5, -0.5, -1, 0, 0, 0, -1, -0.5,
+	-0.5, -0.5, -1, 0, 0, 0, -1, -0.5, -0.5, 0.5, -1, 0, 0,
+	0, 0, -0.5, 0.5, 0.5, -1, 0, 0, 1, 0, 0.5, 0.5, 0.5, 1,
+	0, 0, 1, 0, 0.5, 0.5, -0.5, 1, 0, 0, 1, -1, 0.5, -0.5,
+	-0.5, 1, 0, 0, 0, -1, 0.5, -0.5, -0.5, 1, 0, 0, 0, -1,
+	0.5, -0.5, 0.5, 1, 0, 0, 0, 0, 0.5, 0.5, 0.5, 1, 0, 0,
+	1, 0, -0.5, -0.5, -0.5, 0, -1, 0, 0, -1, 0.5, -0.5,
+	-0.5, 0, -1, 0, 1, -1, 0.5, -0.5, 0.5, 0, -1, 0, 1, 0,
+	0.5, -0.5, 0.5, 0, -1, 0, 1, 0, -0.5, -0.5, 0.5, 0, -1,
+	0, 0, 0, -0.5, -0.5, -0.5, 0, -1, 0, 0, -1, -0.5, 0.5,
+	-0.5, 0, 1, 0, 0, -1, 0.5, 0.5, -0.5, 0, 1, 0, 1, -1,
+	0.5, 0.5, 0.5, 0, 1, 0, 1, 0, 0.5, 0.5, 0.5, 0, 1, 0, 1,
+	0, -0.5, 0.5, 0.5, 0, 1, 0, 0, 0, -0.5, 0.5, -0.5, 0, 1,
+	0, 0, -1,
 ]);
 
 function boxVertexAttribPointer(
@@ -95,7 +78,6 @@ function boxVertexAttribPointer(
 		);
 		gl.enableVertexAttribArray(normalAttrLocation);
 	}
-
 	if (
 		typeof texCoordAttrLocation === "number" &&
 		texCoordAttrLocation >= 0
@@ -113,27 +95,54 @@ function boxVertexAttribPointer(
 	return stride;
 }
 
-function main(
-	instance: Ref<HTMLCanvasElement | undefined>,
-) {
-	let scene: Scene;
-	onMounted(() => {
-		if (!instance.value) return;
-		scene = new Scene(instance.value);
-		const gl = scene.gl.deref();
-		if (!gl) return;
-		let angle = new Date().getTime() * 0.001;
+export default function BoxSceneReact() {
+	const canvasRef = useRef<HTMLCanvasElement | null>(
+		null,
+	);
+	const sceneRef = useRef<Scene | null>(null);
+	const intervalRef = useRef<number | null>(null);
+
+	useEffect(() => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+
+		// create Scene (same as Vue)
+		const scene = new Scene(canvas);
+		sceneRef.current = scene;
+
+		// per your instruction: use scene.gl.deref()
+		// safe access without `any`
+		const maybeGL = (
+			scene as unknown as {
+				gl?: {
+					deref?: () => WebGL2RenderingContext | null;
+				};
+			}
+		).gl;
+		const gl = maybeGL?.deref ? maybeGL.deref() : null;
+		if (!gl) {
+			console.error("webgl2 context unavailable");
+			return;
+		}
+
+		let angle = Date.now() * 0.001;
 		const lightPositions: vec3[] = new Array(4)
 			.fill(0)
-			.map((...[, index]) => {
-				return vec3.fromValues(
+			.map((_, index) =>
+				vec3.fromValues(
 					sin(angle / 3 + index) * 6.5,
 					sin(angle / 3 + index) * 6.5,
 					cos(angle / 3 + index) * 6.5 - 5,
-				);
-			});
+				),
+			);
+
 		const boxShader = new Shader(gl, boxVert, boxFrag);
-		const lightShader = new Shader(gl, boxVert, lightFrag);
+		const lightShader = new Shader(
+			gl,
+			boxVert,
+			lightFrag,
+		);
+
 		const ambient = vec3.fromValues(0.2, 0.2, 0.2);
 		const diffuse = vec3.fromValues(0.6, 0.6, 0.6);
 		const specular = vec3.fromValues(1.0, 1.0, 1.0);
@@ -165,7 +174,8 @@ function main(
 					width: 500,
 					height: 500,
 					textureUnit: 1,
-					textureLocationName: "material.specular",
+					textureLocationName:
+						"material.specular",
 				},
 				{
 					image: awesome,
@@ -176,81 +186,116 @@ function main(
 				},
 			],
 			uniformsSetter(
-				gl: WebGL2RenderingContext,
-				shader: Shader,
+				glInner: WebGL2RenderingContext,
+				shaderInner: Shader,
 			) {
-				shader.setVec3(
-					scene.camera.position,
+				shaderInner.setVec3(
+					(scene as Scene).camera.position,
 					"camera.position",
 				);
-				shader.setFloat(64.0, "material.shininess");
-				shader.setVec3(
+				shaderInner.setFloat(
+					64.0,
+					"material.shininess",
+				);
+				shaderInner.setVec3(
 					vec3.fromValues(0, -1, 0),
 					"parallelLight.direction",
 				);
-				shader.setVec3(ambient, "parallelLight.ambient");
-				shader.setVec3(diffuse, "parallelLight.diffuse");
-				shader.setVec3(specular, "parallelLight.specular");
-				shader.setVec3(
-					scene.camera.position,
+				shaderInner.setVec3(
+					ambient,
+					"parallelLight.ambient",
+				);
+				shaderInner.setVec3(
+					diffuse,
+					"parallelLight.diffuse",
+				);
+				shaderInner.setVec3(
+					specular,
+					"parallelLight.specular",
+				);
+
+				shaderInner.setVec3(
+					(scene as Scene).camera.position,
 					"flashLight.position",
 				);
-				shader.setVec3(
-					scene.camera.front,
+				shaderInner.setVec3(
+					(scene as Scene).camera.front,
 					"flashLight.direction",
 				);
-				shader.setFloat(cos(pi / 18), "flashLight.cutOff");
-				shader.setFloat(
+				shaderInner.setFloat(
+					cos(pi / 18),
+					"flashLight.cutOff",
+				);
+				shaderInner.setFloat(
 					cos(pi / 16),
 					"flashLight.outerCutOff",
 				);
-				shader.setVec3(ambient, "flashLight.ambient");
-				shader.setVec3(
+				shaderInner.setVec3(
+					ambient,
+					"flashLight.ambient",
+				);
+				shaderInner.setVec3(
 					flashLightDiffuse,
 					"flashLight.diffuse",
 				);
-				shader.setVec3(specular, "flashLight.specular");
-				shader.setFloat(1.0, "flashLight.constant");
-				shader.setFloat(0.022, "flashLight.linear");
-				shader.setFloat(0.0019, "flashLight.quadratic");
-				lightPositions.forEach((item, index) => {
-					shader.setVec3(
-						item,
-						`pointLights[${index}].position`,
+				shaderInner.setVec3(
+					specular,
+					"flashLight.specular",
+				);
+				shaderInner.setFloat(
+					1.0,
+					"flashLight.constant",
+				);
+				shaderInner.setFloat(
+					0.022,
+					"flashLight.linear",
+				);
+				shaderInner.setFloat(
+					0.0019,
+					"flashLight.quadratic",
+				);
+
+				lightPositions.forEach((p, idx) => {
+					shaderInner.setVec3(
+						p,
+						`pointLights[${idx}].position`,
 					);
-					shader.setVec3(
+					shaderInner.setVec3(
 						ambient,
-						`pointLights[${index}].ambient`,
+						`pointLights[${idx}].ambient`,
 					);
-					shader.setVec3(
+					shaderInner.setVec3(
 						pointLightDiffuse,
-						`pointLights[${index}].diffuse`,
+						`pointLights[${idx}].diffuse`,
 					);
-					shader.setVec3(
+					shaderInner.setVec3(
 						specular,
-						`pointLights[${index}].specular`,
+						`pointLights[${idx}].specular`,
 					);
-					shader.setFloat(
+					shaderInner.setFloat(
 						1.0,
-						`pointLights[${index}].constant`,
+						`pointLights[${idx}].constant`,
 					);
-					shader.setFloat(
+					shaderInner.setFloat(
 						0.022,
-						`pointLights[${index}].linear`,
+						`pointLights[${idx}].linear`,
 					);
-					shader.setFloat(
+					shaderInner.setFloat(
 						0.0019,
-						`pointLights[${index}].quadratic`,
+						`pointLights[${idx}].quadratic`,
 					);
 				});
 			},
 		});
+
 		const lightGeometry = new Geometry({
 			shader: lightShader,
 			attributes: attribute,
 			vertexAttribPointer: boxVertexAttribPointer,
 		});
-		new Array(10).fill(0).forEach(() => {
+
+		// create 10 random box instances (same behaviour)
+		for (let i = 0; i < 10; i++) {
 			const x = random(-5, 5, true);
 			const y = random(-5, 5, true);
 			const z = random(-10, 0, true);
@@ -268,37 +313,43 @@ function main(
 					),
 				),
 			});
-			scene.geometryMap.set(instance, instance);
-		});
+			(scene as Scene).geometryMap.set(
+				instance,
+				instance,
+			);
+		}
+
 		const arr: GeometryInstance[] = [];
-		for (let i = 0, u = lightPositions.length; i < u; i++) {
-			const lightGeometryInstance = new GeometryInstance({
-				geometry: lightGeometry,
-				matrix: mat4.multiply(
-					mat4.create(),
-					mat4.fromTranslation(
+		for (let i = 0; i < lightPositions.length; i++) {
+			const lightGeometryInstance =
+				new GeometryInstance({
+					geometry: lightGeometry,
+					matrix: mat4.multiply(
 						mat4.create(),
-						lightPositions[i],
+						mat4.fromTranslation(
+							mat4.create(),
+							lightPositions[i],
+						),
+						mat4.fromScaling(
+							mat4.create(),
+							vec3.fromValues(0.1, 0.1, 0.1),
+						),
 					),
-					mat4.fromScaling(
-						mat4.create(),
-						vec3.fromValues(0.1, 0.1, 0.1),
-					),
-				),
-			});
-			scene.geometryMap.set(
+				});
+			(scene as Scene).geometryMap.set(
 				lightGeometryInstance,
 				lightGeometryInstance,
 			);
 			arr.push(lightGeometryInstance);
 		}
-		setInterval(() => {
-			angle = new Date().getTime() * 0.001;
+
+		// setInterval update (kept as original 1ms)
+		const id = window.setInterval(() => {
+			angle = Date.now() * 0.001;
 			arr.forEach((item, index) => {
 				lightPositions[index][0] =
 					cos(angle / 3 + index) * 6.5;
-				// lightPositions[index][1] =
-				// 	sin(angle / 3 + index) * 6.5;
+				// lightPositions[index][1] = sin(angle / 3 + index) * 6.5;
 				lightPositions[index][2] =
 					sin(angle / 3 + index) * 6.5 - 5;
 				item.matrix = mat4.multiply(
@@ -314,19 +365,35 @@ function main(
 				);
 			});
 		}, 1);
-	});
-	onUnmounted(() => {
-		scene.dispatch();
-	});
-}
 
-export default defineComponent({
-	setup() {
-		const canvasRef: Ref<HTMLCanvasElement | undefined> =
-			ref();
-		main(canvasRef);
-		return function () {
-			return <canvas ref={canvasRef}></canvas>;
+		intervalRef.current = id;
+
+		// save scene ref for potential external usage / cleanup
+		sceneRef.current = scene;
+
+		return () => {
+			if (intervalRef.current != null) {
+				clearInterval(intervalRef.current);
+				intervalRef.current = null;
+			}
+			try {
+				scene.dispatch();
+			} catch {
+				// ignore cleanup errors
+			} finally {
+				sceneRef.current = null;
+			}
 		};
-	},
-});
+	}, []);
+
+	return (
+		<canvas
+			ref={canvasRef}
+			style={{
+				width: "100%",
+				height: "100%",
+				display: "block",
+			}}
+		/>
+	);
+}

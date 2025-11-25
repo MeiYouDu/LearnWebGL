@@ -5,7 +5,7 @@ module.exports = {
 			"@babel/preset-env",
 			{
 				useBuiltIns: "usage",
-				corejs: 3,
+				corejs: "3.45",
 			},
 		],
 		[
@@ -17,17 +17,18 @@ module.exports = {
 				optimizeConstEnums: true,
 			},
 		],
-	],
-	plugins: [
 		[
-			"@vue/babel-plugin-jsx",
+			"@babel/preset-react",
 			{
-				transformOn: true,
+				runtime: "automatic",
 			},
 		],
+	],
+	plugins: [
 		[
 			"@babel/plugin-proposal-decorators",
 			{ version: "legacy" },
 		],
+		"babel-plugin-react-compiler",
 	],
 };

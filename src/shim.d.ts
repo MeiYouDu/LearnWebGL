@@ -24,11 +24,6 @@ declare global {
 		const content: string;
 		export default content;
 	}
-	module "*.vue" {
-		import { DefineComponent } from "vue";
-		const component: DefineComponent<any, any, any>;
-		export default component;
-	}
 
 	interface Process extends NodeJS.Process {
 		env: {
@@ -56,10 +51,6 @@ declare global {
 		export default module;
 	}
 
-	module "*.mdx" {
-		const MDXComponent: (props: any) => JSX.Element;
-		export default MDXComponent;
-	}
 	/**
 	 * 文档路径
 	 */

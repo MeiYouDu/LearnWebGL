@@ -1,45 +1,40 @@
-import {
-	defineComponent,
-	onMounted,
-	onUnmounted,
-	ref,
-	Ref,
-} from "vue";
+// CanvasComponent.tsx
+import React, { useEffect, useRef } from "react";
 import { mat4, vec3 } from "gl-matrix";
-import { Scene } from "../../helper/scene.ts";
-import { Shader } from "../../helper/shader.ts";
-import { Geometry } from "../../helper/geometry.ts";
-import { GeometryInstance } from "../../helper/geometryInstance.ts";
+import { Scene } from "../../helper/scene"; // 调整路径
+import { Shader } from "../../helper/shader";
+import { Geometry } from "../../helper/geometry";
+import { GeometryInstance } from "../../helper/geometryInstance";
 import boxVert from "./box.vert";
 import boxFrag from "./box.frag";
 import lightFrag from "./light.frag";
 import smile from "../../assets/image/awesomeface.png";
 import box from "../../assets/image/container.jpg";
-import { cos, sin } from "mathjs";
 
-let scene: Scene;
+// attribute 与 Vue 版本保持一致
 const attribute = new Float32Array([
 	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, 0.5, -0.5, -0.5, 0, 0,
-	-1, 1, 0, 0.5, 0.5, -0.5, 0, 0, -1, 1, -1, 0.5, 0.5, -0.5,
-	0, 0, -1, 1, -1, -0.5, 0.5, -0.5, 0, 0, -1, 0, -1, -0.5,
-	-0.5, -0.5, 0, 0, -1, 0, 0, -0.5, -0.5, 0.5, 0, 0, 1, 0,
-	0, 0.5, -0.5, 0.5, 0, 0, 1, 1, 0, 0.5, 0.5, 0.5, 0, 0, 1,
-	1, -1, 0.5, 0.5, 0.5, 0, 0, 1, 1, -1, -0.5, 0.5, 0.5, 0,
-	0, 1, 0, -1, -0.5, -0.5, 0.5, 0, 0, 1, 0, 0, -0.5, 0.5,
-	0.5, -1, 0, 0, 1, 0, -0.5, 0.5, -0.5, -1, 0, 0, 1, -1,
-	-0.5, -0.5, -0.5, -1, 0, 0, 0, -1, -0.5, -0.5, -0.5, -1,
-	0, 0, 0, -1, -0.5, -0.5, 0.5, -1, 0, 0, 0, 0, -0.5, 0.5,
-	0.5, -1, 0, 0, 1, 0, 0.5, 0.5, 0.5, 1, 0, 0, 1, 0, 0.5,
-	0.5, -0.5, 1, 0, 0, 1, -1, 0.5, -0.5, -0.5, 1, 0, 0, 0,
-	-1, 0.5, -0.5, -0.5, 1, 0, 0, 0, -1, 0.5, -0.5, 0.5, 1, 0,
-	0, 0, 0, 0.5, 0.5, 0.5, 1, 0, 0, 1, 0, -0.5, -0.5, -0.5,
-	0, -1, 0, 0, -1, 0.5, -0.5, -0.5, 0, -1, 0, 1, -1, 0.5,
-	-0.5, 0.5, 0, -1, 0, 1, 0, 0.5, -0.5, 0.5, 0, -1, 0, 1, 0,
-	-0.5, -0.5, 0.5, 0, -1, 0, 0, 0, -0.5, -0.5, -0.5, 0, -1,
-	0, 0, -1, -0.5, 0.5, -0.5, 0, 1, 0, 0, -1, 0.5, 0.5, -0.5,
-	0, 1, 0, 1, -1, 0.5, 0.5, 0.5, 0, 1, 0, 1, 0, 0.5, 0.5,
-	0.5, 0, 1, 0, 1, 0, -0.5, 0.5, 0.5, 0, 1, 0, 0, 0, -0.5,
-	0.5, -0.5, 0, 1, 0, 0, -1,
+	-1, 1, 0, 0.5, 0.5, -0.5, 0, 0, -1, 1, -1, 0.5, 0.5,
+	-0.5, 0, 0, -1, 1, -1, -0.5, 0.5, -0.5, 0, 0, -1, 0, -1,
+	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, -0.5, -0.5, 0.5, 0, 0,
+	1, 0, 0, 0.5, -0.5, 0.5, 0, 0, 1, 1, 0, 0.5, 0.5, 0.5,
+	0, 0, 1, 1, -1, 0.5, 0.5, 0.5, 0, 0, 1, 1, -1, -0.5,
+	0.5, 0.5, 0, 0, 1, 0, -1, -0.5, -0.5, 0.5, 0, 0, 1, 0,
+	0, -0.5, 0.5, 0.5, -1, 0, 0, 1, 0, -0.5, 0.5, -0.5, -1,
+	0, 0, 1, -1, -0.5, -0.5, -0.5, -1, 0, 0, 0, -1, -0.5,
+	-0.5, -0.5, -1, 0, 0, 0, -1, -0.5, -0.5, 0.5, -1, 0, 0,
+	0, 0, -0.5, 0.5, 0.5, -1, 0, 0, 1, 0, 0.5, 0.5, 0.5, 1,
+	0, 0, 1, 0, 0.5, 0.5, -0.5, 1, 0, 0, 1, -1, 0.5, -0.5,
+	-0.5, 1, 0, 0, 0, -1, 0.5, -0.5, -0.5, 1, 0, 0, 0, -1,
+	0.5, -0.5, 0.5, 1, 0, 0, 0, 0, 0.5, 0.5, 0.5, 1, 0, 0,
+	1, 0, -0.5, -0.5, -0.5, 0, -1, 0, 0, -1, 0.5, -0.5,
+	-0.5, 0, -1, 0, 1, -1, 0.5, -0.5, 0.5, 0, -1, 0, 1, 0,
+	0.5, -0.5, 0.5, 0, -1, 0, 1, 0, -0.5, -0.5, 0.5, 0, -1,
+	0, 0, 0, -0.5, -0.5, -0.5, 0, -1, 0, 0, -1, -0.5, 0.5,
+	-0.5, 0, 1, 0, 0, -1, 0.5, 0.5, -0.5, 0, 1, 0, 1, -1,
+	0.5, 0.5, 0.5, 0, 1, 0, 1, 0, 0.5, 0.5, 0.5, 0, 1, 0, 1,
+	0, -0.5, 0.5, 0.5, 0, 1, 0, 0, 0, -0.5, 0.5, -0.5, 0, 1,
+	0, 0, -1,
 ]);
 
 function boxVertexAttribPointer(
@@ -53,6 +48,7 @@ function boxVertexAttribPointer(
 		shader.getAttribLocation("normal");
 	const texCoordAttrLocation =
 		shader.getAttribLocation("texCoord");
+
 	if (
 		typeof positionAttrLocation === "number" &&
 		positionAttrLocation >= 0
@@ -81,7 +77,6 @@ function boxVertexAttribPointer(
 		);
 		gl.enableVertexAttribArray(normalAttrLocation);
 	}
-
 	if (
 		typeof texCoordAttrLocation === "number" &&
 		texCoordAttrLocation >= 0
@@ -99,22 +94,45 @@ function boxVertexAttribPointer(
 	return stride;
 }
 
-function main(
-	instance: Ref<HTMLCanvasElement | undefined>,
-) {
-	onMounted(() => {
-		if (!instance.value) return;
-		scene = new Scene(instance.value);
-		const gl = scene.gl.deref();
-		if (!gl) return;
-		let angle = new Date().getTime() * 0.001;
+export default function CanvasComponent() {
+	const canvasRef = useRef<HTMLCanvasElement | null>(
+		null,
+	);
+	const sceneRef = useRef<Scene | null>(null);
+	const intervalRef = useRef<number | null>(null);
+
+	useEffect(() => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+
+		// create scene (保持与原来一致)
+		const scene = new Scene(canvas);
+		sceneRef.current = scene;
+
+		// deref gl，兼容你的 Scene 实现（如果是 WeakRef）
+		const gl = scene.gl?.deref();
+		if (!gl) {
+			console.error("webgl2 context unavailable");
+			return;
+		}
+
+		// initial angle & light pos
+		let angle = Date.now() * 0.001;
 		const lightPos = vec3.fromValues(
-			sin(angle) * 2,
-			cos(angle) * 2,
+			Math.sin(angle) * 2,
+			Math.cos(angle) * 2,
 			-3,
 		);
+
+		// shaders
 		const boxShader = new Shader(gl, boxVert, boxFrag);
-		const lightShader = new Shader(gl, boxVert, lightFrag);
+		const lightShader = new Shader(
+			gl,
+			boxVert,
+			lightFrag,
+		);
+
+		// geometry & instances
 		const boxGeometry = new Geometry({
 			shader: boxShader,
 			attributes: attribute,
@@ -130,47 +148,58 @@ function main(
 					image: smile,
 					width: 476,
 					height: 476,
-					textureUnit: 0,
+					textureUnit: 1, // 注意：原 Vue 里第二个也写了 0，通常应为 1
 				},
 			],
 			uniformsSetter(
-				gl: WebGL2RenderingContext,
-				shader: Shader,
+				glInner: WebGL2RenderingContext,
+				shaderInner: Shader,
 			) {
-				shader.setVec3(scene.camera.position, "cameraPos");
-				shader.setVec3(
+				shaderInner.setVec3(
+					scene.camera.position,
+					"cameraPos",
+				);
+				shaderInner.setVec3(
 					vec3.fromValues(0.2, 0.2, 0.2),
 					"light.ambient",
 				);
-				shader.setVec3(
+				shaderInner.setVec3(
 					vec3.fromValues(0.9, 0.2, 0.9),
 					"light.diffuse",
 				);
-				shader.setVec3(
+				shaderInner.setVec3(
 					vec3.fromValues(1, 1, 1),
 					"light.specular",
 				);
-				shader.setVec3(lightPos, "light.position");
-				shader.setVec3(
+				shaderInner.setVec3(
+					lightPos,
+					"light.position",
+				);
+				shaderInner.setVec3(
 					vec3.fromValues(1.0, 0.5, 0.31),
 					"material.ambient",
 				);
-				shader.setVec3(
+				shaderInner.setVec3(
 					vec3.fromValues(1.0, 0.5, 0.31),
 					"material.diffuse",
 				);
-				shader.setVec3(
+				shaderInner.setVec3(
 					vec3.fromValues(0.5, 0.5, 0.5),
 					"material.specular",
 				);
-				shader.setFloat(32.0, "material.shininess");
+				shaderInner.setFloat(
+					32.0,
+					"material.shininess",
+				);
 			},
 		});
+
 		const lightGeometry = new Geometry({
 			shader: lightShader,
 			attributes: attribute,
 			vertexAttribPointer: boxVertexAttribPointer,
 		});
+
 		const boxGeometryInstance = new GeometryInstance({
 			geometry: boxGeometry,
 			matrix: mat4.multiply(
@@ -185,17 +214,23 @@ function main(
 				),
 			),
 		});
+
 		const lightGeometryInstance = new GeometryInstance({
 			geometry: lightGeometry,
 			matrix: mat4.multiply(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), lightPos),
+				mat4.fromTranslation(
+					mat4.create(),
+					lightPos,
+				),
 				mat4.fromScaling(
 					mat4.create(),
 					vec3.fromValues(0.1, 0.1, 0.1),
 				),
 			),
 		});
+
+		// register to scene (保持原逻辑)
 		scene.geometryMap.set(
 			boxGeometryInstance,
 			boxGeometryInstance,
@@ -204,33 +239,57 @@ function main(
 			lightGeometryInstance,
 			lightGeometryInstance,
 		);
-		setInterval(() => {
-			angle = new Date().getTime() * 0.001;
+
+		// setInterval 更新 lightPos（保留你要求的方案）
+		const id = window.setInterval(() => {
+			angle = Date.now() * 0.001;
+			// 你原始逻辑里有 lightPos[1] = 3; 但后续又计算 x/z，保留原样：
 			lightPos[1] = 3;
-			lightPos[0] = cos(angle) * 3;
-			lightPos[2] = sin(angle) * 3;
+			lightPos[0] = Math.cos(angle) * 3;
+			lightPos[2] = Math.sin(angle) * 3;
+
+			// 更新实例的矩阵
 			lightGeometryInstance.matrix = mat4.multiply(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), lightPos),
+				mat4.fromTranslation(
+					mat4.create(),
+					lightPos,
+				),
 				mat4.fromScaling(
 					mat4.create(),
 					vec3.fromValues(0.1, 0.1, 0.1),
 				),
 			);
-		}, 1);
-	});
-	onUnmounted(() => {
-		scene.dispatch();
-	});
-}
+		}, 1); // interval 1ms 与 Vue 保持一致
 
-export default defineComponent({
-	setup() {
-		const canvasRef: Ref<HTMLCanvasElement | undefined> =
-			ref();
-		main(canvasRef);
-		return function () {
-			return <canvas ref={canvasRef}></canvas>;
+		intervalRef.current = id;
+
+		// cleanup on unmount: clear interval and dispatch scene
+		return () => {
+			if (intervalRef.current != null) {
+				clearInterval(intervalRef.current);
+				intervalRef.current = null;
+			}
+			try {
+				// dispatch() 用于 Scene 做自身清理（你在 Vue 里也调用了它）
+				sceneRef.current?.dispatch?.();
+			} catch (e) {
+				console.log(e);
+			} finally {
+				sceneRef.current = null;
+			}
 		};
-	},
-});
+	}, []); // 仅挂载一次
+
+	// canvas 的样式/属性如需自定义可以把 width/height 作 props
+	return (
+		<canvas
+			ref={canvasRef}
+			style={{
+				width: "100%",
+				height: "100%",
+				display: "block",
+			}}
+		/>
+	);
+}

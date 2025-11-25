@@ -2,7 +2,7 @@ import { resolve } from "node:path";
 import { cwd } from "node:process";
 import { cpus } from "node:os";
 
-const threadLoader = require("thread-loader");
+// const threadLoader = require("thread-loader");
 
 /**
  * 当前工作目录（根目录）
@@ -11,7 +11,7 @@ const CONTEXT = cwd();
 /**
  * 用例入口
  */
-const EXAMPLE_ENTRY = resolve(__dirname, "src/main.ts");
+const EXAMPLE_ENTRY = resolve(__dirname, "src/main.tsx");
 /**
  * 用例编译输出目录
  */

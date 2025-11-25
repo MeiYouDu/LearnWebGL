@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"target": "esnext",
-		"module": "esnext",
+		"module": "CommonJS",
 		"moduleResolution": "node",
 		"allowImportingTsExtensions": true,
 		"emitDeclarationOnly": true,
@@ -22,14 +22,16 @@
 		"removeComments": false,
 		"lib": ["esnext", "dom"],
 		"jsx": "preserve",
-		"jsxImportSource": "vue"
+		"paths": {
+			"@/*": ["src/*"],
+			"@test/*": ["test/*"]
+		}
 	},
-	"include": ["src/**/*", "test/**/*", "."],
+	"include": ["src/**/*", "test/**/*", "*.ts"],
 	"exclude": [
 		"node_modules",
 		"src/public",
 		"dist",
-		"eslint.config.mjs"
 	],
 	"ts-node": {
 		"compilerOptions": {

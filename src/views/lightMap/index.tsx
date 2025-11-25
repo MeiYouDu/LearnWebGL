@@ -1,46 +1,40 @@
-import {
-	defineComponent,
-	onMounted,
-	onUnmounted,
-	ref,
-	Ref,
-} from "vue";
+// BoxScene.tsx
+import React, { useEffect, useRef } from "react";
 import { mat4, vec3 } from "gl-matrix";
-import { Scene } from "../../helper/scene.ts";
-import { Shader } from "../../helper/shader.ts";
-import { Geometry } from "../../helper/geometry.ts";
-import { GeometryInstance } from "../../helper/geometryInstance.ts";
+import { Scene } from "../../helper/scene";
+import { Shader } from "../../helper/shader";
+import { Geometry } from "../../helper/geometry";
+import { GeometryInstance } from "../../helper/geometryInstance";
 import boxVert from "./box.vert";
 import boxFrag from "./box.frag";
 import lightFrag from "./light.frag";
 import boxBorder from "../../assets/textures/container2_specular.png";
 import box from "../../assets/textures/container2.png";
 import code from "../../assets/textures/matrix.jpg";
-import { cos, sin } from "mathjs";
 
-let scene: Scene;
 const attribute = new Float32Array([
 	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, 0.5, -0.5, -0.5, 0, 0,
-	-1, 1, 0, 0.5, 0.5, -0.5, 0, 0, -1, 1, -1, 0.5, 0.5, -0.5,
-	0, 0, -1, 1, -1, -0.5, 0.5, -0.5, 0, 0, -1, 0, -1, -0.5,
-	-0.5, -0.5, 0, 0, -1, 0, 0, -0.5, -0.5, 0.5, 0, 0, 1, 0,
-	0, 0.5, -0.5, 0.5, 0, 0, 1, 1, 0, 0.5, 0.5, 0.5, 0, 0, 1,
-	1, -1, 0.5, 0.5, 0.5, 0, 0, 1, 1, -1, -0.5, 0.5, 0.5, 0,
-	0, 1, 0, -1, -0.5, -0.5, 0.5, 0, 0, 1, 0, 0, -0.5, 0.5,
-	0.5, -1, 0, 0, 1, 0, -0.5, 0.5, -0.5, -1, 0, 0, 1, -1,
-	-0.5, -0.5, -0.5, -1, 0, 0, 0, -1, -0.5, -0.5, -0.5, -1,
-	0, 0, 0, -1, -0.5, -0.5, 0.5, -1, 0, 0, 0, 0, -0.5, 0.5,
-	0.5, -1, 0, 0, 1, 0, 0.5, 0.5, 0.5, 1, 0, 0, 1, 0, 0.5,
-	0.5, -0.5, 1, 0, 0, 1, -1, 0.5, -0.5, -0.5, 1, 0, 0, 0,
-	-1, 0.5, -0.5, -0.5, 1, 0, 0, 0, -1, 0.5, -0.5, 0.5, 1, 0,
-	0, 0, 0, 0.5, 0.5, 0.5, 1, 0, 0, 1, 0, -0.5, -0.5, -0.5,
-	0, -1, 0, 0, -1, 0.5, -0.5, -0.5, 0, -1, 0, 1, -1, 0.5,
-	-0.5, 0.5, 0, -1, 0, 1, 0, 0.5, -0.5, 0.5, 0, -1, 0, 1, 0,
-	-0.5, -0.5, 0.5, 0, -1, 0, 0, 0, -0.5, -0.5, -0.5, 0, -1,
-	0, 0, -1, -0.5, 0.5, -0.5, 0, 1, 0, 0, -1, 0.5, 0.5, -0.5,
-	0, 1, 0, 1, -1, 0.5, 0.5, 0.5, 0, 1, 0, 1, 0, 0.5, 0.5,
-	0.5, 0, 1, 0, 1, 0, -0.5, 0.5, 0.5, 0, 1, 0, 0, 0, -0.5,
-	0.5, -0.5, 0, 1, 0, 0, -1,
+	-1, 1, 0, 0.5, 0.5, -0.5, 0, 0, -1, 1, -1, 0.5, 0.5,
+	-0.5, 0, 0, -1, 1, -1, -0.5, 0.5, -0.5, 0, 0, -1, 0, -1,
+	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, -0.5, -0.5, 0.5, 0, 0,
+	1, 0, 0, 0.5, -0.5, 0.5, 0, 0, 1, 1, 0, 0.5, 0.5, 0.5,
+	0, 0, 1, 1, -1, 0.5, 0.5, 0.5, 0, 0, 1, 1, -1, -0.5,
+	0.5, 0.5, 0, 0, 1, 0, -1, -0.5, -0.5, 0.5, 0, 0, 1, 0,
+	0, -0.5, 0.5, 0.5, -1, 0, 0, 1, 0, -0.5, 0.5, -0.5, -1,
+	0, 0, 1, -1, -0.5, -0.5, -0.5, -1, 0, 0, 0, -1, -0.5,
+	-0.5, -0.5, -1, 0, 0, 0, -1, -0.5, -0.5, 0.5, -1, 0, 0,
+	0, 0, -0.5, 0.5, 0.5, -1, 0, 0, 1, 0, 0.5, 0.5, 0.5, 1,
+	0, 0, 1, 0, 0.5, 0.5, -0.5, 1, 0, 0, 1, -1, 0.5, -0.5,
+	-0.5, 1, 0, 0, 0, -1, 0.5, -0.5, -0.5, 1, 0, 0, 0, -1,
+	0.5, -0.5, 0.5, 1, 0, 0, 0, 0, 0.5, 0.5, 0.5, 1, 0, 0,
+	1, 0, -0.5, -0.5, -0.5, 0, -1, 0, 0, -1, 0.5, -0.5,
+	-0.5, 0, -1, 0, 1, -1, 0.5, -0.5, 0.5, 0, -1, 0, 1, 0,
+	0.5, -0.5, 0.5, 0, -1, 0, 1, 0, -0.5, -0.5, 0.5, 0, -1,
+	0, 0, 0, -0.5, -0.5, -0.5, 0, -1, 0, 0, -1, -0.5, 0.5,
+	-0.5, 0, 1, 0, 0, -1, 0.5, 0.5, -0.5, 0, 1, 0, 1, -1,
+	0.5, 0.5, 0.5, 0, 1, 0, 1, 0, 0.5, 0.5, 0.5, 0, 1, 0, 1,
+	0, -0.5, 0.5, 0.5, 0, 1, 0, 0, 0, -0.5, 0.5, -0.5, 0, 1,
+	0, 0, -1,
 ]);
 
 function boxVertexAttribPointer(
@@ -82,7 +76,6 @@ function boxVertexAttribPointer(
 		);
 		gl.enableVertexAttribArray(normalAttrLocation);
 	}
-
 	if (
 		typeof texCoordAttrLocation === "number" &&
 		texCoordAttrLocation >= 0
@@ -100,22 +93,44 @@ function boxVertexAttribPointer(
 	return stride;
 }
 
-function main(
-	instance: Ref<HTMLCanvasElement | undefined>,
-) {
-	onMounted(() => {
-		if (!instance.value) return;
-		scene = new Scene(instance.value);
+export default function BoxScene() {
+	const canvasRef = useRef<HTMLCanvasElement | null>(
+		null,
+	);
+	const sceneRef = useRef<Scene | null>(null);
+	const intervalRef = useRef<number | null>(null);
+
+	useEffect(() => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+
+		const scene = new Scene(canvas);
+		sceneRef.current = scene;
+
 		const gl = scene.gl.deref();
-		if (!gl) return;
-		let angle = new Date().getTime() * 0.001;
+
+		if (!gl) {
+			console.error("WebGL2 context unavailable");
+			return;
+		}
+
+		// initial angle & light pos
+		let angle = Date.now() * 0.001;
 		const lightPos = vec3.fromValues(
-			sin(angle) * 2,
-			cos(angle) * 2,
+			Math.sin(angle) * 2,
+			Math.cos(angle) * 2,
 			-3,
 		);
+
+		// shaders
 		const boxShader = new Shader(gl, boxVert, boxFrag);
-		const lightShader = new Shader(gl, boxVert, lightFrag);
+		const lightShader = new Shader(
+			gl,
+			boxVert,
+			lightFrag,
+		);
+
+		// geometry & instances
 		const boxGeometry = new Geometry({
 			shader: boxShader,
 			attributes: attribute,
@@ -133,7 +148,8 @@ function main(
 					width: 500,
 					height: 500,
 					textureUnit: 1,
-					textureLocationName: "material.specular",
+					textureLocationName:
+						"material.specular",
 				},
 				{
 					image: code,
@@ -144,44 +160,52 @@ function main(
 				},
 			],
 			uniformsSetter(
-				gl: WebGL2RenderingContext,
-				shader: Shader,
+				glInner: WebGL2RenderingContext,
+				shaderInner: Shader,
 			) {
-				shader.setVec3(scene.camera.position, "cameraPos");
-				shader.setVec3(
+				// assume scene.camera.position exists
+				shaderInner.setVec3(
+					scene.camera.position,
+					"cameraPos",
+				);
+				shaderInner.setVec3(
 					vec3.fromValues(0.1, 0.1, 0.1),
 					"light.ambient",
 				);
-				shader.setVec3(
+				shaderInner.setVec3(
 					vec3.fromValues(0.8, 0.8, 0.8),
 					"light.diffuse",
 				);
-				shader.setVec3(
+				shaderInner.setVec3(
 					vec3.fromValues(1, 1, 1),
 					"light.specular",
 				);
-				shader.setVec3(lightPos, "light.position");
-				shader.setVec3(
+				shaderInner.setVec3(
+					lightPos,
+					"light.position",
+				);
+				shaderInner.setVec3(
 					vec3.fromValues(1.0, 0.5, 0.31),
 					"material.ambient",
 				);
-				// shader.setVec3(
-				// 	vec3.fromValues(1.0, 0.5, 0.31),
-				// 	"material.diffuse",
-				// );
-				// shader.setVec3(
-				// 	vec3.fromValues(0.5, 0.5, 0.5),
-				// 	"material.specular",
-				// );
-				shader.setFloat(64.0, "material.shininess");
-				shader.setFloat(cos(new Date().getTime()), "time");
+				shaderInner.setFloat(
+					64.0,
+					"material.shininess",
+				);
+				// keep original weird timestamp-based cos
+				shaderInner.setFloat(
+					Math.cos(Date.now()),
+					"time",
+				);
 			},
 		});
+
 		const lightGeometry = new Geometry({
 			shader: lightShader,
 			attributes: attribute,
 			vertexAttribPointer: boxVertexAttribPointer,
 		});
+
 		const boxGeometryInstance = new GeometryInstance({
 			geometry: boxGeometry,
 			matrix: mat4.multiply(
@@ -196,17 +220,23 @@ function main(
 				),
 			),
 		});
+
 		const lightGeometryInstance = new GeometryInstance({
 			geometry: lightGeometry,
 			matrix: mat4.multiply(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), lightPos),
+				mat4.fromTranslation(
+					mat4.create(),
+					lightPos,
+				),
 				mat4.fromScaling(
 					mat4.create(),
 					vec3.fromValues(0.1, 0.1, 0.1),
 				),
 			),
 		});
+
+		// register instances to scene
 		scene.geometryMap.set(
 			boxGeometryInstance,
 			boxGeometryInstance,
@@ -215,33 +245,53 @@ function main(
 			lightGeometryInstance,
 			lightGeometryInstance,
 		);
-		setInterval(() => {
-			angle = new Date().getTime() * 0.001;
-			lightPos[1] = 3;
-			lightPos[0] = cos(angle) * 3;
-			lightPos[2] = sin(angle) * 3;
+
+		// keep updating light position with setInterval (as requested)
+		const id = window.setInterval(() => {
+			angle = Date.now() * 0.001;
+			lightPos[1] = 3; // original code forced y = 3
+			lightPos[0] = Math.cos(angle) * 3;
+			lightPos[2] = Math.sin(angle) * 3;
+
 			lightGeometryInstance.matrix = mat4.multiply(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), lightPos),
+				mat4.fromTranslation(
+					mat4.create(),
+					lightPos,
+				),
 				mat4.fromScaling(
 					mat4.create(),
 					vec3.fromValues(0.1, 0.1, 0.1),
 				),
 			);
 		}, 1);
-	});
-	onUnmounted(() => {
-		scene.dispatch();
-	});
-}
 
-export default defineComponent({
-	setup() {
-		const canvasRef: Ref<HTMLCanvasElement | undefined> =
-			ref();
-		main(canvasRef);
-		return function () {
-			return <canvas ref={canvasRef}></canvas>;
+		intervalRef.current = id;
+
+		// cleanup
+		return () => {
+			if (intervalRef.current != null) {
+				clearInterval(intervalRef.current);
+				intervalRef.current = null;
+			}
+			try {
+				sceneRef.current?.dispatch?.();
+			} catch (e) {
+				console.log(e);
+			} finally {
+				sceneRef.current = null;
+			}
 		};
-	},
-});
+	}, []);
+
+	return (
+		<canvas
+			ref={canvasRef}
+			style={{
+				width: "100%",
+				height: "100%",
+				display: "block",
+			}}
+		/>
+	);
+}

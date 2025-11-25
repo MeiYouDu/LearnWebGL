@@ -9,7 +9,9 @@ class Scene {
 		this.canvas = new WeakRef(canvas);
 		const gl = canvas.getContext("webgl2");
 		if (!gl)
-			throw new Error("fail to create webgl2 context");
+			throw new Error(
+				"fail to create webgl2 context",
+			);
 		this.gl = new WeakRef(gl);
 		this.camera = new Camera({
 			scene: this,
@@ -47,7 +49,12 @@ class Scene {
 		gl.canvas.height = (
 			gl.canvas as HTMLCanvasElement
 		).offsetHeight;
-		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+		gl.viewport(
+			0,
+			0,
+			gl.canvas.width,
+			gl.canvas.height,
+		);
 	}
 	/**
 	 * 当前时间
