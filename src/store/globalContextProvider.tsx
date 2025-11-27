@@ -1,39 +1,20 @@
-import {
-	GlobalContext,
-	GlobalContextType,
-} from "@/store/index.ts";
-import { useState } from "react";
+import { GlobalContext } from "@/store/index.ts";
+import { ReactNode, useEffect } from "react";
+import { useTheme } from "ahooks";
 
 function GlobalContextProvider({
 	children,
 }: {
-	children: React.ReactNode;
+	children: ReactNode;
 }) {
-	const [num, setNum] = useState<number>(0);
-	const [list, setList] = useState<
-		GlobalContextType["list"]
-	>([]);
-
-	function doSome() {
-		setTimeout(() => {
-			setNum(10);
-			setList([
-				{
-					name: "张三",
-					sex: 1,
-					age: 18,
-				},
-			]);
-		}, 2000);
-	}
-
+	const { theme, setThemeMode } = useTheme();
+	useEffect(() => {
+		setThemeMode("system");
+	}, []);
 	return (
 		<GlobalContext.Provider
 			value={{
-				size: num,
-				setSize: setNum,
-				doSome,
-				list,
+				theme,
 			}}>
 			{children}
 		</GlobalContext.Provider>

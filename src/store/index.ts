@@ -6,14 +6,7 @@ export * from "./globalContextProvider.tsx";
  * 全局上下文类型
  */
 interface GlobalContextType {
-	size: number;
-	setSize(size: number): void;
-	doSome(): void;
-	list: Array<{
-		name: string;
-		sex: number;
-		age: number;
-	}>;
+	theme: "light" | "dark";
 }
 
 /**
