@@ -1,11 +1,23 @@
 import type { RouteObject } from "react-router";
-import { createBrowserRouter } from "react-router";
+import {
+	createBrowserRouter,
+	redirect,
+} from "react-router";
 import HydrateFallback from "@/views/hydrateFallback.tsx";
 import Root from "@/views/Root";
 
 const fundamentals: RouteObject[] = [
 	{
 		path: "/",
+		index: true,
+		Component: Root,
+		hydrateFallbackElement: HydrateFallback,
+		loader() {
+			return redirect("/fundamentals/helloWorld");
+		},
+	},
+	{
+		path: "/fundamentals",
 		id: "fundamentals",
 		Component: Root,
 		hydrateFallbackElement: HydrateFallback,

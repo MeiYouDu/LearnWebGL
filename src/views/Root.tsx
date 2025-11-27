@@ -19,18 +19,21 @@ import { routes } from "@/routes";
 function menuItemFactory(
 	routes: RouteObject[],
 ): Required<MenuProps>["items"] {
-	return routes.map((route: RouteObject) => {
-		return {
-			key: route.path as string,
-			label: route.id,
-			type: "item",
-			icon: <PieChartOutlined />,
-			children:
-				route.children && route.children.length > 0
-					? menuItemFactory(route.children)
-					: undefined,
-		};
-	});
+	return routes
+		.filter((item) => item.id)
+		.map((route: RouteObject) => {
+			return {
+				key: route.path as string,
+				label: route.id,
+				type: "item",
+				icon: <PieChartOutlined />,
+				children:
+					route.children &&
+					route.children.length > 0
+						? menuItemFactory(route.children)
+						: undefined,
+			};
+		});
 }
 
 function Navigator({ collapsed }: { collapsed: boolean }) {
@@ -41,10 +44,7 @@ function Navigator({ collapsed }: { collapsed: boolean }) {
 	const selectHandle: MenuProps["onSelect"] = function (
 		info,
 	) {
-		const path = info.keyPath
-			.reverse()
-			.join("/")
-			.replace("//", "/");
+		const path = info.keyPath.reverse().join("/");
 		navigate(path);
 	};
 	return (
