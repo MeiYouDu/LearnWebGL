@@ -3,15 +3,15 @@ import { useEffect, useRef } from "react";
 import { cos, sin } from "mathjs";
 import { mat4, vec3 } from "gl-matrix";
 import { random } from "lodash";
-import { Scene } from "../../../helper/scene";
-import { Shader } from "../../../helper/shader";
-import { Geometry } from "../../../helper/geometry";
-import { GeometryInstance } from "../../../helper/geometryInstance";
+import { Scene } from "../../../../helper/scene.ts";
+import { Shader } from "../../../../helper/shader.ts";
+import { Geometry } from "../../../../helper/geometry.ts";
+import { GeometryInstance } from "../../../../helper/geometryInstance.ts";
 import boxVert from "./box.vert";
 import boxFrag from "./box.frag";
 import lightFrag from "./light.frag";
-import boxBorder from "../../../assets/textures/container2_specular.png";
-import box from "../../../assets/textures/container2.png";
+import boxBorder from "../../../../assets/textures/container2_specular.png";
+import box from "../../../../assets/textures/container2.png";
 
 const attribute = new Float32Array([
 	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, 0.5, -0.5, -0.5, 0, 0,

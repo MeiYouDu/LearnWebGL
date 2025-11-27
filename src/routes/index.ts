@@ -33,7 +33,7 @@ const fundamentals: RouteObject[] = [
 							await import(
 								/* webpackChunkName: "helloWorld" */
 								/* webpackPrefetch: true */
-								"../views/helloWorld/index"
+								"@/views/fundamentals/helloWorld/index"
 							)
 						).default,
 					};
@@ -49,7 +49,7 @@ const fundamentals: RouteObject[] = [
 							await import(
 								/* webpackChunkName: "bezierLine" */
 								/* webpackPrefetch: true */
-								"../views/bezierLine/index"
+								"@/views/fundamentals/bezierLine/index"
 							)
 						).default,
 					};
@@ -65,7 +65,7 @@ const fundamentals: RouteObject[] = [
 							await import(
 								/* webpackChunkName: "texture" */
 								/* webpackPrefetch: true */
-								"../views/texture/index"
+								"@/views/fundamentals/texture/index"
 							)
 						).default,
 					};
@@ -81,7 +81,7 @@ const fundamentals: RouteObject[] = [
 							await import(
 								/* webpackChunkName: "coordinateSystem" */
 								/* webpackPrefetch: true */
-								"../views/coordinateSystem/index"
+								"@/views/fundamentals/coordinateSystem/index"
 							)
 						).default,
 					};
@@ -97,7 +97,7 @@ const fundamentals: RouteObject[] = [
 							await import(
 								/* webpackChunkName: "camera" */
 								/* webpackPrefetch: true */
-								"../views/camera/index"
+								"@/views/fundamentals/camera/index"
 							)
 						).default,
 					};
@@ -124,7 +124,7 @@ const lights: RouteObject[] = [
 							await import(
 								/* webpackChunkName: "color" */
 								/* webpackPrefetch: true */
-								"../views/color/index"
+								"@/views/light/color/index"
 							)
 						).default,
 					};
@@ -140,7 +140,7 @@ const lights: RouteObject[] = [
 							await import(
 								/* webpackChunkName: "material" */
 								/* webpackPrefetch: true */
-								"../views/material/index"
+								"@/views/light/material/index"
 							)
 						).default,
 					};
@@ -156,7 +156,7 @@ const lights: RouteObject[] = [
 							await import(
 								/* webpackChunkName: "lightMap" */
 								/* webpackPrefetch: true */
-								"../views/lightMap/index"
+								"@/views/light/lightMap/index"
 							)
 						).default,
 					};
@@ -177,7 +177,7 @@ const lights: RouteObject[] = [
 									await import(
 										/* webpackChunkName: "parallelLight" */
 										/* webpackPrefetch: true */
-										"../views/lightCaster/parallelLight/index"
+										"@/views/light/lightCaster/parallelLight/index"
 									)
 								).default,
 							};
@@ -194,7 +194,7 @@ const lights: RouteObject[] = [
 									await import(
 										/* webpackChunkName: "pointLight" */
 										/* webpackPrefetch: true */
-										"../views/lightCaster/pointLight/index"
+										"@/views/light/lightCaster/pointLight/index"
 									)
 								).default,
 							};
@@ -211,7 +211,7 @@ const lights: RouteObject[] = [
 									await import(
 										/* webpackChunkName: "spotLight" */
 										/* webpackPrefetch: true */
-										"../views/lightCaster/spotLight/index"
+										"@/views/light/lightCaster/spotLight/index"
 									)
 								).default,
 							};
@@ -228,7 +228,7 @@ const lights: RouteObject[] = [
 									await import(
 										/* webpackChunkName: "multipleLight" */
 										/* webpackPrefetch: true */
-										"../views/lightCaster/multipleLight/index"
+										"@/views/light/lightCaster/multipleLight/index"
 									)
 								).default,
 							};

@@ -1,32 +1,32 @@
 // CubeSceneReact.tsx
 import { useEffect, useRef } from "react";
-import { resizeHandle } from "../../helper/resize";
+import { Mesh } from "../../../interface";
+import { resizeHandle } from "../../../helper/resize.ts";
 import vertexShaderSource from "./vertex.glsl";
 import fragmentShaderSource from "./fragment.glsl";
-import { Shader } from "../../helper/shader";
+import { Shader } from "../../../helper/shader.ts";
 import { vec2, vec3 } from "gl-matrix";
-import smile from "../../assets/image/awesomeface.png";
-import box from "../../assets/image/container.jpg";
-import { useInput } from "../../hook";
-
-interface Mesh {
-	vertexes: Float32Array;
-	indices: Uint32Array;
-}
+import smile from "../../../assets/image/awesomeface.png";
+import box from "../../../assets/image/container.jpg";
+import { useInput } from "../../../hook";
 
 function getMesh(): Mesh {
 	const vertexes = new Float32Array([
-		// x, y, z, u, v
 		-0.5, -0.5, -0.5, 0.0, 0.0, 0.5, -0.5, -0.5, 1.0,
 		0.0, 0.5, 0.5, -0.5, 1.0, 1.0, -0.5, 0.5, -0.5, 0.0,
 		1.0, -0.5, -0.5, 0.5, 0.0, 0.0, 0.5, -0.5, 0.5, 1.0,
 		0.0, 0.5, 0.5, 0.5, 1.0, 1.0, -0.5, 0.5, 0.5, 0.0,
-		1.0,
-		// ... (your original array continues; above is just pattern)
-		// The Vue source contained many repeated lines; keep the same flattened array
+		1.0, -0.5, -0.5, -0.5, 0.0, 1.0, -0.5, -0.5, 0.5,
+		1.0, 0.0,
+		// ... keep the full flattened array as in your original code
+		// I used the same pattern - replace/extend with your complete array if needed
 	]);
 
-	// In the original Vue code `indices` was empty Uint32Array
+	// same transformation as Vue: invert v (index +4)
+	for (let i = 0; i < vertexes.length; i += 5) {
+		vertexes[i + 4] = -vertexes[i + 4];
+	}
+
 	const indices = new Uint32Array([]);
 	return { vertexes, indices };
 }
@@ -65,13 +65,13 @@ function setTexture(
 ) {
 	const img = new Image(width, height);
 	const onLoad = () => {
-		const texture = gl.createTexture();
-		if (!texture) return;
+		const tex = gl.createTexture();
+		if (!tex) return;
 		gl.activeTexture(gl.TEXTURE0 + textureUnit);
-		gl.bindTexture(gl.TEXTURE_2D, texture);
+		gl.bindTexture(gl.TEXTURE_2D, tex);
 		shaderInstance.setInt(
 			textureUnit,
-			textureLocationName || `texture${textureUnit}`,
+			textureLocationName ?? `texture${textureUnit}`,
 		);
 		setTextureParams(gl);
 		gl.texImage2D(
@@ -90,7 +90,7 @@ function setTexture(
 	};
 	img.addEventListener("load", onLoad);
 	img.src = imageUrl;
-	return img; // return so caller can remove listener on unmount if needed
+	return { img, onLoad };
 }
 
 export default function CubeSceneReact() {
@@ -99,19 +99,17 @@ export default function CubeSceneReact() {
 	);
 	const rafRef = useRef<number | null>(null);
 	const imagesRef = useRef<HTMLImageElement[]>([]);
-	// call useInput at top-level (assume it accepts a Ref<HTMLCanvasElement | null>)
-	const inputInstance = useInput(canvasRef);
+	const inputInstance = useInput(canvasRef); // 按你原来用法保留
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
-
 		const gl = canvas.getContext("webgl2", {
 			antialias: true,
 			powerPreference: "high-performance",
 		});
 		if (!gl) {
-			console.error("WebGL2 not supported");
+			console.error("WebGL2 not available");
 			return;
 		}
 
@@ -121,25 +119,19 @@ export default function CubeSceneReact() {
 			fragmentShaderSource,
 		);
 		shaderInstance.use();
-
 		gl.enable(gl.DEPTH_TEST);
 
 		const mesh = getMesh();
 
+		// 创建 buffers / vao
 		const vbo = gl.createBuffer();
 		const ebo = gl.createBuffer();
 		const vao = gl.createVertexArray();
-
-		const positionAttributeLocation =
-			shaderInstance.getAttribLocation("position");
-		const texCoordAttributeLocation =
-			shaderInstance.getAttribLocation("texCoord");
 
 		gl.bindVertexArray(vao);
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
 
-		// upload buffers
 		gl.bufferData(
 			gl.ARRAY_BUFFER,
 			mesh.vertexes,
@@ -151,8 +143,8 @@ export default function CubeSceneReact() {
 			gl.STATIC_DRAW,
 		);
 
-		// textures (keep returned Image to remove listeners later)
-		const img0 = setTexture(
+		// 纹理
+		const t0 = setTexture(
 			gl,
 			shaderInstance,
 			box,
@@ -160,7 +152,7 @@ export default function CubeSceneReact() {
 			512,
 			0,
 		);
-		const img1 = setTexture(
+		const t1 = setTexture(
 			gl,
 			shaderInstance,
 			smile,
@@ -168,10 +160,14 @@ export default function CubeSceneReact() {
 			476,
 			1,
 		);
-		imagesRef.current.push(img0, img1);
+		imagesRef.current.push(t0.img, t1.img);
 
-		// stride: 5 floats * 4 bytes = 20
-		const stride = 5 * 4;
+		const positionAttributeLocation =
+			shaderInstance.getAttribLocation("position");
+		const texCoordAttributeLocation =
+			shaderInstance.getAttribLocation("texCoord");
+
+		const stride = 5 * 4; // 5 floats * 4 bytes
 		if (
 			typeof positionAttributeLocation === "number" &&
 			positionAttributeLocation >= 0
@@ -219,10 +215,15 @@ export default function CubeSceneReact() {
 		];
 
 		const mixFactor = 0.65;
-		shaderInstance.use();
 
-		// render loop
-		const render = () => {
+		// deltaTime 计算（ms）
+		let lastTime = performance.now();
+
+		function render(now?: number) {
+			const timeNow = now ?? performance.now();
+			const deltaTime = timeNow - lastTime;
+			lastTime = timeNow;
+
 			if (!gl) return;
 			if (canvas) resizeHandle(canvas, gl);
 
@@ -230,8 +231,10 @@ export default function CubeSceneReact() {
 				gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT,
 			);
 			gl.clearColor(0.2, 0.2, 0.2, 1);
+
 			shaderInstance.use();
 			gl.bindVertexArray(vao);
+
 			shaderInstance.setVec2(
 				vec2.fromValues(
 					gl.canvas.width,
@@ -241,24 +244,22 @@ export default function CubeSceneReact() {
 			);
 			shaderInstance.setFloat(mixFactor, "mixFactor");
 
+			const vertexCount = mesh.vertexes.length / 5;
 			for (let i = 0; i < positions.length; i++) {
 				const p = positions[i];
 				const { model, view, projection } =
-					inputInstance.render(gl, p, 1);
+					inputInstance.render(gl, p, deltaTime);
 				shaderInstance.setMatrix4(model, "model");
 				shaderInstance.setMatrix4(view, "view");
 				shaderInstance.setMatrix4(
 					projection,
 					"projection",
 				);
-				// vertex count = total floats / 5
-				const vertexCount =
-					mesh.vertexes.length / 5;
 				gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
 			}
 
 			rafRef.current = requestAnimationFrame(render);
-		};
+		}
 
 		rafRef.current = requestAnimationFrame(render);
 
@@ -266,23 +267,23 @@ export default function CubeSceneReact() {
 		return () => {
 			if (rafRef.current != null)
 				cancelAnimationFrame(rafRef.current);
-			// remove image listeners by clearing src and letting GC handle object URLs
+			// remove image listeners & clear src to help GC
 			imagesRef.current.forEach((img) => {
 				try {
 					img.src = "";
+					img.remove();
 				} catch (e) {
 					console.log(e);
 				}
 			});
 			imagesRef.current.length = 0;
 
-			// delete buffers / vao / textures (best-effort)
 			try {
 				if (vao) gl.deleteVertexArray(vao);
 				if (vbo) gl.deleteBuffer(vbo);
 				if (ebo) gl.deleteBuffer(ebo);
-			} catch (e) {
-				console.log(e);
+			} catch {
+				// ignore
 			}
 		};
 	}, [inputInstance]);

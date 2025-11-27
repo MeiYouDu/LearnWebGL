@@ -1,16 +1,16 @@
-// BoxSceneReact.tsx
+// BoxScene.tsx
 import { useEffect, useRef } from "react";
-import { mat4, vec3, vec4 } from "gl-matrix";
-import { cos, sin } from "mathjs";
-import { Scene } from "../../helper/scene";
-import { Shader } from "../../helper/shader";
-import { Geometry } from "../../helper/geometry";
-import { GeometryInstance } from "../../helper/geometryInstance";
+import { mat4, vec3 } from "gl-matrix";
+import { Scene } from "../../../helper/scene.ts";
+import { Shader } from "../../../helper/shader.ts";
+import { Geometry } from "../../../helper/geometry.ts";
+import { GeometryInstance } from "../../../helper/geometryInstance.ts";
 import boxVert from "./box.vert";
 import boxFrag from "./box.frag";
 import lightFrag from "./light.frag";
-import smile from "../../assets/image/awesomeface.png";
-import box from "../../assets/image/container.jpg";
+import boxBorder from "../../../assets/textures/container2_specular.png";
+import box from "../../../assets/textures/container2.png";
+import code from "../../../assets/textures/matrix.jpg";
 
 const attribute = new Float32Array([
 	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, 0.5, -0.5, -0.5, 0, 0,
@@ -48,7 +48,6 @@ function boxVertexAttribPointer(
 		shader.getAttribLocation("normal");
 	const texCoordAttrLocation =
 		shader.getAttribLocation("texCoord");
-
 	if (
 		typeof positionAttrLocation === "number" &&
 		positionAttrLocation >= 0
@@ -94,29 +93,7 @@ function boxVertexAttribPointer(
 	return stride;
 }
 
-// helper: safe gl extraction (scene.gl is expected to be a WeakRef or similar)
-function getGLFromScene(
-	scene: Scene,
-): WebGL2RenderingContext | null {
-	const maybe = (
-		scene as unknown as {
-			gl?: {
-				deref?: () => WebGL2RenderingContext | null;
-			};
-		}
-	).gl;
-	if (!maybe) return null;
-	if (typeof maybe.deref === "function") {
-		try {
-			return maybe.deref() ?? null;
-		} catch {
-			return null;
-		}
-	}
-	return null;
-}
-
-export default function BoxSceneReact() {
+export default function BoxScene() {
 	const canvasRef = useRef<HTMLCanvasElement | null>(
 		null,
 	);
@@ -124,26 +101,28 @@ export default function BoxSceneReact() {
 	const intervalRef = useRef<number | null>(null);
 
 	useEffect(() => {
-		let scene: Scene | null = null;
 		const canvas = canvasRef.current;
 		if (!canvas) return;
 
-		scene = new Scene(canvas);
+		const scene = new Scene(canvas);
 		sceneRef.current = scene;
 
-		const gl = getGLFromScene(scene);
+		const gl = scene.gl.deref();
+
 		if (!gl) {
-			console.error("webgl2 context unavailable");
+			console.error("WebGL2 context unavailable");
 			return;
 		}
 
+		// initial angle & light pos
 		let angle = Date.now() * 0.001;
 		const lightPos = vec3.fromValues(
-			sin(angle) * 2,
-			cos(angle) * 2,
+			Math.sin(angle) * 2,
+			Math.cos(angle) * 2,
 			-3,
 		);
 
+		// shaders
 		const boxShader = new Shader(gl, boxVert, boxFrag);
 		const lightShader = new Shader(
 			gl,
@@ -151,6 +130,7 @@ export default function BoxSceneReact() {
 			lightFrag,
 		);
 
+		// geometry & instances
 		const boxGeometry = new Geometry({
 			shader: boxShader,
 			attributes: attribute,
@@ -161,26 +141,61 @@ export default function BoxSceneReact() {
 					width: 512,
 					height: 512,
 					textureUnit: 0,
+					textureLocationName: "material.diffuse",
 				},
 				{
-					image: smile,
-					width: 476,
-					height: 476,
+					image: boxBorder,
+					width: 500,
+					height: 500,
 					textureUnit: 1,
+					textureLocationName:
+						"material.specular",
+				},
+				{
+					image: code,
+					width: 512,
+					height: 512,
+					textureUnit: 2,
+					textureLocationName: "code",
 				},
 			],
 			uniformsSetter(
 				glInner: WebGL2RenderingContext,
 				shaderInner: Shader,
 			) {
-				shaderInner.setVec4(
-					vec4.fromValues(1, 1, 1, 1.0),
-					"lightColor",
-				);
-				shaderInner.setVec3(lightPos, "lightPos");
+				// assume scene.camera.position exists
 				shaderInner.setVec3(
-					(scene as Scene).camera.position,
+					scene.camera.position,
 					"cameraPos",
+				);
+				shaderInner.setVec3(
+					vec3.fromValues(0.1, 0.1, 0.1),
+					"light.ambient",
+				);
+				shaderInner.setVec3(
+					vec3.fromValues(0.8, 0.8, 0.8),
+					"light.diffuse",
+				);
+				shaderInner.setVec3(
+					vec3.fromValues(1, 1, 1),
+					"light.specular",
+				);
+				shaderInner.setVec3(
+					lightPos,
+					"light.position",
+				);
+				shaderInner.setVec3(
+					vec3.fromValues(1.0, 0.5, 0.31),
+					"material.ambient",
+				);
+				shaderInner.setFloat(
+					64.0,
+					"material.shininess",
+				);
+				// keep original weird timestamp-based cos
+				shaderInner.setFloat(
+					Math.cos(Date.now()),
+					"time",
 				);
 			},
 		});
@@ -221,22 +236,23 @@ export default function BoxSceneReact() {
 			),
 		});
 
-		// register into scene
-		(scene as Scene).geometryMap.set(
+		// register instances to scene
+		scene.geometryMap.set(
 			boxGeometryInstance,
 			boxGeometryInstance,
 		);
-		(scene as Scene).geometryMap.set(
+		scene.geometryMap.set(
 			lightGeometryInstance,
 			lightGeometryInstance,
 		);
 
-		// keep original setInterval behaviour (1ms)
+		// keep updating light position with setInterval (as requested)
 		const id = window.setInterval(() => {
 			angle = Date.now() * 0.001;
-			lightPos[1] = 3;
-			lightPos[0] = cos(angle) * 3;
-			lightPos[2] = sin(angle) * 3;
+			lightPos[1] = 3; // original code forced y = 3
+			lightPos[0] = Math.cos(angle) * 3;
+			lightPos[2] = Math.sin(angle) * 3;
+
 			lightGeometryInstance.matrix = mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(
@@ -252,15 +268,16 @@ export default function BoxSceneReact() {
 
 		intervalRef.current = id;
 
+		// cleanup
 		return () => {
 			if (intervalRef.current != null) {
 				clearInterval(intervalRef.current);
 				intervalRef.current = null;
 			}
 			try {
-				scene?.dispatch();
-			} catch {
-				// ignore
+				sceneRef.current?.dispatch?.();
+			} catch (e) {
+				console.log(e);
 			} finally {
 				sceneRef.current = null;
 			}

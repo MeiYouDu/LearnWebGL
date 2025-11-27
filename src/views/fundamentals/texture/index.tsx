@@ -5,8 +5,8 @@ import vertexShaderSource from "./vertex.glsl";
 import fragmentShaderSource from "./fragment.glsl";
 import { Shader } from "@/helper/shader.ts";
 import { vec2 } from "gl-matrix";
-import smile from "../../assets/image/awesomeface.png";
-import box from "../../assets/image/container.jpg";
+import smile from "../../../assets/image/awesomeface.png";
+import box from "../../../assets/image/container.jpg";
 
 interface Mesh {
 	vertexes: Float32Array;

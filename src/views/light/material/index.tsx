@@ -1,18 +1,17 @@
-// BoxSceneReact.tsx
+// CanvasComponent.tsx
 import { useEffect, useRef } from "react";
-import { cos, sin } from "mathjs";
 import { mat4, vec3 } from "gl-matrix";
-import { random } from "lodash";
-import { Scene } from "../../../helper/scene";
-import { Shader } from "../../../helper/shader";
-import { Geometry } from "../../../helper/geometry";
-import { GeometryInstance } from "../../../helper/geometryInstance";
+import { Scene } from "../../../helper/scene.ts"; // 调整路径
+import { Shader } from "../../../helper/shader.ts";
+import { Geometry } from "../../../helper/geometry.ts";
+import { GeometryInstance } from "../../../helper/geometryInstance.ts";
 import boxVert from "./box.vert";
 import boxFrag from "./box.frag";
 import lightFrag from "./light.frag";
-import boxBorder from "../../../assets/textures/container2_specular.png";
-import box from "../../../assets/textures/container2.png";
+import smile from "../../../assets/image/awesomeface.png";
+import box from "../../../assets/image/container.jpg"; // attribute 与 Vue 版本保持一致
 
+// attribute 与 Vue 版本保持一致
 const attribute = new Float32Array([
 	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, 0.5, -0.5, -0.5, 0, 0,
 	-1, 1, 0, 0.5, 0.5, -0.5, 0, 0, -1, 1, -1, 0.5, 0.5,
@@ -49,6 +48,7 @@ function boxVertexAttribPointer(
 		shader.getAttribLocation("normal");
 	const texCoordAttrLocation =
 		shader.getAttribLocation("texCoord");
+
 	if (
 		typeof positionAttrLocation === "number" &&
 		positionAttrLocation >= 0
@@ -94,7 +94,7 @@ function boxVertexAttribPointer(
 	return stride;
 }
 
-export default function BoxSceneReact() {
+export default function CanvasComponent() {
 	const canvasRef = useRef<HTMLCanvasElement | null>(
 		null,
 	);
@@ -102,26 +102,29 @@ export default function BoxSceneReact() {
 	const intervalRef = useRef<number | null>(null);
 
 	useEffect(() => {
-		let scene: Scene | null = null;
 		const canvas = canvasRef.current;
 		if (!canvas) return;
 
-		scene = new Scene(canvas);
+		// create scene (保持与原来一致)
+		const scene = new Scene(canvas);
 		sceneRef.current = scene;
 
-		const gl = scene.gl.deref();
+		// deref gl，兼容你的 Scene 实现（如果是 WeakRef）
+		const gl = scene.gl?.deref();
 		if (!gl) {
 			console.error("webgl2 context unavailable");
 			return;
 		}
 
+		// initial angle & light pos
 		let angle = Date.now() * 0.001;
 		const lightPos = vec3.fromValues(
-			sin(angle) * 6.5,
-			cos(angle) * 6.5 - 5,
+			Math.sin(angle) * 2,
+			Math.cos(angle) * 2,
 			-3,
 		);
 
+		// shaders
 		const boxShader = new Shader(gl, boxVert, boxFrag);
 		const lightShader = new Shader(
 			gl,
@@ -129,6 +132,7 @@ export default function BoxSceneReact() {
 			lightFrag,
 		);
 
+		// geometry & instances
 		const boxGeometry = new Geometry({
 			shader: boxShader,
 			attributes: attribute,
@@ -139,15 +143,12 @@ export default function BoxSceneReact() {
 					width: 512,
 					height: 512,
 					textureUnit: 0,
-					textureLocationName: "material.diffuse",
 				},
 				{
-					image: boxBorder,
-					width: 500,
-					height: 500,
-					textureUnit: 1,
-					textureLocationName:
-						"material.specular",
+					image: smile,
+					width: 476,
+					height: 476,
+					textureUnit: 1, // 注意：原 Vue 里第二个也写了 0，通常应为 1
 				},
 			],
 			uniformsSetter(
@@ -155,15 +156,15 @@ export default function BoxSceneReact() {
 				shaderInner: Shader,
 			) {
 				shaderInner.setVec3(
-					(scene as Scene).camera.position,
+					scene.camera.position,
 					"cameraPos",
 				);
 				shaderInner.setVec3(
-					vec3.fromValues(0.3, 0.3, 0.3),
+					vec3.fromValues(0.2, 0.2, 0.2),
 					"light.ambient",
 				);
 				shaderInner.setVec3(
-					vec3.fromValues(0.9, 0.9, 0.9),
+					vec3.fromValues(0.9, 0.2, 0.9),
 					"light.diffuse",
 				);
 				shaderInner.setVec3(
@@ -178,14 +179,16 @@ export default function BoxSceneReact() {
 					vec3.fromValues(1.0, 0.5, 0.31),
 					"material.ambient",
 				);
-				shaderInner.setFloat(1.0, "light.constant");
-				shaderInner.setFloat(0.045, "light.linear");
-				shaderInner.setFloat(
-					0.0075,
-					"light.quadratic",
+				shaderInner.setVec3(
+					vec3.fromValues(1.0, 0.5, 0.31),
+					"material.diffuse",
+				);
+				shaderInner.setVec3(
+					vec3.fromValues(0.5, 0.5, 0.5),
+					"material.specular",
 				);
 				shaderInner.setFloat(
-					64.0,
+					32.0,
 					"material.shininess",
 				);
 			},
@@ -197,27 +200,20 @@ export default function BoxSceneReact() {
 			vertexAttribPointer: boxVertexAttribPointer,
 		});
 
-		// create 10 random box instances
-		for (let i = 0; i < 10; i++) {
-			const x = random(-5, 5, true);
-			const y = random(-5, 5, true);
-			const z = random(-10, 0, true);
-			const instance = new GeometryInstance({
-				geometry: boxGeometry,
-				matrix: mat4.multiply(
+		const boxGeometryInstance = new GeometryInstance({
+			geometry: boxGeometry,
+			matrix: mat4.multiply(
+				mat4.create(),
+				mat4.fromTranslation(
 					mat4.create(),
-					mat4.fromTranslation(
-						mat4.create(),
-						vec3.fromValues(x, y, z),
-					),
-					mat4.fromScaling(
-						mat4.create(),
-						vec3.fromValues(1.5, 1.5, 1.5),
-					),
+					vec3.fromValues(0, 0, 0),
 				),
-			});
-			scene.geometryMap.set(instance, instance);
-		}
+				mat4.fromScaling(
+					mat4.create(),
+					vec3.fromValues(1.5, 1.5, 1.5),
+				),
+			),
+		});
 
 		const lightGeometryInstance = new GeometryInstance({
 			geometry: lightGeometry,
@@ -234,17 +230,25 @@ export default function BoxSceneReact() {
 			),
 		});
 
+		// register to scene (保持原逻辑)
+		scene.geometryMap.set(
+			boxGeometryInstance,
+			boxGeometryInstance,
+		);
 		scene.geometryMap.set(
 			lightGeometryInstance,
 			lightGeometryInstance,
 		);
 
-		// setInterval update (kept as original, 1ms)
+		// setInterval 更新 lightPos（保留你要求的方案）
 		const id = window.setInterval(() => {
 			angle = Date.now() * 0.001;
-			lightPos[1] = 0;
-			lightPos[0] = cos(angle / 3) * 6.5;
-			lightPos[2] = sin(angle / 3) * 6.5 - 5;
+			// 你原始逻辑里有 lightPos[1] = 3; 但后续又计算 x/z，保留原样：
+			lightPos[1] = 3;
+			lightPos[0] = Math.cos(angle) * 3;
+			lightPos[2] = Math.sin(angle) * 3;
+
+			// 更新实例的矩阵
 			lightGeometryInstance.matrix = mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(
@@ -256,26 +260,28 @@ export default function BoxSceneReact() {
 					vec3.fromValues(0.1, 0.1, 0.1),
 				),
 			);
-		}, 1);
+		}, 1); // interval 1ms 与 Vue 保持一致
 
 		intervalRef.current = id;
 
+		// cleanup on unmount: clear interval and dispatch scene
 		return () => {
 			if (intervalRef.current != null) {
 				clearInterval(intervalRef.current);
 				intervalRef.current = null;
 			}
 			try {
-				scene?.dispatch();
-			} catch {
-				// ignore
+				// dispatch() 用于 Scene 做自身清理（你在 Vue 里也调用了它）
+				sceneRef.current?.dispatch?.();
+			} catch (e) {
+				console.log(e);
 			} finally {
 				sceneRef.current = null;
 			}
 		};
-	}, []);
+	}, []); // 仅挂载一次
 
-	// keep simple canvas element (no explicit return type)
+	// canvas 的样式/属性如需自定义可以把 width/height 作 props
 	return (
 		<canvas
 			ref={canvasRef}
