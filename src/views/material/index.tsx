@@ -1,5 +1,5 @@
 // CanvasComponent.tsx
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { mat4, vec3 } from "gl-matrix";
 import { Scene } from "../../helper/scene"; // 调整路径
 import { Shader } from "../../helper/shader";
@@ -9,7 +9,7 @@ import boxVert from "./box.vert";
 import boxFrag from "./box.frag";
 import lightFrag from "./light.frag";
 import smile from "../../assets/image/awesomeface.png";
-import box from "../../assets/image/container.jpg";
+import box from "../../assets/image/container.jpg"; // attribute 与 Vue 版本保持一致
 
 // attribute 与 Vue 版本保持一致
 const attribute = new Float32Array([

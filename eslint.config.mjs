@@ -4,6 +4,8 @@ import prettier from "eslint-plugin-prettier/recommended";
 import jsonc from "eslint-plugin-jsonc";
 import globals from "globals";
 import ts from "typescript-eslint";
+import reactPlugin from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
 
 /**
  * ESLint configuration.
@@ -36,10 +38,19 @@ export default ts.config(
 			"tsconfig-for-webpack-config.json",
 		],
 	},
-
+	{
+		settings: {
+			react: {
+				version: "19.0",
+			},
+		},
+	},
 	// Base configs for all files
 	js.configs.recommended,
-	...ts.configs.recommended,
+	ts.configs.recommended,
+	reactPlugin.configs.flat.recommended,
+	reactPlugin.configs.flat["jsx-runtime"],
+	reactHooks.configs.flat.recommended,
 	...jsonc.configs["flat/recommended-with-json"],
 	prettier,
 	{

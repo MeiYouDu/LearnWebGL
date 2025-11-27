@@ -1,5 +1,5 @@
 // BoxSceneReact.tsx
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { cos, pi, sin } from "mathjs";
 import { mat4, vec3 } from "gl-matrix";
 import { random } from "lodash";

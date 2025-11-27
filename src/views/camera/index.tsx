@@ -1,5 +1,5 @@
 // CubeSceneReact.tsx
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Mesh } from "../../interface";
 import { resizeHandle } from "../../helper/resize";
 import vertexShaderSource from "./vertex.glsl";

@@ -1,5 +1,5 @@
 // BoxScene.tsx
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { mat4, vec3 } from "gl-matrix";
 import { Scene } from "../../helper/scene";
 import { Shader } from "../../helper/shader";

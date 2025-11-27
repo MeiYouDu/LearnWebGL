@@ -1,5 +1,5 @@
 // LineSceneReact.tsx
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { resizeHandle } from "../../helper/resize";
 import vertexShaderSource from "./vertex.glsl";
 import fragmentShaderSource from "./fragment.glsl";

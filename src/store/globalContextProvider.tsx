@@ -10,7 +10,7 @@ function GlobalContextProvider({
 	const { theme, setThemeMode } = useTheme();
 	useEffect(() => {
 		setThemeMode("system");
-	}, []);
+	}, [setThemeMode]);
 	return (
 		<GlobalContext.Provider
 			value={{

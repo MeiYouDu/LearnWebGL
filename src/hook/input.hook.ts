@@ -177,6 +177,7 @@ function useInput(
 		delta: number,
 	) {
 		model = mat4.fromTranslation(model, position);
+		// eslint-disable-next-line react-hooks/immutability
 		deltaTime = delta;
 		vec3.add(cameraPos, cameraPos, dPos);
 		quat.rotateY(cameraQuat, cameraQuat, headingPR[1]);
