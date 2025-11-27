@@ -99,6 +99,7 @@ const lights: RouteObject[] = [
 		path: "/light",
 		id: "light",
 		Component: Root,
+		hydrateFallbackElement: HydrateFallback,
 		children: [
 			{
 				path: "color",
@@ -234,11 +235,15 @@ const routes: RouteObject[] = [
 		path: "/imageProcess",
 		id: "imageProcess",
 		children: [],
+		Component: Root,
+		hydrateFallbackElement: HydrateFallback,
 	},
 	{
 		path: "/geometry",
 		id: "geometry",
 		children: [],
+		Component: Root,
+		hydrateFallbackElement: HydrateFallback,
 	},
 ];
 

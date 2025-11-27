@@ -48,16 +48,14 @@ function Navigator({ collapsed }: { collapsed: boolean }) {
 		navigate(path);
 	};
 	return (
-		<div className="h-full">
-			<Menu
-				mode={"inline"}
-				inlineCollapsed={collapsed}
-				className={"h-full"}
-				items={menuItems}
-				theme={theme}
-				onSelect={selectHandle}
-			/>
-		</div>
+		<Menu
+			className={"w-[auto]"}
+			mode={"inline"}
+			inlineCollapsed={collapsed}
+			items={menuItems}
+			theme={theme}
+			onSelect={selectHandle}
+		/>
 	);
 }
 
@@ -69,29 +67,32 @@ function Root() {
 	return (
 		<GlobalContextProvider>
 			<StrictMode>
-				<Layout className={"h-full w-full"}>
-					<Layout.Sider className="w-[auto]">
-						<Navigator collapsed={collapsed} />
-					</Layout.Sider>
+				<Layout className="h-full w-full">
+					<Layout.Header>
+						<Button
+							type="primary"
+							onClick={toggleCollapsed}>
+							{collapsed ? (
+								<MenuUnfoldOutlined />
+							) : (
+								<MenuFoldOutlined />
+							)}
+						</Button>
+					</Layout.Header>
 					<Layout>
-						<Layout.Header>
-							<Button
-								type="primary"
-								onClick={toggleCollapsed}>
-								{collapsed ? (
-									<MenuUnfoldOutlined />
-								) : (
-									<MenuFoldOutlined />
-								)}
-							</Button>
-						</Layout.Header>
+						<Layout.Sider className="">
+							<Navigator
+								collapsed={collapsed}
+							/>
+						</Layout.Sider>
 						<Layout.Content>
 							<Outlet></Outlet>
 						</Layout.Content>
-						{/*<Layout.Footer>*/}
-						{/*	Footer*/}
-						{/*</Layout.Footer>*/}
 					</Layout>
+
+					{/*<Layout.Footer>*/}
+					{/*	Footer*/}
+					{/*</Layout.Footer>*/}
 				</Layout>
 			</StrictMode>
 		</GlobalContextProvider>
