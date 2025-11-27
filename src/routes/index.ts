@@ -1,14 +1,20 @@
 import type { RouteObject } from "react-router";
 import { createBrowserRouter } from "react-router";
 import HydrateFallback from "@/views/hydrateFallback.tsx";
+import Root from "@/views/Root";
 
 const fundamentals: RouteObject[] = [
 	{
+		path: "/",
+		id: "fundamentals",
+		Component: Root,
 		hydrateFallbackElement: HydrateFallback,
 		children: [
 			{
 				index: true,
 				path: "helloWorld",
+				id: "helloWorld",
+				hydrateFallbackElement: HydrateFallback,
 				lazy: async () => {
 					return {
 						Component: (
@@ -23,6 +29,8 @@ const fundamentals: RouteObject[] = [
 			},
 			{
 				path: "bezierLine",
+				id: "bezierLine",
+				hydrateFallbackElement: HydrateFallback,
 				lazy: async () => {
 					return {
 						Component: (
@@ -37,6 +45,8 @@ const fundamentals: RouteObject[] = [
 			},
 			{
 				path: "texture",
+				id: "texture",
+				hydrateFallbackElement: HydrateFallback,
 				lazy: async () => {
 					return {
 						Component: (
@@ -51,6 +61,8 @@ const fundamentals: RouteObject[] = [
 			},
 			{
 				path: "coordinateSystem",
+				id: "coordinateSystem",
+				hydrateFallbackElement: HydrateFallback,
 				lazy: async () => {
 					return {
 						Component: (
@@ -65,6 +77,8 @@ const fundamentals: RouteObject[] = [
 			},
 			{
 				path: "camera",
+				id: "camera",
+				hydrateFallbackElement: HydrateFallback,
 				lazy: async () => {
 					return {
 						Component: (
@@ -80,13 +94,17 @@ const fundamentals: RouteObject[] = [
 		],
 	},
 ];
-const lights = [
+const lights: RouteObject[] = [
 	{
 		path: "/light",
+		id: "light",
+		Component: Root,
 		children: [
 			{
 				path: "color",
+				id: "color",
 				index: true,
+				hydrateFallbackElement: HydrateFallback,
 				lazy: async () => {
 					return {
 						Component: (
@@ -101,6 +119,8 @@ const lights = [
 			},
 			{
 				path: "material",
+				id: "material",
+				hydrateFallbackElement: HydrateFallback,
 				lazy: async () => {
 					return {
 						Component: (
@@ -115,6 +135,8 @@ const lights = [
 			},
 			{
 				path: "lightMap",
+				id: "lightMap",
+				hydrateFallbackElement: HydrateFallback,
 				lazy: async () => {
 					return {
 						Component: (
@@ -129,9 +151,13 @@ const lights = [
 			},
 			{
 				path: "lightCaster",
+				id: "lightCaster",
 				children: [
 					{
 						path: "parallelLight",
+						id: "parallelLight",
+						hydrateFallbackElement:
+							HydrateFallback,
 						lazy: async () => {
 							return {
 								Component: (
@@ -146,6 +172,9 @@ const lights = [
 					},
 					{
 						path: "pointLight",
+						id: "pointLight",
+						hydrateFallbackElement:
+							HydrateFallback,
 						lazy: async () => {
 							return {
 								Component: (
@@ -160,6 +189,9 @@ const lights = [
 					},
 					{
 						path: "spotLight",
+						id: "spotLight",
+						hydrateFallbackElement:
+							HydrateFallback,
 						lazy: async () => {
 							return {
 								Component: (
@@ -174,6 +206,9 @@ const lights = [
 					},
 					{
 						path: "multipleLight",
+						id: "multipleLight",
+						hydrateFallbackElement:
+							HydrateFallback,
 						lazy: async () => {
 							return {
 								Component: (
@@ -197,10 +232,12 @@ const routes: RouteObject[] = [
 	...lights,
 	{
 		path: "/imageProcess",
+		id: "imageProcess",
 		children: [],
 	},
 	{
 		path: "/geometry",
+		id: "geometry",
 		children: [],
 	},
 ];
