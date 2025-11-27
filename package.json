@@ -50,6 +50,7 @@
 		"@types/react": "^19.1.12",
 		"@types/react-dom": "^19.1.9",
 		"@types/react-router": "^5.1.20",
+		"@types/three": "^0.181.0",
 		"@types/webpack": "^5.28.5",
 		"@types/webpack-env": "^1.18.8",
 		"@vercel/webpack-asset-relocator-loader": "^1.10.0",
@@ -114,6 +115,9 @@
 	"dependencies": {
 		"@ant-design/icons": "^5.6.1",
 		"@ant-design/v5-patch-for-react-19": "^1.0.3",
+		"@mkkellogg/gaussian-splats-3d": "^0.4.7",
+		"@reall3d/reall3dviewer": "^2.3.2",
+		"@sparkjsdev/spark": "^0.1.10",
 		"ahooks": "^3.9.6",
 		"antd": "^5.27.3",
 		"axios": "^1.11.0",
@@ -129,6 +133,7 @@
 		"react-dom": "^19.1.1",
 		"react-router": "^7.8.2",
 		"react-use": "^17.6.0",
-		"satellite.js": "^5.0.0"
+		"satellite.js": "^5.0.0",
+		"three": "^0.181.2"
 	}
 }

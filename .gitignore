@@ -148,3 +148,5 @@ temp
 .gitlab-ci-local
 *.gz
 .nx/cache
+
+model

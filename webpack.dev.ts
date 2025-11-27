@@ -16,6 +16,10 @@ export default merge<Config>(common, {
 	mode: "development",
 	devtool: "source-map",
 	devServer: {
+		headers: {
+			"Cross-Origin-Opener-Policy": "same-origin",
+			"Cross-Origin-Embedder-Policy": "require-corp",
+		},
 		port: 2000,
 		compress: true,
 		hot: true,

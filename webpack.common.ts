@@ -176,39 +176,39 @@ const config: Configuration = {
 		// 		{
 		// 			from: resolve(
 		// 				__dirname,
-		// 				"./node_modules/cesium/Build/Cesium/Workers",
+		// 				"src/assets/model",
 		// 			),
-		// 			to: "cesiumAssets/Workers",
+		// 			to: "assets/model",
 		// 		},
-		// 		{
-		// 			from: resolve(
-		// 				__dirname,
-		// 				"./node_modules/cesium/Source/ThirdParty",
-		// 			),
-		// 			to: "cesiumAssets/ThirdParty",
-		// 		},
-		// 		{
-		// 			from: resolve(
-		// 				__dirname,
-		// 				"./node_modules/cesium/Source/Assets",
-		// 			),
-		// 			to: "cesiumAssets/Assets",
-		// 		},
-		// 		{
-		// 			from: resolve(
-		// 				__dirname,
-		// 				"./node_modules/cesium/Source/Widgets",
-		// 			),
-		// 			to: "cesiumAssets/Widgets",
-		// 		},
-		// 		// {
-		// 		// 	from: resolve(
-		// 		// 		__dirname,
-		// 		// 		"./node_modules/cesium/Source/Cesium.d.ts",
-		// 		// 	),
-		// 		// 	to: "assets/declare",
-		// 		// },
-		// 		// ...PATTERNS,
+		// {
+		// 	from: resolve(
+		// 		__dirname,
+		// 		"./node_modules/cesium/Source/ThirdParty",
+		// 	),
+		// 	to: "cesiumAssets/ThirdParty",
+		// },
+		// {
+		// 	from: resolve(
+		// 		__dirname,
+		// 		"./node_modules/cesium/Source/Assets",
+		// 	),
+		// 	to: "cesiumAssets/Assets",
+		// },
+		// {
+		// 	from: resolve(
+		// 		__dirname,
+		// 		"./node_modules/cesium/Source/Widgets",
+		// 	),
+		// 	to: "cesiumAssets/Widgets",
+		// },
+		// {
+		// 	from: resolve(
+		// 		__dirname,
+		// 		"./node_modules/cesium/Source/Cesium.d.ts",
+		// 	),
+		// 	to: "assets/declare",
+		// },
+		// ...PATTERNS,
 		// 	],
 		// }),
 		new DefinePlugin({

@@ -257,6 +257,30 @@ const routes: RouteObject[] = [
 		Component: Root,
 		hydrateFallbackElement: HydrateFallback,
 	},
+	{
+		path: "/gaussian",
+		id: "gaussian",
+		Component: Root,
+		hydrateFallbackElement: HydrateFallback,
+		children: [
+			{
+				path: "demo",
+				id: "gaussianDemo",
+				hydrateFallbackElement: HydrateFallback,
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "gaussian" */
+								/* webpackPrefetch: true */
+								"@/views/gaussian"
+							)
+						).Gaussian,
+					};
+				},
+			},
+		],
+	},
 ];
 
 const router = createBrowserRouter(routes);
