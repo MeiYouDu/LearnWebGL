@@ -6,6 +6,7 @@ import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import NodePolyfillWebpackPlugin from "node-polyfill-webpack-plugin";
 import { Configuration, DefinePlugin } from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
+import CopyWebpackPlugin from "copy-webpack-plugin";
 import {
 	CONTEXT,
 	EXAMPLE_ENTRY,
@@ -171,46 +172,46 @@ const config: Configuration = {
 			lintDirtyModulesOnly:
 				env.NODE_ENV === "development",
 		}),
-		// new CopyWebpackPlugin({
-		// 	patterns: [
-		// 		{
-		// 			from: resolve(
-		// 				__dirname,
-		// 				"src/assets/model",
-		// 			),
-		// 			to: "assets/model",
-		// 		},
-		// {
-		// 	from: resolve(
-		// 		__dirname,
-		// 		"./node_modules/cesium/Source/ThirdParty",
-		// 	),
-		// 	to: "cesiumAssets/ThirdParty",
-		// },
-		// {
-		// 	from: resolve(
-		// 		__dirname,
-		// 		"./node_modules/cesium/Source/Assets",
-		// 	),
-		// 	to: "cesiumAssets/Assets",
-		// },
-		// {
-		// 	from: resolve(
-		// 		__dirname,
-		// 		"./node_modules/cesium/Source/Widgets",
-		// 	),
-		// 	to: "cesiumAssets/Widgets",
-		// },
-		// {
-		// 	from: resolve(
-		// 		__dirname,
-		// 		"./node_modules/cesium/Source/Cesium.d.ts",
-		// 	),
-		// 	to: "assets/declare",
-		// },
-		// ...PATTERNS,
-		// 	],
-		// }),
+		new CopyWebpackPlugin({
+			patterns: [
+				{
+					from: resolve(
+						__dirname,
+						"src/assets/model",
+					),
+					to: "assets/model",
+				},
+				// {
+				// 	from: resolve(
+				// 		__dirname,
+				// 		"./node_modules/cesium/Source/ThirdParty",
+				// 	),
+				// 	to: "cesiumAssets/ThirdParty",
+				// },
+				// {
+				// 	from: resolve(
+				// 		__dirname,
+				// 		"./node_modules/cesium/Source/Assets",
+				// 	),
+				// 	to: "cesiumAssets/Assets",
+				// },
+				// {
+				// 	from: resolve(
+				// 		__dirname,
+				// 		"./node_modules/cesium/Source/Widgets",
+				// 	),
+				// 	to: "cesiumAssets/Widgets",
+				// },
+				// {
+				// 	from: resolve(
+				// 		__dirname,
+				// 		"./node_modules/cesium/Source/Cesium.d.ts",
+				// 	),
+				// 	to: "assets/declare",
+				// },
+				// ...PATTERNS,
+			],
+		}),
 		new DefinePlugin({
 			CESIUM_BASE_URL:
 				JSON.stringify("/cesiumAssets"),

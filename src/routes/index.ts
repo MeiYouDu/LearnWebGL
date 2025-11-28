@@ -264,8 +264,8 @@ const routes: RouteObject[] = [
 		hydrateFallbackElement: HydrateFallback,
 		children: [
 			{
-				path: "demo",
-				id: "gaussianDemo",
+				path: "GaussianSplats3D",
+				id: "GaussianSplats3DDemo",
 				hydrateFallbackElement: HydrateFallback,
 				lazy: async () => {
 					return {
@@ -275,7 +275,23 @@ const routes: RouteObject[] = [
 								/* webpackPrefetch: true */
 								"@/views/gaussian"
 							)
-						).Gaussian,
+						).GaussianSplats3DDemo,
+					};
+				},
+			},
+			{
+				path: "spark",
+				id: "sparkDemo",
+				hydrateFallbackElement: HydrateFallback,
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "gaussian" */
+								/* webpackPrefetch: true */
+								"@/views/gaussian/sparkDemo.tsx"
+							)
+						).SparkDemo,
 					};
 				},
 			},

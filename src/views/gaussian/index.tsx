@@ -10,7 +10,7 @@ import { useMount, useUnmount } from "ahooks";
 import * as GaussianSplats3D from "@mkkellogg/gaussian-splats-3d";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-function Gaussian() {
+function GaussianSplats3DDemo() {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const sceneRef = useRef<Scene>(null);
 	useMount(function () {
@@ -35,12 +35,6 @@ function Gaussian() {
 		);
 		renderer.setAnimationLoop(animate);
 		camera.position.x = 5;
-		// const garden = new SplatMesh({
-		// 	url: "/assets/model/garden_high.ksplat",
-		// });
-		// garden.quaternion.set(1, 0, 0, 0);
-		// garden.position.set(0, 0, 0);
-		// sceneRef.current.add(garden);
 		sceneRef.current.add(new AxesHelper(4));
 
 		function animate() {
@@ -59,16 +53,16 @@ function Gaussian() {
 			threeScene: sceneRef.current,
 		});
 		viewer
-			.addSplatScene(
-				"/assets/model/garden_high.ksplat",
-				{
-					splatAlphaRemovalThreshold: 5,
-					showLoadingUI: true,
-					position: [0, 1, 0],
-					rotation: [0, 0, 0, 1],
-					scale: [1.5, 1.5, 1.5],
-				},
-			)
+			.addSplatScene("/assets/model/garden.ksplat", {
+				splatAlphaRemovalThreshold: 5,
+				showLoadingUI: true,
+				useBuiltInControl: true,
+				selfDrivenMode: false,
+
+				// position: [0, 1, 0],
+				rotation: [-1, 0, 0, 0],
+				// scale: [1.5, 1.5, 1.5],
+			})
 			.then(() => {
 				viewer.start();
 			});
@@ -82,4 +76,4 @@ function Gaussian() {
 	);
 }
 
-export { Gaussian };
+export { GaussianSplats3DDemo };
