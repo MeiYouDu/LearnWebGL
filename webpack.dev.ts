@@ -19,6 +19,7 @@ export default merge<Config>(common, {
 		headers: {
 			"Cross-Origin-Opener-Policy": "same-origin",
 			"Cross-Origin-Embedder-Policy": "require-corp",
+			"access-control-allow-origin": "*",
 		},
 		port: 2000,
 		compress: true,

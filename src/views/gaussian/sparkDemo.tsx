@@ -3,10 +3,13 @@ import {
 	AxesHelper,
 	BufferGeometry,
 	Float32BufferAttribute,
+	MathUtils,
 	PerspectiveCamera,
 	Points,
 	PointsMaterial,
+	Quaternion,
 	Scene,
+	Vector3,
 	WebGLRenderer,
 } from "three";
 import { useMount, useUnmount } from "ahooks";
@@ -36,8 +39,9 @@ function SparkDemo() {
 			0.1,
 			1000,
 		);
-		cameraRef.current.position.set(0, 0, 5); // 从 x 轴移到 z 轴，更直观
-		cameraRef.current.lookAt(0, 0, 0);
+		cameraRef.current.position.set(0, -5, -1.5);
+		cameraRef.current.up.set(0, 0, 1);
+		cameraRef.current.lookAt(0, 0, -1.5);
 		rendererRef.current = new SparkRenderer({
 			renderer: new WebGLRenderer(),
 			falloff: 0.0, // 0 -> no gaussian falloff (更像 flat disks / points)
@@ -58,8 +62,6 @@ function SparkDemo() {
 		});
 		sceneRef.current.add(splatMeshRef.current);
 		sceneRef.current.add(new AxesHelper(4));
-		splatMeshRef.current.quaternion.set(1, 0, 0, 0);
-		splatMeshRef.current.position.set(0, 0, 0);
 		await splatMeshRef.current.initialized;
 		const geometry = new BufferGeometry();
 		const positions: number[] = [];
@@ -87,13 +89,22 @@ function SparkDemo() {
 			new PointsMaterial({
 				size: 0.05, // 像素大小，按需调整
 				vertexColors: true,
-				// sizeAttenuation: true,
-				// transparent: true,
-				// depthTest: true,
 			}),
 		);
 		pointsRef.current.visible = false;
-		pointsRef.current.quaternion.set(1, 0, 0, 0);
+		const qx = new Quaternion().setFromAxisAngle(
+			new Vector3(1, 0, 0),
+			MathUtils.degToRad(-120),
+		);
+		const qz = new Quaternion().setFromAxisAngle(
+			new Vector3(0, 0, 1),
+			MathUtils.degToRad(-17.5),
+		);
+		const q = new Quaternion()
+			.multiplyQuaternions(qz, qx)
+			.normalize();
+		splatMeshRef.current.quaternion.copy(q);
+		pointsRef.current.quaternion.copy(q);
 		sceneRef.current.add(pointsRef.current);
 		rendererRef.current.renderer.setAnimationLoop(
 			animate,
@@ -101,6 +112,11 @@ function SparkDemo() {
 		function animate() {
 			if (!cameraRef.current) return;
 			controlRef.current?.update(cameraRef?.current);
+			rendererRef.current?.renderer.setSize(
+				containerRef.current?.offsetWidth || 0,
+				(containerRef.current?.offsetHeight || 0) -
+					1,
+			);
 			rendererRef.current?.renderer.render(
 				sceneRef.current as Scene,
 				cameraRef?.current,
