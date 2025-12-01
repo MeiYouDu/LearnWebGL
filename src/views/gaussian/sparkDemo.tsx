@@ -58,7 +58,7 @@ function SparkDemo() {
 		);
 
 		splatMeshRef.current = new SplatMesh({
-			url: "/assets/model/garden.ksplat",
+			url: "/assets/model/garden_high.ksplat",
 		});
 		sceneRef.current.add(splatMeshRef.current);
 		sceneRef.current.add(new AxesHelper(4));
