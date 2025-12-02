@@ -1,3 +1,4 @@
+import { useMount, useUnmount } from "ahooks";
 import { useRef } from "react";
 import {
 	AxesHelper,
@@ -5,10 +6,9 @@ import {
 	Scene,
 	WebGLRenderer,
 } from "three";
-import { useMount, useUnmount } from "ahooks";
 // @ts-expect-error test
-import * as GaussianSplats3D from "@mkkellogg/gaussian-splats-3d";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { Viewer } from "@mkkellogg/gaussian-splats-3d";
+import { SparkControls } from "@sparkjsdev/spark";
 
 function GaussianSplats3DDemo() {
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -25,46 +25,53 @@ function GaussianSplats3DDemo() {
 			1000,
 		);
 		const renderer = new WebGLRenderer();
-		const controls = new OrbitControls(
-			camera,
-			renderer.domElement,
-		);
+		const controls = new SparkControls({
+			canvas: renderer.domElement,
+		});
 		renderer.setSize(
 			containerRef.current?.offsetWidth,
 			containerRef.current?.offsetHeight,
 		);
-		renderer.setAnimationLoop(animate);
-		camera.position.x = 5;
+		camera.position.set(0, 0, 7);
+		camera.up.set(0, 1, 0);
+		camera.lookAt(-1, -5, 7);
 		sceneRef.current.add(new AxesHelper(4));
 
 		function animate() {
-			controls.update();
-			renderer.render(
-				sceneRef.current as Scene,
-				camera,
+			// renderer.render(
+			// 	sceneRef.current as Scene,
+			// 	camera,
+			// );
+			renderer.setSize(
+				containerRef.current?.offsetWidth || 0,
+				containerRef.current?.offsetHeight || 0,
 			);
+			viewer.update();
+			viewer.render();
+			controls.update(camera);
 		}
+		void animate;
 		containerRef.current?.appendChild(
 			renderer.domElement,
 		);
-		const viewer = new GaussianSplats3D.Viewer({
+		const viewer = new Viewer({
 			renderer,
 			camera,
 			threeScene: sceneRef.current,
 		});
 		viewer
-			.addSplatScene("/assets/model/garden.ksplat", {
-				splatAlphaRemovalThreshold: 5,
-				showLoadingUI: true,
-				useBuiltInControl: true,
-				selfDrivenMode: false,
-
-				// position: [0, 1, 0],
-				rotation: [-1, 0, 0, 0],
-				// scale: [1.5, 1.5, 1.5],
-			})
+			.addSplatScene(
+				"/assets/model/converted_file.ksplat",
+				{
+					showLoadingUI: true,
+					useBuiltInControls: true,
+					selfDrivenMode: true,
+					ignoreDevicePixelRatio: 4,
+				},
+			)
 			.then(() => {
 				viewer.start();
+				// renderer.setAnimationLoop(animate);
 			});
 	});
 	useUnmount(() => {});

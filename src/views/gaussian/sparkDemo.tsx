@@ -1,3 +1,10 @@
+import {
+	SparkControls,
+	SparkRenderer,
+	SplatMesh,
+} from "@sparkjsdev/spark";
+import { useMount, useUnmount } from "ahooks";
+import { Switch } from "antd";
 import { useRef } from "react";
 import {
 	AxesHelper,
@@ -12,13 +19,6 @@ import {
 	Vector3,
 	WebGLRenderer,
 } from "three";
-import { useMount, useUnmount } from "ahooks";
-import {
-	SparkControls,
-	SparkRenderer,
-	SplatMesh,
-} from "@sparkjsdev/spark";
-import { Switch } from "antd";
 
 function SparkDemo() {
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -36,12 +36,20 @@ function SparkDemo() {
 			45,
 			containerRef.current?.offsetWidth /
 				containerRef.current?.offsetHeight,
-			0.1,
+			3,
 			1000,
 		);
-		cameraRef.current.position.set(0, -5, -1.5);
+		cameraRef.current.position.set(
+			-1.96397,
+			-7.77895,
+			6.89202,
+		);
 		cameraRef.current.up.set(0, 0, 1);
-		cameraRef.current.lookAt(0, 0, -1.5);
+		cameraRef.current.lookAt(
+			-1.38789,
+			-14.37853,
+			6.65558,
+		);
 		rendererRef.current = new SparkRenderer({
 			renderer: new WebGLRenderer(),
 			falloff: 0.0, // 0 -> no gaussian falloff (更像 flat disks / points)
@@ -58,7 +66,7 @@ function SparkDemo() {
 		);
 
 		splatMeshRef.current = new SplatMesh({
-			url: "/assets/model/garden_high.ksplat",
+			url: "/assets/model/converted_file.ksplat",
 		});
 		sceneRef.current.add(splatMeshRef.current);
 		sceneRef.current.add(new AxesHelper(4));
@@ -66,14 +74,20 @@ function SparkDemo() {
 		const geometry = new BufferGeometry();
 		const positions: number[] = [];
 		const colors: number[] = [];
+
 		splatMeshRef.current.forEachSplat(
-			(...[, center, , , , color]) => {
+			(...[, center, , , opacity, color]) => {
 				positions.push(
 					center.x,
 					center.y,
 					center.z,
 				);
-				colors.push(color.r, color.g, color.b);
+				colors.push(
+					color.r,
+					color.g,
+					color.b,
+					opacity,
+				);
 			},
 		);
 		geometry.setAttribute(
@@ -82,13 +96,15 @@ function SparkDemo() {
 		);
 		geometry.setAttribute(
 			"color",
-			new Float32BufferAttribute(colors, 3),
+			new Float32BufferAttribute(colors, 4),
 		);
 		pointsRef.current = new Points(
 			geometry,
 			new PointsMaterial({
-				size: 0.05, // 像素大小，按需调整
+				size: 1, // 像素大小，按需调整
 				vertexColors: true,
+				sizeAttenuation: false,
+				transparent: true,
 			}),
 		);
 		pointsRef.current.visible = false;
@@ -103,8 +119,9 @@ function SparkDemo() {
 		const q = new Quaternion()
 			.multiplyQuaternions(qz, qx)
 			.normalize();
-		splatMeshRef.current.quaternion.copy(q);
-		pointsRef.current.quaternion.copy(q);
+		void q;
+		// splatMeshRef.current.quaternion.copy(q);
+		// pointsRef.current.quaternion.copy(q);
 		sceneRef.current.add(pointsRef.current);
 		rendererRef.current.renderer.setAnimationLoop(
 			animate,

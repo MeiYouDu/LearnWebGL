@@ -41,6 +41,9 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
+      gaussian-splats-3d:
+        specifier: link:@types/@mkkellogg/gaussian-splats-3d
+        version: link:@types/@mkkellogg/gaussian-splats-3d
       gl-matrix:
         specifier: ^3.4.3
         version: 3.4.4
