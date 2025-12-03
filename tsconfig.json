@@ -32,6 +32,9 @@
 		"node_modules",
 		"src/public",
 		"dist",
+		".vscode",
+		".idea",
+		".husky"
 	],
 	"ts-node": {
 		"compilerOptions": {
