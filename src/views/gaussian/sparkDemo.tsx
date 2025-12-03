@@ -1,3 +1,4 @@
+import { alphaFromColor } from "@/utils";
 import {
 	SparkControls,
 	SparkRenderer,
@@ -11,6 +12,7 @@ import {
 	BufferGeometry,
 	Float32BufferAttribute,
 	MathUtils,
+	Object3D,
 	PerspectiveCamera,
 	Points,
 	PointsMaterial,
@@ -75,18 +77,20 @@ function SparkDemo() {
 		const positions: number[] = [];
 		const colors: number[] = [];
 
+		let alpha: number;
 		splatMeshRef.current.forEachSplat(
-			(...[, center, , , opacity, color]) => {
+			(...[, center, , , , color]) => {
 				positions.push(
 					center.x,
 					center.y,
 					center.z,
 				);
+				alpha = alphaFromColor(color);
 				colors.push(
 					color.r,
 					color.g,
 					color.b,
-					opacity,
+					alpha,
 				);
 			},
 		);
@@ -101,7 +105,7 @@ function SparkDemo() {
 		pointsRef.current = new Points(
 			geometry,
 			new PointsMaterial({
-				size: 1, // 像素大小，按需调整
+				size: 1, // 像素大小，按需调整a
 				vertexColors: true,
 				sizeAttenuation: false,
 				transparent: true,
@@ -144,16 +148,16 @@ function SparkDemo() {
 		);
 	});
 	useUnmount(() => {
-		// sceneRef.current?.remove(
-		// 	splatMeshRef.current as Object3D,
-		// 	pointsRef.current as Object3D,
-		// );
-		// sceneRef.current = null;
-		// rendererRef.current?.renderer.dispose();
-		// rendererRef.current = null;
-		// cameraRef.current = null;
-		// controlRef.current = null;
-		// splatMeshRef.current?.dispose();
+		sceneRef.current?.remove(
+			splatMeshRef.current as Object3D,
+			pointsRef.current as Object3D,
+		);
+		sceneRef.current = null;
+		rendererRef.current?.renderer.dispose();
+		rendererRef.current = null;
+		cameraRef.current = null;
+		controlRef.current = null;
+		splatMeshRef.current?.dispose();
 	});
 	function switchHandle(val: boolean) {
 		if (!splatMeshRef.current || !pointsRef.current)
