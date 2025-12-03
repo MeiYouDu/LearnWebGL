@@ -12,7 +12,6 @@ import {
 	BufferGeometry,
 	Float32BufferAttribute,
 	MathUtils,
-	Object3D,
 	PerspectiveCamera,
 	Points,
 	PointsMaterial,
@@ -38,8 +37,8 @@ function SparkDemo() {
 			45,
 			containerRef.current?.offsetWidth /
 				containerRef.current?.offsetHeight,
-			3,
-			1000,
+			2,
+			200,
 		);
 		cameraRef.current.position.set(
 			-1.96397,
@@ -105,9 +104,9 @@ function SparkDemo() {
 		pointsRef.current = new Points(
 			geometry,
 			new PointsMaterial({
-				size: 1, // 像素大小，按需调整a
+				size: 0.01, // 像素大小，按需调整
 				vertexColors: true,
-				sizeAttenuation: false,
+				// sizeAttenuation: false,
 				transparent: true,
 			}),
 		);
@@ -148,16 +147,17 @@ function SparkDemo() {
 		);
 	});
 	useUnmount(() => {
-		sceneRef.current?.remove(
-			splatMeshRef.current as Object3D,
-			pointsRef.current as Object3D,
-		);
-		sceneRef.current = null;
-		rendererRef.current?.renderer.dispose();
-		rendererRef.current = null;
-		cameraRef.current = null;
-		controlRef.current = null;
-		splatMeshRef.current?.dispose();
+		// sceneRef.current?.remove(
+		// 	splatMeshRef.current as Object3D,
+		// 	pointsRef.current as Object3D,
+		// );
+		// sceneRef.current = null;
+		// rendererRef.current?.renderer.dispose();
+		// rendererRef.current = null;
+		// cameraRef.current = null;
+		// controlRef.current = null;
+		// splatMeshRef.current?.dispose();
+		// splatMeshRef.current = null;
 	});
 	function switchHandle(val: boolean) {
 		if (!splatMeshRef.current || !pointsRef.current)
