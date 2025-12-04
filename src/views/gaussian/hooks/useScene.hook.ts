@@ -28,7 +28,7 @@ function useSceneHook(): ReturnType {
 	/**
 	 * 鼠标 hover 时请求下一帧
 	 */
-	const isHover = useRef(false);
+	const isHover = useRef(true);
 	const sceneRef = useRef<Scene>(null);
 	const rendererRef = useRef<SparkRenderer>(null);
 	const cameraRef = useRef<PerspectiveCamera>(null);
@@ -61,7 +61,7 @@ function useSceneHook(): ReturnType {
 			containerRef.current.parentElement.offsetWidth /
 				containerRef.current?.parentElement
 					.offsetHeight,
-			2,
+			0.5,
 			200,
 		);
 		cameraRef.current.position.set(
@@ -79,9 +79,7 @@ function useSceneHook(): ReturnType {
 			renderer: new WebGLRenderer({
 				canvas: containerRef.current,
 			}),
-			falloff: 0.0, // 0 -> no gaussian falloff (更像 flat disks / points)
-			minPixelRadius: 0.0, // 最小像素半径
-			maxPixelRadius: 0.4, // 限制最大大小，尽量小
+			maxStdDev: Math.sqrt(3),
 		});
 		controlRef.current = new SparkControls({
 			canvas: rendererRef.current.renderer.domElement,
