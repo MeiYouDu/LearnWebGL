@@ -10,8 +10,8 @@ function SparkDemo() {
 			id={"container"}>
 			<Switch
 				className={"absolute"}
-				unCheckedChildren="点云"
-				checkedChildren={"高斯泼溅"}
+				unCheckedChildren="高斯"
+				checkedChildren={"点云"}
 				defaultChecked
 				onChange={switchHandle}></Switch>
 			<canvas

@@ -12,6 +12,7 @@ import {
 	SparkRenderer,
 } from "@sparkjsdev/spark";
 import { useSplatLoadHook } from "@/views/gaussian/hooks/useSplatLoad.hook.ts";
+import { useHover } from "ahooks";
 
 interface ReturnType {
 	containerRef: RefObject<HTMLCanvasElement | null>;
@@ -24,6 +25,10 @@ interface ReturnType {
 
 function useSceneHook(): ReturnType {
 	const containerRef = useRef<HTMLCanvasElement>(null);
+	/**
+	 * 鼠标 hover 时请求下一帧
+	 */
+	const isHover = useRef(false);
 	const sceneRef = useRef<Scene>(null);
 	const rendererRef = useRef<SparkRenderer>(null);
 	const cameraRef = useRef<PerspectiveCamera>(null);
@@ -31,15 +36,20 @@ function useSceneHook(): ReturnType {
 	const { pointsRef, splatMeshRef } = useSplatLoadHook(
 		"/assets/model/converted_file.ksplat",
 	);
+	useHover(containerRef, {
+		onChange: (isFocusWithin: boolean) => {
+			isHover.current = isFocusWithin;
+		},
+	});
 	function switchHandle(val: boolean) {
 		if (!splatMeshRef.current || !pointsRef.current)
 			return;
 		if (val) {
-			splatMeshRef.current.visible = true;
-			pointsRef.current.visible = false;
-		} else {
 			splatMeshRef.current.visible = false;
 			pointsRef.current.visible = true;
+		} else {
+			splatMeshRef.current.visible = true;
+			pointsRef.current.visible = false;
 		}
 	}
 	useEffect(() => {
@@ -72,7 +82,6 @@ function useSceneHook(): ReturnType {
 			falloff: 0.0, // 0 -> no gaussian falloff (更像 flat disks / points)
 			minPixelRadius: 0.0, // 最小像素半径
 			maxPixelRadius: 0.4, // 限制最大大小，尽量小
-			minAlpha: 1.0,
 		});
 		controlRef.current = new SparkControls({
 			canvas: rendererRef.current.renderer.domElement,
@@ -92,6 +101,7 @@ function useSceneHook(): ReturnType {
 			animate,
 		);
 		function animate() {
+			if (!isHover.current) return;
 			if (!cameraRef.current) return;
 			controlRef.current?.update(cameraRef?.current);
 			rendererRef.current?.renderer.setSize(

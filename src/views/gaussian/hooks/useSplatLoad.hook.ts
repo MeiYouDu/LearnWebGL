@@ -37,7 +37,9 @@ function useSplatLoadHook(url: string): ReturnType {
 			new LoadingManager(),
 		);
 		splatMeshRef.current = new SplatMesh();
+		splatMeshRef.current.visible = false;
 		pointsRef.current = new Points();
+		pointsRef.current.visible = true;
 		pointsRef.current.material = new PointsMaterial({
 			size: 0.01, // 像素大小，按需调整
 			vertexColors: true,
@@ -83,7 +85,7 @@ function useSplatLoadHook(url: string): ReturnType {
 				new Float32BufferAttribute(colors, 4),
 			);
 			pointsRef.current.geometry = geometry;
-			pointsRef.current.visible = false;
+
 			const qx = new Quaternion().setFromAxisAngle(
 				new Vector3(1, 0, 0),
 				MathUtils.degToRad(-120),
