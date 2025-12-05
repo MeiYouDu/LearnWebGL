@@ -3,10 +3,24 @@ import { SceneManager } from "@/views/gaussian/helper/sceneManager.ts";
 import {
 	BufferGeometry,
 	Float32BufferAttribute,
+	Mesh,
+	MeshBasicMaterial,
 	Points,
 	PointsMaterial,
 } from "three";
 import { alphaFromColor } from "@/utils";
+import {
+	acceleratedRaycast,
+	computeBoundsTree,
+	disposeBoundsTree,
+	MeshBVHHelper,
+} from "three-mesh-bvh";
+
+Mesh.prototype.raycast = acceleratedRaycast;
+BufferGeometry.prototype.computeBoundsTree =
+	computeBoundsTree;
+BufferGeometry.prototype.disposeBoundsTree =
+	disposeBoundsTree;
 
 class Splat {
 	constructor(sceneManager: SceneManager) {
@@ -17,6 +31,7 @@ class Splat {
 	private sceneManager: WeakRef<SceneManager>;
 	private points?: Points = new Points();
 	private splatMesh?: SplatMesh = new SplatMesh();
+	private BVHHelper?: MeshBVHHelper;
 	private addPoints(data: PackedSplats) {
 		if (!this.points) return;
 		this.points.visible = true;
@@ -45,6 +60,7 @@ class Splat {
 		);
 		this.points.geometry = geometry;
 		this.sceneManager.deref()?.scene?.add(this.points);
+		this.addBVH(geometry);
 	}
 	private addSplat(data: PackedSplats) {
 		if (!this.splatMesh) return;
@@ -54,8 +70,30 @@ class Splat {
 			.deref()
 			?.scene?.add(this.splatMesh);
 	}
-	private addBVH() {
-		// void
+	private addBVH(geometry: BufferGeometry) {
+		const indices = [];
+		const bvhGeometry = geometry.clone();
+		const verticesLength =
+			bvhGeometry.attributes.position.count;
+		for (let i = 0, l = verticesLength; i < l; i++) {
+			indices.push(i, i, i);
+		}
+
+		bvhGeometry.setIndex(indices);
+		const bvhMaterial = new MeshBasicMaterial({
+			color: 0xff0000,
+		});
+		const bvhMesh = new Mesh(bvhGeometry, bvhMaterial);
+		this.BVHHelper = new MeshBVHHelper(bvhMesh, 20);
+		this.BVHHelper.visible = true;
+		this.BVHHelper.displayParents = true;
+		this.sceneManager
+			.deref()
+			?.scene?.add(bvhMesh, this.BVHHelper);
+		console.time("computeBoundsTree");
+		bvhMesh.geometry.computeBoundsTree();
+		console.timeEnd("computeBoundsTree");
+		this.BVHHelper.update();
 	}
 	public add(data: PackedSplats) {
 		this.addPoints(data);
@@ -74,6 +112,9 @@ class Splat {
 		this.points?.clear();
 		this.points = undefined;
 		this.splatMesh = undefined;
+	}
+	public render() {
+		// this.BVHHelper?.update();
 	}
 }
 export { Splat };

@@ -53,6 +53,9 @@ function useSceneHook(): ReturnType {
 			sceneManagerRef.current,
 		);
 		sceneManagerRef.current?.init(containerRef.current);
+		sceneManagerRef.current?.addGraphic(
+			splatRef.current,
+		);
 		setCameraProperty();
 		(async function () {
 			try {
@@ -66,7 +69,6 @@ function useSceneHook(): ReturnType {
 			}
 		})();
 		return () => {
-			splatRef.current?.dispose();
 			sceneManagerRef.current?.dispose();
 		};
 	}, [load]);

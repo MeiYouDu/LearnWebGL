@@ -7,6 +7,7 @@ import {
 	SparkControls,
 	SparkRenderer,
 } from "@sparkjsdev/spark";
+import { Splat } from "@/views/gaussian/helper/splat.ts";
 
 class SceneManager {
 	constructor() {
@@ -23,6 +24,7 @@ class SceneManager {
 	}
 	private static instance?: SceneManager;
 	private needRender: boolean = true;
+	private graphics?: Map<Splat, Splat> = new Map();
 	private render = () => {
 		if (!this.needRender) return;
 		if (!this.camera) return;
@@ -41,6 +43,7 @@ class SceneManager {
 				.offsetWidth /
 			(this.canvas?.parentElement ?? this.canvas)
 				.offsetHeight;
+		this.graphics?.forEach((item) => item.render());
 		this.renderer.renderer.render(
 			this.scene as Scene,
 			this.camera,
@@ -79,16 +82,24 @@ class SceneManager {
 	public setNeedRender(status: boolean) {
 		this.needRender = status;
 	}
+	public addGraphic(...graphics: Array<Splat>) {
+		graphics.forEach((item) =>
+			this.graphics?.set(item, item),
+		);
+	}
 	public dispose(): void {
 		this.scene?.clear();
 		this.renderer?.renderer.dispose();
 		this.renderer?.clear();
 		this.camera?.clear();
+		this.graphics?.forEach((item) => item.dispose());
+		this.graphics?.clear();
 		this.canvas = undefined;
 		this.scene = undefined;
 		this.renderer = undefined;
 		this.camera = undefined;
 		this.controls = undefined;
+		this.graphics = undefined;
 		SceneManager.instance = undefined;
 	}
 }
