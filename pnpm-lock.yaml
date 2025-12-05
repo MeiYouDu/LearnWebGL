@@ -41,9 +41,6 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
-      gaussian-splats-3d:
-        specifier: link:@types/@mkkellogg/gaussian-splats-3d
-        version: link:@types/@mkkellogg/gaussian-splats-3d
       gl-matrix:
         specifier: ^3.4.3
         version: 3.4.4
@@ -77,6 +74,9 @@ importers:
       three:
         specifier: ^0.181.2
         version: 0.181.2
+      three-mesh-bvh:
+        specifier: ^0.9.3
+        version: 0.9.3(three@0.181.2)
     devDependencies:
       '@babel/cli':
         specifier: ^7.28.3
@@ -7087,6 +7087,11 @@ packages:
     engines: {node: '>= 16.10.0'}
     peerDependencies:
       webpack: ^5.0.0
+
+  three-mesh-bvh@0.9.3:
+    resolution: {integrity: sha512-LaxfvQpF+At96fS90GnQxHpff9bu78UL5eooJNxYyBbyiWrOBpjRx+5yn/+Dj2lQVhz5A/jHqwpVchYYnz/hWQ==}
+    peerDependencies:
+      three: '>= 0.159.0'
 
   three@0.181.2:
     resolution: {integrity: sha512-k/CjiZ80bYss6Qs7/ex1TBlPD11whT9oKfT8oTGiHa34W4JRd1NiH/Tr1DbHWQ2/vMUypxksLnF2CfmlmM5XFQ==}
@@ -15556,6 +15561,10 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 4.3.3
       webpack: 5.103.0(webpack-cli@6.0.1)
+
+  three-mesh-bvh@0.9.3(three@0.181.2):
+    dependencies:
+      three: 0.181.2
 
   three@0.181.2: {}
 

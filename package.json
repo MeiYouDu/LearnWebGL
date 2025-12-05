@@ -134,6 +134,7 @@
 		"react-router": "^7.8.2",
 		"react-use": "^17.6.0",
 		"satellite.js": "^5.0.0",
-		"three": "^0.181.2"
+		"three": "^0.181.2",
+		"three-mesh-bvh": "^0.9.3"
 	}
 }

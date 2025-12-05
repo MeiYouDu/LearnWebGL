@@ -1,136 +1,77 @@
 import { RefObject, useEffect, useRef } from "react";
-import {
-	AxesHelper,
-	Object3D,
-	Object3DEventMap,
-	PerspectiveCamera,
-	Scene,
-	WebGLRenderer,
-} from "three";
-import {
-	SparkControls,
-	SparkRenderer,
-} from "@sparkjsdev/spark";
 import { useSplatLoadHook } from "@/views/gaussian/hooks/useSplatLoad.hook.ts";
 import { useHover } from "ahooks";
+import { SceneManager } from "@/views/gaussian/helper/sceneManager.ts";
+import { Splat } from "@/views/gaussian/helper/splat.ts";
 
 interface ReturnType {
 	containerRef: RefObject<HTMLCanvasElement | null>;
-	sceneRef: RefObject<Scene<Object3DEventMap> | null>;
-	rendererRef: RefObject<SparkRenderer | null>;
-	cameraRef: RefObject<PerspectiveCamera | null>;
-	controlRef: RefObject<SparkControls | null>;
 	switchHandle: (val: boolean) => void;
 }
 
 function useSceneHook(): ReturnType {
 	const containerRef = useRef<HTMLCanvasElement>(null);
-	/**
-	 * 鼠标 hover 时请求下一帧
-	 */
-	const isHover = useRef(true);
-	const sceneRef = useRef<Scene>(null);
-	const rendererRef = useRef<SparkRenderer>(null);
-	const cameraRef = useRef<PerspectiveCamera>(null);
-	const controlRef = useRef<SparkControls>(null);
-	const { pointsRef, splatMeshRef } = useSplatLoadHook(
-		"/assets/model/converted_file.ksplat",
-	);
-	useHover(containerRef, {
-		onChange: (isFocusWithin: boolean) => {
-			isHover.current = isFocusWithin;
-		},
-	});
+	const sceneManagerRef = useRef<SceneManager>(null);
+	const splatRef = useRef<Splat>(null);
+
+	const { load } = useSplatLoadHook();
 	function switchHandle(val: boolean) {
-		if (!splatMeshRef.current || !pointsRef.current)
-			return;
 		if (val) {
-			splatMeshRef.current.visible = false;
-			pointsRef.current.visible = true;
+			splatRef.current?.setPointsVisible(true);
+			splatRef.current?.setSplatVisible(false);
 		} else {
-			splatMeshRef.current.visible = true;
-			pointsRef.current.visible = false;
+			splatRef.current?.setPointsVisible(false);
+			splatRef.current?.setSplatVisible(true);
 		}
+		sceneManagerRef.current?.setNeedRender(true);
 	}
-	useEffect(() => {
-		if (!containerRef.current) return;
-		if (!containerRef.current.parentElement) return;
-		sceneRef.current = new Scene();
-		cameraRef.current = new PerspectiveCamera(
-			45,
-			containerRef.current.parentElement.offsetWidth /
-				containerRef.current?.parentElement
-					.offsetHeight,
-			0.5,
-			200,
-		);
-		cameraRef.current.position.set(
+
+	function setCameraProperty() {
+		sceneManagerRef.current?.camera?.position.set(
 			-1.96397,
 			-7.77895,
 			6.89202,
 		);
-		cameraRef.current.up.set(0, 0, 1);
-		cameraRef.current.lookAt(
+		sceneManagerRef.current?.camera?.up.set(0, 0, 1);
+		sceneManagerRef.current?.camera?.lookAt(
 			-1.38789,
 			-14.37853,
 			6.65558,
 		);
-		rendererRef.current = new SparkRenderer({
-			renderer: new WebGLRenderer({
-				canvas: containerRef.current,
-			}),
-			maxStdDev: Math.sqrt(3),
-		});
-		controlRef.current = new SparkControls({
-			canvas: rendererRef.current.renderer.domElement,
-		});
-		rendererRef.current.renderer.setSize(
-			containerRef.current?.parentElement.offsetWidth,
-			containerRef.current?.parentElement
-				.offsetHeight,
-		);
-		sceneRef.current.add(new AxesHelper(8));
-		if (pointsRef.current)
-			sceneRef.current?.add(pointsRef.current);
-		if (splatMeshRef.current)
-			sceneRef.current?.add(splatMeshRef.current);
-
-		rendererRef.current.renderer.setAnimationLoop(
-			animate,
-		);
-		function animate() {
-			if (!isHover.current) return;
-			if (!cameraRef.current) return;
-			controlRef.current?.update(cameraRef?.current);
-			rendererRef.current?.renderer.setSize(
-				containerRef.current?.parentElement
-					?.offsetWidth || 0,
-				containerRef.current?.parentElement
-					?.offsetHeight || 0,
+	}
+	useHover(containerRef, {
+		onChange: (isFocusWithin: boolean) => {
+			SceneManager.getInstance().setNeedRender(
+				isFocusWithin,
 			);
-			rendererRef.current?.renderer.render(
-				sceneRef.current as Scene,
-				cameraRef?.current,
-			);
-		}
+		},
+	});
+	useEffect(() => {
+		if (!containerRef.current) return;
+		sceneManagerRef.current = new SceneManager();
+		splatRef.current = new Splat(
+			sceneManagerRef.current,
+		);
+		sceneManagerRef.current?.init(containerRef.current);
+		setCameraProperty();
+		(async function () {
+			try {
+				const data = await load(
+					"/assets/model/converted_file.ksplat",
+				);
+				if (!data) return;
+				splatRef.current?.add(data);
+			} catch (e) {
+				console.log(e);
+			}
+		})();
 		return () => {
-			sceneRef.current?.remove(
-				pointsRef.current as Object3D,
-			);
-			rendererRef.current?.renderer.dispose();
-			sceneRef.current = null;
-			rendererRef.current = null;
-			cameraRef.current = null;
-			controlRef.current = null;
-			pointsRef.current = null;
+			splatRef.current?.dispose();
+			sceneManagerRef.current?.dispose();
 		};
-	}, [pointsRef, splatMeshRef]);
+	}, [load]);
 	return {
 		containerRef,
-		sceneRef,
-		rendererRef,
-		cameraRef,
-		controlRef,
 		switchHandle,
 	};
 }
