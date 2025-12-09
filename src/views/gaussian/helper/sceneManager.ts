@@ -88,12 +88,12 @@ class SceneManager {
 		);
 	}
 	public dispose(): void {
-		this.scene?.clear();
-		this.renderer?.renderer.dispose();
-		this.renderer?.clear();
-		this.camera?.clear();
 		this.graphics?.forEach((item) => item.dispose());
 		this.graphics?.clear();
+		this.camera?.clear();
+		this.renderer?.clear();
+		this.scene?.clear();
+		this.renderer?.renderer.dispose();
 		this.canvas = undefined;
 		this.scene = undefined;
 		this.renderer = undefined;

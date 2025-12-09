@@ -84,15 +84,15 @@ class Splat {
 			color: 0xff0000,
 		});
 		const bvhMesh = new Mesh(bvhGeometry, bvhMaterial);
-		this.BVHHelper = new MeshBVHHelper(bvhMesh, 20);
+		this.BVHHelper = new MeshBVHHelper(bvhMesh, 15);
 		this.BVHHelper.visible = true;
-		this.BVHHelper.displayParents = true;
+		// this.BVHHelper.displayParents = true;
 		this.sceneManager
 			.deref()
 			?.scene?.add(bvhMesh, this.BVHHelper);
-		console.time("computeBoundsTree");
-		bvhMesh.geometry.computeBoundsTree();
-		console.timeEnd("computeBoundsTree");
+		// console.time("computeBoundsTree");
+		// bvhMesh.geometry.computeBoundsTree();
+		// console.timeEnd("computeBoundsTree");
 		this.BVHHelper.update();
 	}
 	public add(data: PackedSplats) {
@@ -110,6 +110,8 @@ class Splat {
 	public dispose() {
 		this.splatMesh?.dispose();
 		this.points?.clear();
+		this.BVHHelper?.clear();
+		this.BVHHelper = undefined;
 		this.points = undefined;
 		this.splatMesh = undefined;
 	}
