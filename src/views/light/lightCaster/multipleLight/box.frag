@@ -104,7 +104,7 @@ vec3 computePointLight(PointLight light, Material material, Camera camera, vec3 
 	float specularFactor = pow(max(dot(reflectDir, viewDir), 0.0), material.shininess);
 	vec3 texDiffuse = texture(material.diffuse, outTexCoord).rgb;
 	// 环境光
-	vec3 ambient = light.ambient * texDiffuse;
+	vec3 ambient = light.ambient * texDiffuse * attenuation;
 	// 漫反射
 	vec3 diffuse = light.diffuse * texDiffuse * diffuseFactor * attenuation;
 	// 高光
