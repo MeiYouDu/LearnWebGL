@@ -1,10 +1,10 @@
 // BoxScene.tsx
 import { useEffect, useRef } from "react";
 import { mat4, vec3 } from "gl-matrix";
-import { Scene } from "../../../helper/scene.ts";
-import { Shader } from "../../../helper/shader.ts";
-import { Geometry } from "../../../helper/geometry.ts";
-import { GeometryInstance } from "../../../helper/geometryInstance.ts";
+import { Scene } from "@/helper/scene.ts";
+import { Shader } from "@/helper/shader.ts";
+import { Geometry } from "@/helper/geometry.ts";
+import { GeometryInstance } from "@/helper/geometryInstance.ts";
 import boxVert from "./box.vert";
 import boxFrag from "./box.frag";
 import lightFrag from "./light.frag";
@@ -169,7 +169,7 @@ export default function BoxScene() {
 					"cameraPos",
 				);
 				shaderInner.setVec3(
-					vec3.fromValues(0.1, 0.1, 0.1),
+					vec3.fromValues(0.5, 0.5, 0.5),
 					"light.ambient",
 				);
 				shaderInner.setVec3(
@@ -194,7 +194,12 @@ export default function BoxScene() {
 				);
 				// keep original weird timestamp-based cos
 				shaderInner.setFloat(
-					Math.cos(Date.now()),
+					Number(
+						new Date()
+							.getTime()
+							.toString()
+							.slice(9),
+					) * 0.005,
 					"time",
 				);
 			},
@@ -249,7 +254,7 @@ export default function BoxScene() {
 		// keep updating light position with setInterval (as requested)
 		const id = window.setInterval(() => {
 			angle = Date.now() * 0.001;
-			lightPos[1] = 3; // original code forced y = 3
+			lightPos[1] = 0; // original code forced y = 3
 			lightPos[0] = Math.cos(angle) * 3;
 			lightPos[2] = Math.sin(angle) * 3;
 

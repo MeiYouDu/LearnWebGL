@@ -33,7 +33,10 @@ out vec4 fragmentColor;
 void main() {
 	vec3 texDiffuse = texture(material.diffuse, outTexCoord).rgb;
 	vec3 texSpecular = texture(material.specular, outTexCoord).rgb;
-	vec4 emission = texture(code, vec2(outTexCoord.s, outTexCoord.t * time));
+	vec4 emission = texture(code, vec2(outTexCoord.s, (outTexCoord.t + time))) * 0.8;
+	if(length(texSpecular) > 0.0) {
+		emission = vec4(0, 0, 0, 0);
+	}
 	// 环境光
 	vec4 ambient = vec4(light.ambient * texDiffuse, 1.0);
 	vec3 norm = normalize(outNormal);
