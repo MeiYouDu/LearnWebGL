@@ -14,7 +14,7 @@ interface CameraConstructorOptions {
 class FPSControl {
 	constructor(options: CameraConstructorOptions) {
 		this.camera = new WeakRef(options.camera);
-		this.speed = options.speed || 0.05;
+		this._speed = options.speed || 0.05;
 		this.sensitivity = options.sensitivity || 0.005;
 		this.initFront = vec3.copy(
 			vec3.create(),
@@ -25,11 +25,14 @@ class FPSControl {
 		if (canvas) this.addListener(canvas);
 	}
 	public readonly scene: WeakRef<Scene>;
-	public readonly speed: number;
+	public getSpeed(isShift?: boolean): number {
+		if (isShift) return this._speed * 3;
+		return this._speed;
+	}
 	public readonly sensitivity;
 	public camera?: WeakRef<Camera>;
 	public render(gl: WebGL2RenderingContext) {
-		this.updateProjectionMatrix(gl);
+		this.camera?.deref()?.render(gl);
 		this.updatePosition();
 		this.updateQuaternion();
 		this.updateFront();
@@ -43,7 +46,7 @@ class FPSControl {
 		if (!canvas) return;
 		this.removeListener(canvas);
 	}
-
+	private _speed: number;
 	private mouseIsDown: boolean = false;
 	private mouseMoveEvent: MouseEvent | undefined;
 	/**
@@ -142,26 +145,34 @@ class FPSControl {
 			this.dPosition = vec3.scale(
 				this.dPosition,
 				camera.front,
-				this.speed * scene.deltaTime * 0.1,
+				this.getSpeed(ev.shiftKey) *
+					scene.deltaTime *
+					0.1,
 			);
 		if (ev.code === "KeyS")
 			this.dPosition = vec3.scale(
 				this.dPosition,
 				camera.front,
-				-this.speed * scene.deltaTime * 0.1,
+				-this.getSpeed(ev.shiftKey) *
+					scene.deltaTime *
+					0.1,
 			);
 		if (ev.code === "KeyA")
 			vec3.scale(
 				this.dPosition,
 				left,
-				-this.speed * scene.deltaTime * 0.1,
+				-this.getSpeed(ev.shiftKey) *
+					scene.deltaTime *
+					0.1,
 			);
 
 		if (ev.code === "KeyD")
 			vec3.scale(
 				this.dPosition,
 				left,
-				this.speed * scene.deltaTime * 0.1,
+				this.getSpeed(ev.shiftKey) *
+					scene.deltaTime *
+					0.1,
 			);
 	}
 	private keyupHandle(ev: KeyboardEvent) {
@@ -177,10 +188,21 @@ class FPSControl {
 	private setDzZero = debounce(function (
 		this: FPSControl,
 	) {
-		this.dPosition[2] = 0;
+		this.dPosition = vec3.fromValues(0, 0, 0);
 	}, 100);
 	private wheelHandle(ev: WheelEvent) {
-		this.dPosition[2] = -ev.deltaY * this.sensitivity;
+		const camera = this.camera?.deref();
+		const scene = this.scene.deref();
+		if (!scene) return;
+		if (!camera) return;
+		this.dPosition = vec3.scale(
+			this.dPosition,
+			camera.front,
+			-ev.deltaY *
+				this.sensitivity *
+				scene.deltaTime *
+				0.05,
+		);
 		this.setDzZero();
 		ev.stopPropagation();
 		ev.stopImmediatePropagation();
@@ -223,19 +245,6 @@ class FPSControl {
 				180;
 		}
 		this.mouseMoveEvent = ev;
-	}
-	private updateProjectionMatrix(
-		gl: WebGL2RenderingContext,
-	) {
-		const camera = this.camera?.deref();
-		if (!camera) return;
-		mat4.perspective(
-			camera.projectionMatrix,
-			pi / 4,
-			gl.canvas.width / gl.canvas.height,
-			1,
-			Number.POSITIVE_INFINITY,
-		);
 	}
 
 	private updatePosition() {

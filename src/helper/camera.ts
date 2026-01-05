@@ -1,4 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
+import { pi } from "mathjs";
 
 interface CameraConstructorOptions {
 	position?: vec3;
@@ -24,7 +25,7 @@ class Camera {
 		mat4.create(),
 	);
 	public render(gl: WebGL2RenderingContext) {
-		void gl;
+		this.updateProjectionMatrix(gl);
 	}
 	/**
 	 * 销毁实例
@@ -32,6 +33,17 @@ class Camera {
 	public dispatch() {
 		// const canvas = this.scene.deref()?.canvas.deref();
 		// if (!canvas) return;
+	}
+	private updateProjectionMatrix(
+		gl: WebGL2RenderingContext,
+	) {
+		mat4.perspective(
+			this.projectionMatrix,
+			pi / 4,
+			gl.canvas.width / gl.canvas.height,
+			1,
+			Number.POSITIVE_INFINITY,
+		);
 	}
 }
 
