@@ -1,5 +1,6 @@
 import { GeometryInstance } from "./geometryInstance.ts";
 import { Camera } from "./camera.ts";
+import { FPSControl } from "@/helper/control/FPSControl.ts";
 
 /**
  * 场景类
@@ -13,7 +14,9 @@ class Scene {
 				"fail to create webgl2 context",
 			);
 		this.gl = new WeakRef(gl);
-		this.camera = new Camera({
+		this.camera = new Camera();
+		this.control = new FPSControl({
+			camera: this.camera,
 			scene: this,
 		});
 		gl.enable(gl.DEPTH_TEST);
@@ -32,6 +35,7 @@ class Scene {
 	 * 相机
 	 */
 	public camera: Camera;
+	public control: FPSControl;
 	/**
 	 * 延迟时间
 	 * @private
@@ -39,6 +43,7 @@ class Scene {
 	public deltaTime: number = 0;
 	public dispatch() {
 		this.camera.dispatch();
+		this.control.dispatch();
 	}
 	public resize() {
 		const gl = this.gl.deref();
@@ -91,7 +96,7 @@ class Scene {
 		this.updateDeltaTime();
 		this.resize();
 		this.clearScreen(gl);
-		this.camera.render(gl);
+		this.control.render(gl);
 		this.geometryMap.forEach((item) => {
 			item.render(this);
 		});
