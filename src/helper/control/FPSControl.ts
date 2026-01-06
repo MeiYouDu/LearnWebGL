@@ -222,9 +222,9 @@ class FPSControl {
 			const scene = this.scene.deref();
 			if (!scene) return;
 			const diffX =
-				ev.clientX - this.mouseMoveEvent.clientX;
+				ev.offsetX - this.mouseMoveEvent.offsetX;
 			const diffY =
-				ev.clientY - this.mouseMoveEvent.clientY;
+				ev.offsetY - this.mouseMoveEvent.offsetY;
 			this.PYR[0] =
 				(-diffY *
 					this.sensitivity *

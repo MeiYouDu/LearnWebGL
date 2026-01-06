@@ -12,10 +12,10 @@ interface CameraConstructorOptions {
 class Camera {
 	constructor(options?: CameraConstructorOptions) {
 		this.position =
-			options?.position || vec3.fromValues(0, 0, 3);
+			options?.position || vec3.fromValues(0, -3, 0);
 		this.front =
-			options?.front || vec3.fromValues(0, 0, -1);
-		this.up = options?.up || vec3.fromValues(0, 1, 0);
+			options?.front || vec3.fromValues(0, 1, 0);
+		this.up = options?.up || vec3.fromValues(0, 0, 1);
 	}
 	public position: vec3;
 	public front: vec3;
@@ -24,6 +24,7 @@ class Camera {
 	public projectionMatrix: mat4 = mat4.identity(
 		mat4.create(),
 	);
+
 	public render(gl: WebGL2RenderingContext) {
 		this.updateProjectionMatrix(gl);
 	}
