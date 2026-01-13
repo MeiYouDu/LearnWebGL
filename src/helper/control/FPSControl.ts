@@ -36,7 +36,6 @@ class FPSControl {
 		this.updatePosition();
 		this.updateQuaternion();
 		this.updateFront();
-		this.updateViewMatrix();
 	}
 	/**
 	 * 销毁实例
@@ -59,7 +58,6 @@ class FPSControl {
 	private PYR: vec3 = vec3.fromValues(0, 0, 0);
 	private maxPitch: number = (89 / 180) * pi;
 	private minPitch: number = (-89 / 180) * pi;
-	private quaternion: quat = quat.create();
 
 	/**
 	 * 记录初始位置方便四元数累加
@@ -266,38 +264,32 @@ class FPSControl {
 				this.initFront,
 				mat4.fromQuat(
 					mat4.create(),
-					this.quaternion,
+					camera.quaternion,
 				),
 			),
 		);
 	}
 	private updateQuaternion() {
-		quat.rotateY(
-			this.quaternion,
-			this.quaternion,
-			this.PYR[1],
-		);
-		quat.normalize(this.quaternion, this.quaternion);
-		quat.rotateX(
-			this.quaternion,
-			this.quaternion,
-			this.PYR[0],
-		); // 直接更新持续的四元数
-		quat.normalize(this.quaternion, this.quaternion); // 每次更新后归一化
-	}
-	private updateViewMatrix() {
 		const camera = this.camera?.deref();
 		if (!camera) return;
-		mat4.lookAt(
-			camera.viewMatrix,
-			camera.position,
-			vec3.add(
-				vec3.create(),
-				camera.position,
-				camera.front,
-			),
-			camera.up,
+		quat.rotateY(
+			camera.quaternion,
+			camera.quaternion,
+			this.PYR[1],
 		);
+		quat.normalize(
+			camera.quaternion,
+			camera.quaternion,
+		);
+		quat.rotateX(
+			camera.quaternion,
+			camera.quaternion,
+			this.PYR[0],
+		); // 直接更新持续的四元数
+		quat.normalize(
+			camera.quaternion,
+			camera.quaternion,
+		); // 每次更新后归一化
 	}
 }
 

@@ -1,4 +1,4 @@
-import { mat4, vec3 } from "gl-matrix";
+import { mat4, quat, vec3 } from "gl-matrix";
 import { pi } from "mathjs";
 
 interface CameraConstructorOptions {
@@ -21,11 +21,13 @@ class Camera {
 	public front: vec3;
 	public up: vec3;
 	public viewMatrix: mat4 = mat4.identity(mat4.create());
+	public quaternion: quat = quat.create();
 	public projectionMatrix: mat4 = mat4.identity(
 		mat4.create(),
 	);
 
 	public render(gl: WebGL2RenderingContext) {
+		this.updateViewMatrix();
 		this.updateProjectionMatrix(gl);
 	}
 	/**
@@ -44,6 +46,18 @@ class Camera {
 			gl.canvas.width / gl.canvas.height,
 			1,
 			Number.POSITIVE_INFINITY,
+		);
+	}
+	private updateViewMatrix() {
+		mat4.lookAt(
+			this.viewMatrix,
+			this.position,
+			vec3.add(
+				vec3.create(),
+				this.position,
+				this.front,
+			),
+			this.up,
 		);
 	}
 }
