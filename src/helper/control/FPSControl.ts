@@ -20,22 +20,36 @@ class FPSControl {
 			vec3.create(),
 			options.camera.front,
 		);
+		this.upOrigin = vec3.copy(
+			vec3.create(),
+			options.camera.up,
+		);
 		this.scene = new WeakRef(options.scene);
 		const canvas = options.scene.canvas.deref();
 		if (canvas) this.addListener(canvas);
 	}
 	public readonly scene: WeakRef<Scene>;
+	public readonly sensitivity;
+	public camera?: WeakRef<Camera>;
+	public render(gl: WebGL2RenderingContext) {
+		this.updatePosition();
+		this.updateQuaternion();
+		this.updateDirection();
+		this.camera?.deref()?.render(gl);
+	}
 	public getSpeed(isShift?: boolean): number {
 		if (isShift) return this._speed * 3;
 		return this._speed;
 	}
-	public readonly sensitivity;
-	public camera?: WeakRef<Camera>;
-	public render(gl: WebGL2RenderingContext) {
-		this.camera?.deref()?.render(gl);
-		this.updatePosition();
-		this.updateQuaternion();
-		this.updateFront();
+	public getRight(): vec3 | undefined {
+		const camera = this.camera?.deref();
+		if (!camera) return;
+		const right = vec3.cross(
+			vec3.create(),
+			camera.front,
+			camera.up,
+		);
+		return vec3.normalize(right, right);
 	}
 	/**
 	 * 销毁实例
@@ -64,6 +78,7 @@ class FPSControl {
 	 * @private
 	 */
 	private readonly initFront: vec3;
+	private readonly upOrigin: vec3;
 
 	private addListener(canvas: HTMLCanvasElement) {
 		this.keydownHandle = this.keydownHandle.bind(this);
@@ -212,7 +227,7 @@ class FPSControl {
 	private mouseUpHandle() {
 		this.mouseIsDown = false;
 		this.mouseMoveEvent = undefined;
-		this.PYR = vec3.create();
+		// this.PYR = vec3.create();
 	}
 	private mouseMoveHandle(ev: MouseEvent) {
 		if (!this.mouseIsDown) return;
@@ -223,7 +238,7 @@ class FPSControl {
 				ev.offsetX - this.mouseMoveEvent.offsetX;
 			const diffY =
 				ev.offsetY - this.mouseMoveEvent.offsetY;
-			this.PYR[0] =
+			this.PYR[0] +=
 				(-diffY *
 					this.sensitivity *
 					scene.deltaTime *
@@ -235,7 +250,7 @@ class FPSControl {
 			if (this.PYR[0] <= this.minPitch) {
 				this.PYR[0] = this.minPitch;
 			}
-			this.PYR[1] =
+			this.PYR[1] +=
 				(-diffX *
 					this.sensitivity *
 					scene.deltaTime *
@@ -254,7 +269,7 @@ class FPSControl {
 			this.dPosition,
 		);
 	}
-	private updateFront() {
+	private updateDirection() {
 		const camera = this.camera?.deref();
 		if (!camera) return;
 		vec3.normalize(
@@ -268,28 +283,68 @@ class FPSControl {
 				),
 			),
 		);
+		// vec3.normalize(
+		// 	camera.up,
+		// 	vec3.transformMat4(
+		// 		camera.up,
+		// 		this.upOrigin,
+		// 		mat4.fromQuat(
+		// 			mat4.create(),
+		// 			camera.quaternion,
+		// 		),
+		// 	),
+		// );
 	}
 	private updateQuaternion() {
 		const camera = this.camera?.deref();
 		if (!camera) return;
-		quat.rotateY(
-			camera.quaternion,
-			camera.quaternion,
+
+		const quatYaw = quat.create();
+		quat.setAxisAngle(
+			quatYaw,
+			this.upOrigin,
 			this.PYR[1],
 		);
+		quat.normalize(quatYaw, quatYaw);
+
+		const initialRight = vec3.create();
+		vec3.cross(
+			initialRight,
+			this.initFront,
+			this.upOrigin,
+		);
+		vec3.normalize(initialRight, initialRight);
+
+		// rotate the initial right by the yaw so pitch axis is the right axis after yaw
+		const tmpMat = mat4.fromQuat(
+			mat4.create(),
+			quatYaw,
+		);
+		const rotatedRight = vec3.create();
+		vec3.transformMat4(
+			rotatedRight,
+			initialRight,
+			tmpMat,
+		);
+		vec3.normalize(rotatedRight, rotatedRight);
+
+		const quatPitch = quat.create();
+		quat.setAxisAngle(
+			quatPitch,
+			rotatedRight,
+			this.PYR[0],
+		);
+		quat.normalize(quatPitch, quatPitch);
+
+		quat.multiply(
+			camera.quaternion,
+			quatPitch,
+			quatYaw,
+		);
 		quat.normalize(
 			camera.quaternion,
 			camera.quaternion,
 		);
-		quat.rotateX(
-			camera.quaternion,
-			camera.quaternion,
-			this.PYR[0],
-		); // 直接更新持续的四元数
-		quat.normalize(
-			camera.quaternion,
-			camera.quaternion,
-		); // 每次更新后归一化
 	}
 }
 
