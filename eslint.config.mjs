@@ -1,11 +1,11 @@
 import react from "@eslint-react/eslint-plugin";
 import js from "@eslint/js";
-import prettier from "eslint-plugin-prettier/recommended";
 import jsonc from "eslint-plugin-jsonc";
-import globals from "globals";
-import ts from "typescript-eslint";
+import prettier from "eslint-plugin-prettier/recommended";
 import reactPlugin from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
+import globals from "globals";
+import ts from "typescript-eslint";
 
 /**
  * ESLint configuration.

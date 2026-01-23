@@ -1,104 +1,57 @@
 // BoxSceneReact.tsx
-import { useEffect, useRef } from "react";
-import { cos, pi, sin } from "mathjs";
 import { mat4, vec3 } from "gl-matrix";
 import { random } from "lodash";
-import { Scene } from "../../../../helper/scene.ts";
-import { Shader } from "../../../../helper/shader.ts";
+import { cos, pi, sin } from "mathjs";
+import { useEffect, useRef } from "react";
+import awesome from "../../../../assets/textures/awesomeface.png";
+import box from "../../../../assets/textures/container2.png";
+import boxBorder from "../../../../assets/textures/container2_specular.png";
 import { Geometry } from "../../../../helper/geometry.ts";
 import { GeometryInstance } from "../../../../helper/geometryInstance.ts";
-import boxVert from "./box.vert";
+import { Scene } from "../../../../helper/scene.ts";
+import { Shader } from "../../../../helper/shader.ts";
 import boxFrag from "./box.frag";
+import boxVert from "./box.vert";
 import lightFrag from "./light.frag";
-import boxBorder from "../../../../assets/textures/container2_specular.png";
-import box from "../../../../assets/textures/container2.png";
-import awesome from "../../../../assets/textures/awesomeface.png";
 
 const attribute = new Float32Array([
-	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, 0.5, -0.5, -0.5, 0, 0,
-	-1, 1, 0, 0.5, 0.5, -0.5, 0, 0, -1, 1, -1, 0.5, 0.5,
-	-0.5, 0, 0, -1, 1, -1, -0.5, 0.5, -0.5, 0, 0, -1, 0, -1,
-	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, -0.5, -0.5, 0.5, 0, 0,
-	1, 0, 0, 0.5, -0.5, 0.5, 0, 0, 1, 1, 0, 0.5, 0.5, 0.5,
-	0, 0, 1, 1, -1, 0.5, 0.5, 0.5, 0, 0, 1, 1, -1, -0.5,
-	0.5, 0.5, 0, 0, 1, 0, -1, -0.5, -0.5, 0.5, 0, 0, 1, 0,
-	0, -0.5, 0.5, 0.5, -1, 0, 0, 1, 0, -0.5, 0.5, -0.5, -1,
-	0, 0, 1, -1, -0.5, -0.5, -0.5, -1, 0, 0, 0, -1, -0.5,
-	-0.5, -0.5, -1, 0, 0, 0, -1, -0.5, -0.5, 0.5, -1, 0, 0,
-	0, 0, -0.5, 0.5, 0.5, -1, 0, 0, 1, 0, 0.5, 0.5, 0.5, 1,
-	0, 0, 1, 0, 0.5, 0.5, -0.5, 1, 0, 0, 1, -1, 0.5, -0.5,
-	-0.5, 1, 0, 0, 0, -1, 0.5, -0.5, -0.5, 1, 0, 0, 0, -1,
-	0.5, -0.5, 0.5, 1, 0, 0, 0, 0, 0.5, 0.5, 0.5, 1, 0, 0,
-	1, 0, -0.5, -0.5, -0.5, 0, -1, 0, 0, -1, 0.5, -0.5,
-	-0.5, 0, -1, 0, 1, -1, 0.5, -0.5, 0.5, 0, -1, 0, 1, 0,
-	0.5, -0.5, 0.5, 0, -1, 0, 1, 0, -0.5, -0.5, 0.5, 0, -1,
-	0, 0, 0, -0.5, -0.5, -0.5, 0, -1, 0, 0, -1, -0.5, 0.5,
-	-0.5, 0, 1, 0, 0, -1, 0.5, 0.5, -0.5, 0, 1, 0, 1, -1,
-	0.5, 0.5, 0.5, 0, 1, 0, 1, 0, 0.5, 0.5, 0.5, 0, 1, 0, 1,
-	0, -0.5, 0.5, 0.5, 0, 1, 0, 0, 0, -0.5, 0.5, -0.5, 0, 1,
-	0, 0, -1,
+	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, 0.5, -0.5, -0.5, 0, 0, -1, 1, 0, 0.5, 0.5, -0.5, 0, 0, -1, 1,
+	-1, 0.5, 0.5, -0.5, 0, 0, -1, 1, -1, -0.5, 0.5, -0.5, 0, 0, -1, 0, -1, -0.5, -0.5, -0.5, 0, 0,
+	-1, 0, 0, -0.5, -0.5, 0.5, 0, 0, 1, 0, 0, 0.5, -0.5, 0.5, 0, 0, 1, 1, 0, 0.5, 0.5, 0.5, 0, 0, 1,
+	1, -1, 0.5, 0.5, 0.5, 0, 0, 1, 1, -1, -0.5, 0.5, 0.5, 0, 0, 1, 0, -1, -0.5, -0.5, 0.5, 0, 0, 1,
+	0, 0, -0.5, 0.5, 0.5, -1, 0, 0, 1, 0, -0.5, 0.5, -0.5, -1, 0, 0, 1, -1, -0.5, -0.5, -0.5, -1, 0,
+	0, 0, -1, -0.5, -0.5, -0.5, -1, 0, 0, 0, -1, -0.5, -0.5, 0.5, -1, 0, 0, 0, 0, -0.5, 0.5, 0.5,
+	-1, 0, 0, 1, 0, 0.5, 0.5, 0.5, 1, 0, 0, 1, 0, 0.5, 0.5, -0.5, 1, 0, 0, 1, -1, 0.5, -0.5, -0.5,
+	1, 0, 0, 0, -1, 0.5, -0.5, -0.5, 1, 0, 0, 0, -1, 0.5, -0.5, 0.5, 1, 0, 0, 0, 0, 0.5, 0.5, 0.5,
+	1, 0, 0, 1, 0, -0.5, -0.5, -0.5, 0, -1, 0, 0, -1, 0.5, -0.5, -0.5, 0, -1, 0, 1, -1, 0.5, -0.5,
+	0.5, 0, -1, 0, 1, 0, 0.5, -0.5, 0.5, 0, -1, 0, 1, 0, -0.5, -0.5, 0.5, 0, -1, 0, 0, 0, -0.5,
+	-0.5, -0.5, 0, -1, 0, 0, -1, -0.5, 0.5, -0.5, 0, 1, 0, 0, -1, 0.5, 0.5, -0.5, 0, 1, 0, 1, -1,
+	0.5, 0.5, 0.5, 0, 1, 0, 1, 0, 0.5, 0.5, 0.5, 0, 1, 0, 1, 0, -0.5, 0.5, 0.5, 0, 1, 0, 0, 0, -0.5,
+	0.5, -0.5, 0, 1, 0, 0, -1,
 ]);
 
-function boxVertexAttribPointer(
-	gl: WebGL2RenderingContext,
-	shader: Shader,
-): number {
+function boxVertexAttribPointer(gl: WebGL2RenderingContext, shader: Shader): number {
 	const stride = 8;
-	const positionAttrLocation =
-		shader.getAttribLocation("position");
-	const normalAttrLocation =
-		shader.getAttribLocation("normal");
-	const texCoordAttrLocation =
-		shader.getAttribLocation("texCoord");
-	if (
-		typeof positionAttrLocation === "number" &&
-		positionAttrLocation >= 0
-	) {
-		gl.vertexAttribPointer(
-			positionAttrLocation,
-			3,
-			gl.FLOAT,
-			false,
-			stride * 4,
-			0,
-		);
+	const positionAttrLocation = shader.getAttribLocation("position");
+	const normalAttrLocation = shader.getAttribLocation("normal");
+	const texCoordAttrLocation = shader.getAttribLocation("texCoord");
+	if (typeof positionAttrLocation === "number" && positionAttrLocation >= 0) {
+		gl.vertexAttribPointer(positionAttrLocation, 3, gl.FLOAT, false, stride * 4, 0);
 		gl.enableVertexAttribArray(positionAttrLocation);
 	}
-	if (
-		typeof normalAttrLocation === "number" &&
-		normalAttrLocation >= 0
-	) {
-		gl.vertexAttribPointer(
-			normalAttrLocation,
-			3,
-			gl.FLOAT,
-			false,
-			stride * 4,
-			3 * 4,
-		);
+	if (typeof normalAttrLocation === "number" && normalAttrLocation >= 0) {
+		gl.vertexAttribPointer(normalAttrLocation, 3, gl.FLOAT, false, stride * 4, 3 * 4);
 		gl.enableVertexAttribArray(normalAttrLocation);
 	}
-	if (
-		typeof texCoordAttrLocation === "number" &&
-		texCoordAttrLocation >= 0
-	) {
-		gl.vertexAttribPointer(
-			texCoordAttrLocation,
-			2,
-			gl.FLOAT,
-			false,
-			stride * 4,
-			6 * 4,
-		);
+	if (typeof texCoordAttrLocation === "number" && texCoordAttrLocation >= 0) {
+		gl.vertexAttribPointer(texCoordAttrLocation, 2, gl.FLOAT, false, stride * 4, 6 * 4);
 		gl.enableVertexAttribArray(texCoordAttrLocation);
 	}
 	return stride;
 }
 
 export default function BoxSceneReact() {
-	const canvasRef = useRef<HTMLCanvasElement | null>(
-		null,
-	);
+	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const sceneRef = useRef<Scene | null>(null);
 	const intervalRef = useRef<number | null>(null);
 
@@ -137,25 +90,13 @@ export default function BoxSceneReact() {
 			);
 
 		const boxShader = new Shader(gl, boxVert, boxFrag);
-		const lightShader = new Shader(
-			gl,
-			boxVert,
-			lightFrag,
-		);
+		const lightShader = new Shader(gl, boxVert, lightFrag);
 
 		const ambient = vec3.fromValues(0.2, 0.2, 0.2);
 		const diffuse = vec3.fromValues(0.6, 0.6, 0.6);
 		const specular = vec3.fromValues(1.0, 1.0, 1.0);
-		const flashLightDiffuse = vec3.fromValues(
-			0.9,
-			0.9,
-			0.9,
-		);
-		const pointLightDiffuse = vec3.fromValues(
-			0.8,
-			0.8,
-			0.8,
-		);
+		const flashLightDiffuse = vec3.fromValues(0.9, 0.9, 0.9);
+		const pointLightDiffuse = vec3.fromValues(0.8, 0.8, 0.8);
 
 		const boxGeometry = new Geometry({
 			shader: boxShader,
@@ -174,8 +115,7 @@ export default function BoxSceneReact() {
 					width: 500,
 					height: 500,
 					textureUnit: 1,
-					textureLocationName:
-						"material.specular",
+					textureLocationName: "material.specular",
 				},
 				{
 					image: awesome,
@@ -185,105 +125,33 @@ export default function BoxSceneReact() {
 					textureLocationName: "awesome",
 				},
 			],
-			uniformsSetter(
-				glInner: WebGL2RenderingContext,
-				shaderInner: Shader,
-			) {
-				shaderInner.setVec3(
-					(scene as Scene).camera.position,
-					"camera.position",
-				);
-				shaderInner.setFloat(
-					64.0,
-					"material.shininess",
-				);
-				shaderInner.setVec3(
-					vec3.fromValues(0, -1, 0),
-					"parallelLight.direction",
-				);
-				shaderInner.setVec3(
-					ambient,
-					"parallelLight.ambient",
-				);
-				shaderInner.setVec3(
-					diffuse,
-					"parallelLight.diffuse",
-				);
-				shaderInner.setVec3(
-					specular,
-					"parallelLight.specular",
-				);
+			uniformsSetter(glInner: WebGL2RenderingContext, shaderInner: Shader) {
+				shaderInner.setVec3((scene as Scene).camera.position, "camera.position");
+				shaderInner.setFloat(64.0, "material.shininess");
+				shaderInner.setVec3(vec3.fromValues(0, -1, 0), "parallelLight.direction");
+				shaderInner.setVec3(ambient, "parallelLight.ambient");
+				shaderInner.setVec3(diffuse, "parallelLight.diffuse");
+				shaderInner.setVec3(specular, "parallelLight.specular");
 
-				shaderInner.setVec3(
-					(scene as Scene).camera.position,
-					"flashLight.position",
-				);
-				shaderInner.setVec3(
-					(scene as Scene).camera.front,
-					"flashLight.direction",
-				);
-				shaderInner.setFloat(
-					cos(pi / 18),
-					"flashLight.cutOff",
-				);
-				shaderInner.setFloat(
-					cos(pi / 16),
-					"flashLight.outerCutOff",
-				);
-				shaderInner.setVec3(
-					ambient,
-					"flashLight.ambient",
-				);
-				shaderInner.setVec3(
-					flashLightDiffuse,
-					"flashLight.diffuse",
-				);
-				shaderInner.setVec3(
-					specular,
-					"flashLight.specular",
-				);
-				shaderInner.setFloat(
-					1.0,
-					"flashLight.constant",
-				);
-				shaderInner.setFloat(
-					0.022,
-					"flashLight.linear",
-				);
-				shaderInner.setFloat(
-					0.0019,
-					"flashLight.quadratic",
-				);
+				shaderInner.setVec3((scene as Scene).camera.position, "flashLight.position");
+				shaderInner.setVec3((scene as Scene).camera.front, "flashLight.direction");
+				shaderInner.setFloat(cos(pi / 18), "flashLight.cutOff");
+				shaderInner.setFloat(cos(pi / 16), "flashLight.outerCutOff");
+				shaderInner.setVec3(ambient, "flashLight.ambient");
+				shaderInner.setVec3(flashLightDiffuse, "flashLight.diffuse");
+				shaderInner.setVec3(specular, "flashLight.specular");
+				shaderInner.setFloat(1.0, "flashLight.constant");
+				shaderInner.setFloat(0.022, "flashLight.linear");
+				shaderInner.setFloat(0.0019, "flashLight.quadratic");
 
 				lightPositions.forEach((p, idx) => {
-					shaderInner.setVec3(
-						p,
-						`pointLights[${idx}].position`,
-					);
-					shaderInner.setVec3(
-						ambient,
-						`pointLights[${idx}].ambient`,
-					);
-					shaderInner.setVec3(
-						pointLightDiffuse,
-						`pointLights[${idx}].diffuse`,
-					);
-					shaderInner.setVec3(
-						specular,
-						`pointLights[${idx}].specular`,
-					);
-					shaderInner.setFloat(
-						1.0,
-						`pointLights[${idx}].constant`,
-					);
-					shaderInner.setFloat(
-						0.022,
-						`pointLights[${idx}].linear`,
-					);
-					shaderInner.setFloat(
-						0.0019,
-						`pointLights[${idx}].quadratic`,
-					);
+					shaderInner.setVec3(p, `pointLights[${idx}].position`);
+					shaderInner.setVec3(ambient, `pointLights[${idx}].ambient`);
+					shaderInner.setVec3(pointLightDiffuse, `pointLights[${idx}].diffuse`);
+					shaderInner.setVec3(specular, `pointLights[${idx}].specular`);
+					shaderInner.setFloat(1.0, `pointLights[${idx}].constant`);
+					shaderInner.setFloat(0.022, `pointLights[${idx}].linear`);
+					shaderInner.setFloat(0.0019, `pointLights[${idx}].quadratic`);
 				});
 			},
 		});
@@ -303,43 +171,24 @@ export default function BoxSceneReact() {
 				geometry: boxGeometry,
 				matrix: mat4.multiply(
 					mat4.create(),
-					mat4.fromTranslation(
-						mat4.create(),
-						vec3.fromValues(x, y, z),
-					),
-					mat4.fromScaling(
-						mat4.create(),
-						vec3.fromValues(1.5, 1.5, 1.5),
-					),
+					mat4.fromTranslation(mat4.create(), vec3.fromValues(x, y, z)),
+					mat4.fromScaling(mat4.create(), vec3.fromValues(1.5, 1.5, 1.5)),
 				),
 			});
-			(scene as Scene).geometryMap.set(
-				instance,
-				instance,
-			);
+			(scene as Scene).geometryMap.set(instance, instance);
 		}
 
 		const arr: GeometryInstance[] = [];
 		for (let i = 0; i < lightPositions.length; i++) {
-			const lightGeometryInstance =
-				new GeometryInstance({
-					geometry: lightGeometry,
-					matrix: mat4.multiply(
-						mat4.create(),
-						mat4.fromTranslation(
-							mat4.create(),
-							lightPositions[i],
-						),
-						mat4.fromScaling(
-							mat4.create(),
-							vec3.fromValues(0.1, 0.1, 0.1),
-						),
-					),
-				});
-			(scene as Scene).geometryMap.set(
-				lightGeometryInstance,
-				lightGeometryInstance,
-			);
+			const lightGeometryInstance = new GeometryInstance({
+				geometry: lightGeometry,
+				matrix: mat4.multiply(
+					mat4.create(),
+					mat4.fromTranslation(mat4.create(), lightPositions[i]),
+					mat4.fromScaling(mat4.create(), vec3.fromValues(0.1, 0.1, 0.1)),
+				),
+			});
+			(scene as Scene).geometryMap.set(lightGeometryInstance, lightGeometryInstance);
 			arr.push(lightGeometryInstance);
 		}
 
@@ -347,21 +196,13 @@ export default function BoxSceneReact() {
 		const id = window.setInterval(() => {
 			angle = Date.now() * 0.001;
 			arr.forEach((item, index) => {
-				lightPositions[index][0] =
-					cos(angle / 3 + index) * 6.5;
+				lightPositions[index][0] = cos(angle / 3 + index) * 6.5;
 				// lightPositions[index][1] = sin(angle / 3 + index) * 6.5;
-				lightPositions[index][2] =
-					sin(angle / 3 + index) * 6.5 - 5;
+				lightPositions[index][2] = sin(angle / 3 + index) * 6.5 - 5;
 				item.matrix = mat4.multiply(
 					mat4.create(),
-					mat4.fromTranslation(
-						mat4.create(),
-						lightPositions[index],
-					),
-					mat4.fromScaling(
-						mat4.create(),
-						vec3.fromValues(0.1, 0.1, 0.1),
-					),
+					mat4.fromTranslation(mat4.create(), lightPositions[index]),
+					mat4.fromScaling(mat4.create(), vec3.fromValues(0.1, 0.1, 0.1)),
 				);
 			});
 		}, 1);
