@@ -1,8 +1,8 @@
-import { RefObject, useEffect, useRef } from "react";
-import { useSplatLoadHook } from "@/views/gaussian/hooks/useSplatLoad.hook.ts";
-import { useHover } from "ahooks";
 import { SceneManager } from "@/views/gaussian/helper/sceneManager.ts";
 import { Splat } from "@/views/gaussian/helper/splat.ts";
+import { useSplatLoadHook } from "@/views/gaussian/hooks/useSplatLoad.hook.ts";
+import { useHover } from "ahooks";
+import { RefObject, useEffect, useRef } from "react";
 
 interface ReturnType {
 	containerRef: RefObject<HTMLCanvasElement | null>;

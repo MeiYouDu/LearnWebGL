@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
 import { PackedSplats, SplatLoader } from "@sparkjsdev/spark";
+import { useEffect, useRef } from "react";
 import { LoadingManager } from "three";
 
 interface ReturnType {
