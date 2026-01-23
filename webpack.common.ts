@@ -7,13 +7,7 @@ import NodePolyfillWebpackPlugin from "node-polyfill-webpack-plugin";
 import { Configuration, DefinePlugin } from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import CopyWebpackPlugin from "copy-webpack-plugin";
-import {
-	CONTEXT,
-	EXAMPLE_ENTRY,
-	EXAMPLE_OUTPUT_PATH,
-	EXCLUDE,
-	HTML_TEMPLATE,
-} from "./constant.ts";
+import { CONTEXT, EXAMPLE_ENTRY, EXAMPLE_OUTPUT_PATH, EXCLUDE, HTML_TEMPLATE } from "./constant.ts";
 
 const config: Configuration = {
 	context: CONTEXT,
@@ -23,8 +17,7 @@ const config: Configuration = {
 		path: EXAMPLE_OUTPUT_PATH,
 		publicPath: "/",
 		filename: "js/[name].[contenthash:8].bundle.js",
-		chunkFilename:
-			"js/[name].[contenthash:8].bundle.js",
+		chunkFilename: "js/[name].[contenthash:8].bundle.js",
 	},
 	resolve: {
 		alias: {
@@ -32,17 +25,7 @@ const config: Configuration = {
 			"@test": resolve(__dirname, "./test"),
 		},
 		fullySpecified: false,
-		extensions: [
-			".js",
-			".cjs",
-			".mjs",
-			".ts",
-			".tsx",
-			".scss",
-			".css",
-			".jsx",
-			".html",
-		],
+		extensions: [".js", ".cjs", ".mjs", ".ts", ".tsx", ".scss", ".css", ".jsx", ".html"],
 	},
 	module: {
 		rules: [
@@ -90,8 +73,7 @@ const config: Configuration = {
 				type: "asset",
 				exclude: EXCLUDE,
 				generator: {
-					filename:
-						"assets/images/[name].[contenthash:8][ext]",
+					filename: "assets/images/[name].[contenthash:8][ext]",
 				},
 				parser: {
 					dataUrlCondition: {
@@ -103,8 +85,7 @@ const config: Configuration = {
 				test: /\.(woff|woff2|eot|ttf|otf)$/i,
 				type: "asset/resource",
 				generator: {
-					filename:
-						"assets/fonts/[name].[contenthash:8][ext]",
+					filename: "assets/fonts/[name].[contenthash:8][ext]",
 				},
 			},
 			{
@@ -112,8 +93,7 @@ const config: Configuration = {
 				type: "asset/resource",
 				exclude: EXCLUDE,
 				generator: {
-					filename:
-						"assets/text/[name].[contenthash:8][ext]",
+					filename: "assets/text/[name].[contenthash:8][ext]",
 				},
 			},
 			{
@@ -147,20 +127,11 @@ const config: Configuration = {
 		new NodePolyfillWebpackPlugin(),
 		new EslintWebpackPlugin({
 			failOnError: env.NODE_ENV === "production",
-			lintDirtyModulesOnly:
-				env.NODE_ENV === "development",
+			lintDirtyModulesOnly: env.NODE_ENV === "development",
 			configType: "flat",
 			context: resolve(__dirname, "./"),
 			fixTypes: ["problem", "suggestion", "layout"],
-			extensions: [
-				".js",
-				".ts",
-				".json",
-				".jsx",
-				".tsx",
-				".mdx",
-				".md",
-			],
+			extensions: [".js", ".ts", ".json", ".jsx", ".tsx", ".mdx", ".md"],
 			emitWarning: false,
 			concurrency: "auto",
 		}),
@@ -169,16 +140,12 @@ const config: Configuration = {
 			threads: true,
 			allowEmptyInput: true,
 			context: resolve(__dirname, "./"),
-			lintDirtyModulesOnly:
-				env.NODE_ENV === "development",
+			lintDirtyModulesOnly: env.NODE_ENV === "development",
 		}),
 		new CopyWebpackPlugin({
 			patterns: [
 				{
-					from: resolve(
-						__dirname,
-						"src/assets/model",
-					),
+					from: resolve(__dirname, "src/assets/model"),
 					to: "assets/model",
 				},
 				// {
@@ -213,8 +180,7 @@ const config: Configuration = {
 			],
 		}),
 		new DefinePlugin({
-			CESIUM_BASE_URL:
-				JSON.stringify("/cesiumAssets"),
+			CESIUM_BASE_URL: JSON.stringify("/cesiumAssets"),
 		}),
 	],
 	optimization: {

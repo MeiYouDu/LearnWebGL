@@ -7,7 +7,5 @@ import { RouterProvider } from "react-router";
 const root = document.getElementById("app");
 
 if (root) {
-	createRoot(root).render(
-		<RouterProvider router={router}></RouterProvider>,
-	);
+	createRoot(root).render(<RouterProvider router={router}></RouterProvider>);
 }

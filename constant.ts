@@ -19,16 +19,11 @@ const EXAMPLE_OUTPUT_PATH = resolve(__dirname, "./dist");
 /**
  * html模板
  */
-const HTML_TEMPLATE = resolve(
-	__dirname,
-	"src/public/index.html",
-);
+const HTML_TEMPLATE = resolve(__dirname, "src/public/index.html");
 /**
  * 需要排除的路径
  */
-const EXCLUDE: Array<string | RegExp> = [
-	/(node_modules|bower_components)/,
-];
+const EXCLUDE: Array<string | RegExp> = [/(node_modules|bower_components)/];
 /**
  * 边译样式时需要排除的路径
  */

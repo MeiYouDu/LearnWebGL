@@ -1,24 +1,11 @@
 import { StrictMode, useContext, useState } from "react";
-import {
-	Outlet,
-	RouteObject,
-	useNavigate,
-} from "react-router";
+import { Outlet, RouteObject, useNavigate } from "react-router";
 import { Button, Layout, Menu, MenuProps } from "antd";
-import {
-	GlobalContext,
-	GlobalContextProvider,
-} from "@/store";
-import {
-	MenuFoldOutlined,
-	MenuUnfoldOutlined,
-	PieChartOutlined,
-} from "@ant-design/icons";
+import { GlobalContext, GlobalContextProvider } from "@/store";
+import { MenuFoldOutlined, MenuUnfoldOutlined, PieChartOutlined } from "@ant-design/icons";
 import { routes } from "@/routes";
 
-function menuItemFactory(
-	routes: RouteObject[],
-): Required<MenuProps>["items"] {
+function menuItemFactory(routes: RouteObject[]): Required<MenuProps>["items"] {
 	return routes
 		.filter((item) => item.id)
 		.map((route: RouteObject) => {
@@ -28,8 +15,7 @@ function menuItemFactory(
 				type: "item",
 				icon: <PieChartOutlined />,
 				children:
-					route.children &&
-					route.children.length > 0
+					route.children && route.children.length > 0
 						? menuItemFactory(route.children)
 						: undefined,
 			};
@@ -39,11 +25,8 @@ function menuItemFactory(
 function Navigator({ collapsed }: { collapsed: boolean }) {
 	const { theme } = useContext(GlobalContext);
 	const navigate = useNavigate();
-	const menuItems: MenuProps["items"] =
-		menuItemFactory(routes);
-	const selectHandle: MenuProps["onSelect"] = function (
-		info,
-	) {
+	const menuItems: MenuProps["items"] = menuItemFactory(routes);
+	const selectHandle: MenuProps["onSelect"] = function (info) {
 		const path = info.keyPath.reverse().join("/");
 		navigate(path);
 	};
@@ -69,21 +52,13 @@ function Root() {
 			<StrictMode>
 				<Layout className="h-full w-full">
 					<Layout.Header>
-						<Button
-							type="primary"
-							onClick={toggleCollapsed}>
-							{collapsed ? (
-								<MenuUnfoldOutlined />
-							) : (
-								<MenuFoldOutlined />
-							)}
+						<Button type="primary" onClick={toggleCollapsed}>
+							{collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
 						</Button>
 					</Layout.Header>
 					<Layout>
 						<Layout.Sider className="">
-							<Navigator
-								collapsed={collapsed}
-							/>
+							<Navigator collapsed={collapsed} />
 						</Layout.Sider>
 						<Layout.Content>
 							<Outlet></Outlet>

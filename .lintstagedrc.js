@@ -1,7 +1,5 @@
 module.exports = {
-	"*.{js,ts,jsx,tsx,json,mdx,md}": [
-		"pnpm exec eslint --fix",
-	],
+	"*.{js,ts,jsx,tsx,json,mdx,md}": ["pnpm exec eslint --fix"],
 	"*.{css,sass,scss}": [
 		"pnpm exec stylelint --fix --cache-location node_modules/.cache/stylelint-webpack-plugin/.stylelintcache",
 	],

@@ -12,12 +12,9 @@ import { useInput } from "../../../hook";
 
 function getMesh(): Mesh {
 	const vertexes = new Float32Array([
-		-0.5, -0.5, -0.5, 0.0, 0.0, 0.5, -0.5, -0.5, 1.0,
-		0.0, 0.5, 0.5, -0.5, 1.0, 1.0, -0.5, 0.5, -0.5, 0.0,
-		1.0, -0.5, -0.5, 0.5, 0.0, 0.0, 0.5, -0.5, 0.5, 1.0,
-		0.0, 0.5, 0.5, 0.5, 1.0, 1.0, -0.5, 0.5, 0.5, 0.0,
-		1.0, -0.5, -0.5, -0.5, 0.0, 1.0, -0.5, -0.5, 0.5,
-		1.0, 0.0,
+		-0.5, -0.5, -0.5, 0.0, 0.0, 0.5, -0.5, -0.5, 1.0, 0.0, 0.5, 0.5, -0.5, 1.0, 1.0, -0.5, 0.5,
+		-0.5, 0.0, 1.0, -0.5, -0.5, 0.5, 0.0, 0.0, 0.5, -0.5, 0.5, 1.0, 0.0, 0.5, 0.5, 0.5, 1.0,
+		1.0, -0.5, 0.5, 0.5, 0.0, 1.0, -0.5, -0.5, -0.5, 0.0, 1.0, -0.5, -0.5, 0.5, 1.0, 0.0,
 		// ... keep the full flattened array as in your original code
 		// I used the same pattern - replace/extend with your complete array if needed
 	]);
@@ -32,26 +29,10 @@ function getMesh(): Mesh {
 }
 
 function setTextureParams(gl: WebGL2RenderingContext) {
-	gl.texParameteri(
-		gl.TEXTURE_2D,
-		gl.TEXTURE_WRAP_S,
-		gl.REPEAT,
-	);
-	gl.texParameteri(
-		gl.TEXTURE_2D,
-		gl.TEXTURE_WRAP_T,
-		gl.REPEAT,
-	);
-	gl.texParameteri(
-		gl.TEXTURE_2D,
-		gl.TEXTURE_MIN_FILTER,
-		gl.LINEAR_MIPMAP_LINEAR,
-	);
-	gl.texParameteri(
-		gl.TEXTURE_2D,
-		gl.TEXTURE_MAG_FILTER,
-		gl.LINEAR,
-	);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 }
 
 function setTexture(
@@ -69,22 +50,9 @@ function setTexture(
 		if (!tex) return;
 		gl.activeTexture(gl.TEXTURE0 + textureUnit);
 		gl.bindTexture(gl.TEXTURE_2D, tex);
-		shaderInstance.setInt(
-			textureUnit,
-			textureLocationName ?? `texture${textureUnit}`,
-		);
+		shaderInstance.setInt(textureUnit, textureLocationName ?? `texture${textureUnit}`);
 		setTextureParams(gl);
-		gl.texImage2D(
-			gl.TEXTURE_2D,
-			0,
-			gl.RGBA,
-			width,
-			height,
-			0,
-			gl.RGBA,
-			gl.UNSIGNED_BYTE,
-			img,
-		);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, img);
 		gl.generateMipmap(gl.TEXTURE_2D);
 		img.removeEventListener("load", onLoad);
 	};
@@ -94,9 +62,7 @@ function setTexture(
 }
 
 export default function CubeSceneReact() {
-	const canvasRef = useRef<HTMLCanvasElement | null>(
-		null,
-	);
+	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const rafRef = useRef<number | null>(null);
 	const imagesRef = useRef<HTMLImageElement[]>([]);
 	const inputInstance = useInput(canvasRef); // 按你原来用法保留
@@ -113,11 +79,7 @@ export default function CubeSceneReact() {
 			return;
 		}
 
-		const shaderInstance = new Shader(
-			gl,
-			vertexShaderSource,
-			fragmentShaderSource,
-		);
+		const shaderInstance = new Shader(gl, vertexShaderSource, fragmentShaderSource);
 		shaderInstance.use();
 		gl.enable(gl.DEPTH_TEST);
 
@@ -132,73 +94,25 @@ export default function CubeSceneReact() {
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
 
-		gl.bufferData(
-			gl.ARRAY_BUFFER,
-			mesh.vertexes,
-			gl.STATIC_DRAW,
-		);
-		gl.bufferData(
-			gl.ELEMENT_ARRAY_BUFFER,
-			mesh.indices,
-			gl.STATIC_DRAW,
-		);
+		gl.bufferData(gl.ARRAY_BUFFER, mesh.vertexes, gl.STATIC_DRAW);
+		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, mesh.indices, gl.STATIC_DRAW);
 
 		// 纹理
-		const t0 = setTexture(
-			gl,
-			shaderInstance,
-			box,
-			512,
-			512,
-			0,
-		);
-		const t1 = setTexture(
-			gl,
-			shaderInstance,
-			smile,
-			476,
-			476,
-			1,
-		);
+		const t0 = setTexture(gl, shaderInstance, box, 512, 512, 0);
+		const t1 = setTexture(gl, shaderInstance, smile, 476, 476, 1);
 		imagesRef.current.push(t0.img, t1.img);
 
-		const positionAttributeLocation =
-			shaderInstance.getAttribLocation("position");
-		const texCoordAttributeLocation =
-			shaderInstance.getAttribLocation("texCoord");
+		const positionAttributeLocation = shaderInstance.getAttribLocation("position");
+		const texCoordAttributeLocation = shaderInstance.getAttribLocation("texCoord");
 
 		const stride = 5 * 4; // 5 floats * 4 bytes
-		if (
-			typeof positionAttributeLocation === "number" &&
-			positionAttributeLocation >= 0
-		) {
-			gl.vertexAttribPointer(
-				positionAttributeLocation,
-				3,
-				gl.FLOAT,
-				false,
-				stride,
-				0,
-			);
-			gl.enableVertexAttribArray(
-				positionAttributeLocation,
-			);
+		if (typeof positionAttributeLocation === "number" && positionAttributeLocation >= 0) {
+			gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, stride, 0);
+			gl.enableVertexAttribArray(positionAttributeLocation);
 		}
-		if (
-			typeof texCoordAttributeLocation === "number" &&
-			texCoordAttributeLocation >= 0
-		) {
-			gl.vertexAttribPointer(
-				texCoordAttributeLocation,
-				2,
-				gl.FLOAT,
-				false,
-				stride,
-				12,
-			);
-			gl.enableVertexAttribArray(
-				texCoordAttributeLocation,
-			);
+		if (typeof texCoordAttributeLocation === "number" && texCoordAttributeLocation >= 0) {
+			gl.vertexAttribPointer(texCoordAttributeLocation, 2, gl.FLOAT, false, stride, 12);
+			gl.enableVertexAttribArray(texCoordAttributeLocation);
 		}
 
 		const positions: Array<vec3> = [
@@ -227,19 +141,14 @@ export default function CubeSceneReact() {
 			if (!gl) return;
 			if (canvas) resizeHandle(canvas, gl);
 
-			gl.clear(
-				gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT,
-			);
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 			gl.clearColor(0.2, 0.2, 0.2, 1);
 
 			shaderInstance.use();
 			gl.bindVertexArray(vao);
 
 			shaderInstance.setVec2(
-				vec2.fromValues(
-					gl.canvas.width,
-					gl.canvas.height,
-				),
+				vec2.fromValues(gl.canvas.width, gl.canvas.height),
 				"resolution",
 			);
 			shaderInstance.setFloat(mixFactor, "mixFactor");
@@ -247,14 +156,10 @@ export default function CubeSceneReact() {
 			const vertexCount = mesh.vertexes.length / 5;
 			for (let i = 0; i < positions.length; i++) {
 				const p = positions[i];
-				const { model, view, projection } =
-					inputInstance.render(gl, p, deltaTime);
+				const { model, view, projection } = inputInstance.render(gl, p, deltaTime);
 				shaderInstance.setMatrix4(model, "model");
 				shaderInstance.setMatrix4(view, "view");
-				shaderInstance.setMatrix4(
-					projection,
-					"projection",
-				);
+				shaderInstance.setMatrix4(projection, "projection");
 				gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
 			}
 
@@ -265,8 +170,7 @@ export default function CubeSceneReact() {
 
 		// cleanup
 		return () => {
-			if (rafRef.current != null)
-				cancelAnimationFrame(rafRef.current);
+			if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
 			// remove image listeners & clear src to help GC
 			imagesRef.current.forEach((img) => {
 				try {

@@ -27,41 +27,25 @@ function useSceneHook(): ReturnType {
 	}
 
 	function setCameraProperty() {
-		sceneManagerRef.current?.camera?.position.set(
-			-1.96397,
-			-7.77895,
-			6.89202,
-		);
+		sceneManagerRef.current?.camera?.position.set(-1.96397, -7.77895, 6.89202);
 		sceneManagerRef.current?.camera?.up.set(0, 0, 1);
-		sceneManagerRef.current?.camera?.lookAt(
-			-1.38789,
-			-14.37853,
-			6.65558,
-		);
+		sceneManagerRef.current?.camera?.lookAt(-1.38789, -14.37853, 6.65558);
 	}
 	useHover(containerRef, {
 		onChange: (isFocusWithin: boolean) => {
-			SceneManager.getInstance().setNeedRender(
-				isFocusWithin,
-			);
+			SceneManager.getInstance().setNeedRender(isFocusWithin);
 		},
 	});
 	useEffect(() => {
 		if (!containerRef.current) return;
 		sceneManagerRef.current = new SceneManager();
-		splatRef.current = new Splat(
-			sceneManagerRef.current,
-		);
+		splatRef.current = new Splat(sceneManagerRef.current);
 		sceneManagerRef.current?.init(containerRef.current);
-		sceneManagerRef.current?.addGraphic(
-			splatRef.current,
-		);
+		sceneManagerRef.current?.addGraphic(splatRef.current);
 		setCameraProperty();
 		(async function () {
 			try {
-				const data = await load(
-					"/assets/model/converted_file.ksplat",
-				);
+				const data = await load("/assets/model/converted_file.ksplat");
 				if (!data) return;
 				splatRef.current?.add(data);
 			} catch (e) {

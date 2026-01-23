@@ -12,9 +12,7 @@ interface GlobalContextType {
 /**
  * 全局上下文
  */
-const GlobalContext = createContext<GlobalContextType>(
-	{} as GlobalContextType,
-);
+const GlobalContext = createContext<GlobalContextType>({} as GlobalContextType);
 
 export { GlobalContext };
 export type { GlobalContextType };

@@ -17,16 +17,12 @@ import {
 } from "three-mesh-bvh";
 
 Mesh.prototype.raycast = acceleratedRaycast;
-BufferGeometry.prototype.computeBoundsTree =
-	computeBoundsTree;
-BufferGeometry.prototype.disposeBoundsTree =
-	disposeBoundsTree;
+BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 
 class Splat {
 	constructor(sceneManager: SceneManager) {
-		this.sceneManager = new WeakRef<SceneManager>(
-			sceneManager,
-		);
+		this.sceneManager = new WeakRef<SceneManager>(sceneManager);
 	}
 	private sceneManager: WeakRef<SceneManager>;
 	private points?: Points = new Points();
@@ -50,14 +46,8 @@ class Splat {
 			alpha = alphaFromColor(color);
 			colors.push(color.r, color.g, color.b, alpha);
 		});
-		geometry.setAttribute(
-			"position",
-			new Float32BufferAttribute(positions, 3),
-		);
-		geometry.setAttribute(
-			"color",
-			new Float32BufferAttribute(colors, 4),
-		);
+		geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
+		geometry.setAttribute("color", new Float32BufferAttribute(colors, 4));
 		this.points.geometry = geometry;
 		this.sceneManager.deref()?.scene?.add(this.points);
 		this.addBVH(geometry);
@@ -66,15 +56,12 @@ class Splat {
 		if (!this.splatMesh) return;
 		this.splatMesh.visible = false;
 		this.splatMesh.packedSplats = data;
-		this.sceneManager
-			.deref()
-			?.scene?.add(this.splatMesh);
+		this.sceneManager.deref()?.scene?.add(this.splatMesh);
 	}
 	private addBVH(geometry: BufferGeometry) {
 		const indices = [];
 		const bvhGeometry = geometry.clone();
-		const verticesLength =
-			bvhGeometry.attributes.position.count;
+		const verticesLength = bvhGeometry.attributes.position.count;
 		for (let i = 0, l = verticesLength; i < l; i++) {
 			indices.push(i, i, i);
 		}
@@ -87,9 +74,7 @@ class Splat {
 		this.BVHHelper = new MeshBVHHelper(bvhMesh, 15);
 		this.BVHHelper.visible = true;
 		// this.BVHHelper.displayParents = true;
-		this.sceneManager
-			.deref()
-			?.scene?.add(bvhMesh, this.BVHHelper);
+		this.sceneManager.deref()?.scene?.add(bvhMesh, this.BVHHelper);
 		// console.time("computeBoundsTree");
 		// bvhMesh.geometry.computeBoundsTree();
 		// console.timeEnd("computeBoundsTree");

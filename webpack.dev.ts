@@ -33,10 +33,7 @@ export default merge<Config>(common, {
 						也就是require("这里的路径是一个变量")，导致了这个警告，但实际上代码可以正常运行，所以通过这个方式过滤掉
 					*/
 					const EXP = /typescript/;
-					return !(
-						warn.moduleName &&
-						EXP.test(warn.moduleName)
-					);
+					return !(warn.moduleName && EXP.test(warn.moduleName));
 				},
 			},
 		},
@@ -56,8 +53,7 @@ export default merge<Config>(common, {
 							importLoaders: 1,
 							modules: {
 								auto: true,
-								localIdentName:
-									"[local]_[hash:base64:8]",
+								localIdentName: "[local]_[hash:base64:8]",
 								exportGlobals: true,
 								namedExport: true,
 							},
@@ -80,8 +76,7 @@ export default merge<Config>(common, {
 							importLoaders: 2,
 							modules: {
 								auto: true,
-								localIdentName:
-									"[local]_[hash:base64:8]",
+								localIdentName: "[local]_[hash:base64:8]",
 								exportGlobals: true,
 								namedExport: true,
 							},
@@ -102,8 +97,7 @@ export default merge<Config>(common, {
 	},
 	plugins: [
 		new DefinePlugin({
-			"process.env.NODE_ENV":
-				JSON.stringify("development"),
+			"process.env.NODE_ENV": JSON.stringify("development"),
 		}),
 	],
 });

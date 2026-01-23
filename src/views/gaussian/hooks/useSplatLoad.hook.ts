@@ -1,8 +1,5 @@
 import { useEffect, useRef } from "react";
-import {
-	PackedSplats,
-	SplatLoader,
-} from "@sparkjsdev/spark";
+import { PackedSplats, SplatLoader } from "@sparkjsdev/spark";
 import { LoadingManager } from "three";
 
 interface ReturnType {
@@ -15,13 +12,9 @@ function useSplatLoadHook(): ReturnType {
 		return splatLoaderRef.current?.loadAsync(url);
 	}
 	useEffect(() => {
-		splatLoaderRef.current = new SplatLoader(
-			new LoadingManager(),
-		);
+		splatLoaderRef.current = new SplatLoader(new LoadingManager());
 		return () => {
-			splatLoaderRef.current?.manager.abortController.abort(
-				"abort",
-			);
+			splatLoaderRef.current?.manager.abortController.abort("abort");
 			splatLoaderRef.current = null;
 		};
 	}, []);

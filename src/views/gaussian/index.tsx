@@ -1,11 +1,6 @@
 import { useMount, useUnmount } from "ahooks";
 import { useRef } from "react";
-import {
-	AxesHelper,
-	PerspectiveCamera,
-	Scene,
-	WebGLRenderer,
-} from "three";
+import { AxesHelper, PerspectiveCamera, Scene, WebGLRenderer } from "three";
 // @ts-expect-error test
 import { Viewer } from "@mkkellogg/gaussian-splats-3d";
 import { SparkControls } from "@sparkjsdev/spark";
@@ -19,8 +14,7 @@ function GaussianSplats3DDemo() {
 		sceneRef.current = new Scene();
 		const camera = new PerspectiveCamera(
 			75,
-			containerRef.current?.offsetWidth /
-				containerRef.current?.offsetHeight,
+			containerRef.current?.offsetWidth / containerRef.current?.offsetHeight,
 			0.1,
 			1000,
 		);
@@ -28,10 +22,7 @@ function GaussianSplats3DDemo() {
 		const controls = new SparkControls({
 			canvas: renderer.domElement,
 		});
-		renderer.setSize(
-			containerRef.current?.offsetWidth,
-			containerRef.current?.offsetHeight,
-		);
+		renderer.setSize(containerRef.current?.offsetWidth, containerRef.current?.offsetHeight);
 		camera.position.set(0, 0, 7);
 		camera.up.set(0, 1, 0);
 		camera.lookAt(-1, -5, 7);
@@ -51,36 +42,26 @@ function GaussianSplats3DDemo() {
 			controls.update(camera);
 		}
 		void animate;
-		containerRef.current?.appendChild(
-			renderer.domElement,
-		);
+		containerRef.current?.appendChild(renderer.domElement);
 		const viewer = new Viewer({
 			renderer,
 			camera,
 			threeScene: sceneRef.current,
 		});
 		viewer
-			.addSplatScene(
-				"/assets/model/converted_file.ksplat",
-				{
-					showLoadingUI: true,
-					useBuiltInControls: true,
-					selfDrivenMode: true,
-					ignoreDevicePixelRatio: 4,
-				},
-			)
+			.addSplatScene("/assets/model/converted_file.ksplat", {
+				showLoadingUI: true,
+				useBuiltInControls: true,
+				selfDrivenMode: true,
+				ignoreDevicePixelRatio: 4,
+			})
 			.then(() => {
 				viewer.start();
 				// renderer.setAnimationLoop(animate);
 			});
 	});
 	useUnmount(() => {});
-	return (
-		<div
-			className={"h-full w-full"}
-			ref={containerRef}
-			id={"container"}></div>
-	);
+	return <div className={"h-full w-full"} ref={containerRef} id={"container"}></div>;
 }
 
 export { GaussianSplats3DDemo };

@@ -9,10 +9,7 @@ class Scene {
 	constructor(canvas: HTMLCanvasElement) {
 		this.canvas = new WeakRef(canvas);
 		const gl = canvas.getContext("webgl2");
-		if (!gl)
-			throw new Error(
-				"fail to create webgl2 context",
-			);
+		if (!gl) throw new Error("fail to create webgl2 context");
 		this.gl = new WeakRef(gl);
 		this.camera = new Camera();
 		this.control = new FPSControl({
@@ -27,10 +24,7 @@ class Scene {
 	/**
 	 * 几何体实例
 	 */
-	public geometryMap: Map<
-		GeometryInstance,
-		GeometryInstance
-	> = new Map();
+	public geometryMap: Map<GeometryInstance, GeometryInstance> = new Map();
 	/**
 	 * 相机
 	 */
@@ -48,18 +42,9 @@ class Scene {
 	public resize() {
 		const gl = this.gl.deref();
 		if (!gl) throw new Error("gl is undefined");
-		gl.canvas.width = (
-			gl.canvas as HTMLCanvasElement
-		).offsetWidth;
-		gl.canvas.height = (
-			gl.canvas as HTMLCanvasElement
-		).offsetHeight;
-		gl.viewport(
-			0,
-			0,
-			gl.canvas.width,
-			gl.canvas.height,
-		);
+		gl.canvas.width = (gl.canvas as HTMLCanvasElement).offsetWidth;
+		gl.canvas.height = (gl.canvas as HTMLCanvasElement).offsetHeight;
+		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 	}
 	/**
 	 * 当前时间

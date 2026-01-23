@@ -10,9 +10,7 @@ interface GeometryInstanceConstructorOptions {
  * 几何体实例类
  */
 class GeometryInstance {
-	constructor(
-		options: GeometryInstanceConstructorOptions,
-	) {
+	constructor(options: GeometryInstanceConstructorOptions) {
 		this.geometry = options.geometry;
 		this.matrix = options.matrix;
 	}

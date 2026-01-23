@@ -1,12 +1,5 @@
-import {
-	PerspectiveCamera,
-	Scene,
-	WebGLRenderer,
-} from "three";
-import {
-	SparkControls,
-	SparkRenderer,
-} from "@sparkjsdev/spark";
+import { PerspectiveCamera, Scene, WebGLRenderer } from "three";
+import { SparkControls, SparkRenderer } from "@sparkjsdev/spark";
 import { Splat } from "@/views/gaussian/helper/splat.ts";
 
 class SceneManager {
@@ -33,21 +26,14 @@ class SceneManager {
 		if (!this.canvas) return;
 		this.controls?.update(this.camera);
 		this.renderer.renderer.setSize(
-			(this.canvas?.parentElement ?? this.canvas)
-				.offsetWidth,
-			(this.canvas?.parentElement ?? this.canvas)
-				.offsetHeight,
+			(this.canvas?.parentElement ?? this.canvas).offsetWidth,
+			(this.canvas?.parentElement ?? this.canvas).offsetHeight,
 		);
 		this.camera.aspect =
-			(this.canvas?.parentElement ?? this.canvas)
-				.offsetWidth /
-			(this.canvas?.parentElement ?? this.canvas)
-				.offsetHeight;
+			(this.canvas?.parentElement ?? this.canvas).offsetWidth /
+			(this.canvas?.parentElement ?? this.canvas).offsetHeight;
 		this.graphics?.forEach((item) => item.render());
-		this.renderer.renderer.render(
-			this.scene as Scene,
-			this.camera,
-		);
+		this.renderer.renderer.render(this.scene as Scene, this.camera);
 	};
 	private canvas?: HTMLCanvasElement;
 	public scene?: Scene;
@@ -67,25 +53,20 @@ class SceneManager {
 		this.camera = new PerspectiveCamera(
 			45,
 			(canvas.parentElement || canvas).offsetWidth /
-				(canvas?.parentElement || canvas)
-					.offsetHeight,
+				(canvas?.parentElement || canvas).offsetHeight,
 			0.5,
 			200,
 		);
 		this.controls = new SparkControls({
 			canvas,
 		});
-		this.renderer.renderer.setAnimationLoop(
-			this.render,
-		);
+		this.renderer.renderer.setAnimationLoop(this.render);
 	}
 	public setNeedRender(status: boolean) {
 		this.needRender = status;
 	}
 	public addGraphic(...graphics: Array<Splat>) {
-		graphics.forEach((item) =>
-			this.graphics?.set(item, item),
-		);
+		graphics.forEach((item) => this.graphics?.set(item, item));
 	}
 	public dispose(): void {
 		this.graphics?.forEach((item) => item.dispose());

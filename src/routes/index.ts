@@ -1,8 +1,5 @@
 import type { RouteObject } from "react-router";
-import {
-	createBrowserRouter,
-	redirect,
-} from "react-router";
+import { createBrowserRouter, redirect } from "react-router";
 import HydrateFallback from "@/views/hydrateFallback.tsx";
 import Root from "@/views/Root";
 
@@ -169,8 +166,7 @@ const lights: RouteObject[] = [
 					{
 						path: "parallelLight",
 						id: "parallelLight",
-						hydrateFallbackElement:
-							HydrateFallback,
+						hydrateFallbackElement: HydrateFallback,
 						lazy: async () => {
 							return {
 								Component: (
@@ -186,8 +182,7 @@ const lights: RouteObject[] = [
 					{
 						path: "pointLight",
 						id: "pointLight",
-						hydrateFallbackElement:
-							HydrateFallback,
+						hydrateFallbackElement: HydrateFallback,
 						lazy: async () => {
 							return {
 								Component: (
@@ -203,8 +198,7 @@ const lights: RouteObject[] = [
 					{
 						path: "spotLight",
 						id: "spotLight",
-						hydrateFallbackElement:
-							HydrateFallback,
+						hydrateFallbackElement: HydrateFallback,
 						lazy: async () => {
 							return {
 								Component: (
@@ -220,8 +214,7 @@ const lights: RouteObject[] = [
 					{
 						path: "multipleLight",
 						id: "multipleLight",
-						hydrateFallbackElement:
-							HydrateFallback,
+						hydrateFallbackElement: HydrateFallback,
 						lazy: async () => {
 							return {
 								Component: (

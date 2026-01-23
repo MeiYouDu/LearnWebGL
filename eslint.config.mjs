@@ -72,8 +72,7 @@ export default ts.config(
 		files: ["**/*.{jsx,tsx}"],
 		...react.configs["recommended-typescript"],
 		rules: {
-			"@eslint-react/dom/no-missing-iframe-sandbox":
-				"off",
+			"@eslint-react/dom/no-missing-iframe-sandbox": "off",
 		},
 		languageOptions: {
 			parser: ts.parser,

@@ -16,43 +16,23 @@ interface Mesh {
 function getMesh(): Mesh {
 	// 与你原来一致：每顶点 8 个 float: x,y,z, r,g,b, s,t
 	const vertexes = new Float32Array([
-		-0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -0.5, 0.5,
-		0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.5, 0.5, 0.0, 0.0,
-		0.0, 1.0, 1.0, 1.0, -0.5, -0.5, 0.0, 1.0, 0.0, 0.0,
-		0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0,
-		0.5, -0.5, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0,
+		-0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -0.5, 0.5, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.5, 0.5,
+		0.0, 0.0, 0.0, 1.0, 1.0, 1.0, -0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0,
+		0.0, 1.0, 1.0, 1.0, 0.5, -0.5, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0,
 	]);
 	const indices = new Uint32Array([]); // 这里用 drawArrays，所以 indices 为空
 	return { vertexes, indices };
 }
 
 function setTextureParams(gl: WebGL2RenderingContext) {
-	gl.texParameteri(
-		gl.TEXTURE_2D,
-		gl.TEXTURE_WRAP_S,
-		gl.REPEAT,
-	);
-	gl.texParameteri(
-		gl.TEXTURE_2D,
-		gl.TEXTURE_WRAP_T,
-		gl.REPEAT,
-	);
-	gl.texParameteri(
-		gl.TEXTURE_2D,
-		gl.TEXTURE_MIN_FILTER,
-		gl.LINEAR_MIPMAP_LINEAR,
-	);
-	gl.texParameteri(
-		gl.TEXTURE_2D,
-		gl.TEXTURE_MAG_FILTER,
-		gl.LINEAR,
-	);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 }
 
 export default function TextureDemo() {
-	const canvasRef = useRef<HTMLCanvasElement | null>(
-		null,
-	);
+	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const rafRef = useRef<number | null>(null);
 	const mixFactorRef = useRef<number>(0.5);
 
@@ -71,11 +51,7 @@ export default function TextureDemo() {
 		}
 
 		// Shader
-		const shaderInstance = new Shader(
-			gl,
-			vertexShaderSource,
-			fragmentShaderSource,
-		);
+		const shaderInstance = new Shader(gl, vertexShaderSource, fragmentShaderSource);
 		shaderInstance.use();
 
 		// Mesh & buffers
@@ -83,70 +59,27 @@ export default function TextureDemo() {
 		const vbo = gl.createBuffer();
 		const vao = gl.createVertexArray();
 
-		const positionAttributeLocation =
-			shaderInstance.getAttribLocation("position");
-		const colorAttributeLocation =
-			shaderInstance.getAttribLocation("color");
-		const texCoordAttributeLocation =
-			shaderInstance.getAttribLocation("texCoord");
+		const positionAttributeLocation = shaderInstance.getAttribLocation("position");
+		const colorAttributeLocation = shaderInstance.getAttribLocation("color");
+		const texCoordAttributeLocation = shaderInstance.getAttribLocation("texCoord");
 
 		gl.bindVertexArray(vao);
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-		gl.bufferData(
-			gl.ARRAY_BUFFER,
-			mesh.vertexes,
-			gl.STATIC_DRAW,
-		);
+		gl.bufferData(gl.ARRAY_BUFFER, mesh.vertexes, gl.STATIC_DRAW);
 
 		const STRIDE = 8 * 4; // 8 floats * 4 bytes
 
-		if (
-			typeof positionAttributeLocation === "number" &&
-			positionAttributeLocation >= 0
-		) {
-			gl.vertexAttribPointer(
-				positionAttributeLocation,
-				3,
-				gl.FLOAT,
-				false,
-				STRIDE,
-				0,
-			);
-			gl.enableVertexAttribArray(
-				positionAttributeLocation,
-			);
+		if (typeof positionAttributeLocation === "number" && positionAttributeLocation >= 0) {
+			gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, STRIDE, 0);
+			gl.enableVertexAttribArray(positionAttributeLocation);
 		}
-		if (
-			typeof colorAttributeLocation === "number" &&
-			colorAttributeLocation >= 0
-		) {
-			gl.vertexAttribPointer(
-				colorAttributeLocation,
-				3,
-				gl.FLOAT,
-				false,
-				STRIDE,
-				12,
-			);
-			gl.enableVertexAttribArray(
-				colorAttributeLocation,
-			);
+		if (typeof colorAttributeLocation === "number" && colorAttributeLocation >= 0) {
+			gl.vertexAttribPointer(colorAttributeLocation, 3, gl.FLOAT, false, STRIDE, 12);
+			gl.enableVertexAttribArray(colorAttributeLocation);
 		}
-		if (
-			typeof texCoordAttributeLocation === "number" &&
-			texCoordAttributeLocation >= 0
-		) {
-			gl.vertexAttribPointer(
-				texCoordAttributeLocation,
-				2,
-				gl.FLOAT,
-				false,
-				STRIDE,
-				24,
-			);
-			gl.enableVertexAttribArray(
-				texCoordAttributeLocation,
-			);
+		if (typeof texCoordAttributeLocation === "number" && texCoordAttributeLocation >= 0) {
+			gl.vertexAttribPointer(texCoordAttributeLocation, 2, gl.FLOAT, false, STRIDE, 24);
+			gl.enableVertexAttribArray(texCoordAttributeLocation);
 		}
 
 		// Textures
@@ -165,22 +98,12 @@ export default function TextureDemo() {
 			gl.bindTexture(gl.TEXTURE_2D, texture0);
 			setTextureParams(gl);
 			// use HTMLImageElement overload
-			gl.texImage2D(
-				gl.TEXTURE_2D,
-				0,
-				gl.RGB,
-				gl.RGB,
-				gl.UNSIGNED_BYTE,
-				image0,
-			);
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image0);
 			gl.generateMipmap(gl.TEXTURE_2D);
 			shaderInstance.use();
 			shaderInstance.setInt(0, "texture0");
 			// tidy
-			image0.removeEventListener(
-				"load",
-				onImage0Load,
-			);
+			image0.removeEventListener("load", onImage0Load);
 		};
 
 		const onImage1Load = () => {
@@ -188,21 +111,11 @@ export default function TextureDemo() {
 			gl.activeTexture(gl.TEXTURE1);
 			gl.bindTexture(gl.TEXTURE_2D, texture1);
 			setTextureParams(gl);
-			gl.texImage2D(
-				gl.TEXTURE_2D,
-				0,
-				gl.RGBA,
-				gl.RGBA,
-				gl.UNSIGNED_BYTE,
-				image1,
-			);
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image1);
 			gl.generateMipmap(gl.TEXTURE_2D);
 			shaderInstance.use();
 			shaderInstance.setInt(1, "texture1");
-			image1.removeEventListener(
-				"load",
-				onImage1Load,
-			);
+			image1.removeEventListener("load", onImage1Load);
 		};
 
 		image0.addEventListener("load", onImage0Load);
@@ -213,15 +126,9 @@ export default function TextureDemo() {
 		// keyboard control
 		const onKeydown = (ev: KeyboardEvent) => {
 			if (ev.key === "ArrowUp") {
-				mixFactorRef.current = Math.min(
-					1.0,
-					mixFactorRef.current + 0.05,
-				);
+				mixFactorRef.current = Math.min(1.0, mixFactorRef.current + 0.05);
 			} else if (ev.key === "ArrowDown") {
-				mixFactorRef.current = Math.max(
-					0.0,
-					mixFactorRef.current - 0.05,
-				);
+				mixFactorRef.current = Math.max(0.0, mixFactorRef.current - 0.05);
 			}
 		};
 		document.addEventListener("keydown", onKeydown);
@@ -239,16 +146,10 @@ export default function TextureDemo() {
 
 			// set resolution (pixel dims)
 			shaderInstance.setVec2(
-				vec2.fromValues(
-					gl.canvas.width,
-					gl.canvas.height,
-				),
+				vec2.fromValues(gl.canvas.width, gl.canvas.height),
 				"resolution",
 			);
-			shaderInstance.setFloat(
-				mixFactorRef.current,
-				"mixFactor",
-			);
+			shaderInstance.setFloat(mixFactorRef.current, "mixFactor");
 
 			// draw 6 vertices as triangles
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -266,19 +167,10 @@ export default function TextureDemo() {
 				rafRef.current = null;
 			}
 			// remove keyboard listener
-			document.removeEventListener(
-				"keydown",
-				onKeydown,
-			);
+			document.removeEventListener("keydown", onKeydown);
 			// remove image listeners
-			image0.removeEventListener(
-				"load",
-				onImage0Load,
-			);
-			image1.removeEventListener(
-				"load",
-				onImage1Load,
-			);
+			image0.removeEventListener("load", onImage0Load);
+			image1.removeEventListener("load", onImage1Load);
 			// try to delete GL resources
 			try {
 				gl.bindVertexArray(null);

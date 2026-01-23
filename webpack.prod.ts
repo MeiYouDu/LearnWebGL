@@ -13,12 +13,10 @@ export default merge<Configuration>(common, {
 	plugins: [
 		new CompressionPlugin(),
 		new MiniCssExtractPlugin({
-			filename:
-				"assets/css/[name].[contenthash:8].css",
+			filename: "assets/css/[name].[contenthash:8].css",
 		}),
 		new DefinePlugin({
-			"process.env.NODE_ENV":
-				JSON.stringify("production"),
+			"process.env.NODE_ENV": JSON.stringify("production"),
 		}),
 	],
 	module: {
@@ -35,8 +33,7 @@ export default merge<Configuration>(common, {
 							importLoaders: 2,
 							modules: {
 								auto: true,
-								localIdentName:
-									"[local]_[hash:base64:8]",
+								localIdentName: "[local]_[hash:base64:8]",
 								exportGlobals: true,
 							},
 						},
@@ -55,8 +52,7 @@ export default merge<Configuration>(common, {
 							importLoaders: 2,
 							modules: {
 								auto: true,
-								localIdentName:
-									"[local]_[hash:base64:8]",
+								localIdentName: "[local]_[hash:base64:8]",
 								exportGlobals: true,
 							},
 						},

@@ -16,14 +16,8 @@ class FPSControl {
 		this.camera = new WeakRef(options.camera);
 		this._speed = options.speed || 0.05;
 		this.sensitivity = options.sensitivity || 0.005;
-		this.initFront = vec3.copy(
-			vec3.create(),
-			options.camera.front,
-		);
-		this.upOrigin = vec3.copy(
-			vec3.create(),
-			options.camera.up,
-		);
+		this.initFront = vec3.copy(vec3.create(), options.camera.front);
+		this.upOrigin = vec3.copy(vec3.create(), options.camera.up);
 		this.scene = new WeakRef(options.scene);
 		const canvas = options.scene.canvas.deref();
 		if (canvas) this.addListener(canvas);
@@ -44,11 +38,7 @@ class FPSControl {
 	public getRight(): vec3 | undefined {
 		const camera = this.camera?.deref();
 		if (!camera) return;
-		const right = vec3.cross(
-			vec3.create(),
-			camera.front,
-			camera.up,
-		);
+		const right = vec3.cross(vec3.create(), camera.front, camera.up);
 		return vec3.normalize(right, right);
 	}
 	/**
@@ -83,124 +73,63 @@ class FPSControl {
 	private addListener(canvas: HTMLCanvasElement) {
 		this.keydownHandle = this.keydownHandle.bind(this);
 
-		this.mouseMoveHandle =
-			this.mouseMoveHandle.bind(this);
+		this.mouseMoveHandle = this.mouseMoveHandle.bind(this);
 
 		this.keyupHandle = this.keyupHandle.bind(this);
 
 		this.wheelHandle = this.wheelHandle.bind(this);
 
-		this.mouseDownHandle =
-			this.mouseDownHandle.bind(this);
+		this.mouseDownHandle = this.mouseDownHandle.bind(this);
 
 		this.mouseUpHandle = this.mouseUpHandle.bind(this);
-		document.addEventListener(
-			"keydown",
-			this.keydownHandle,
-		);
-		document.addEventListener(
-			"keyup",
-			this.keyupHandle,
-		);
+		document.addEventListener("keydown", this.keydownHandle);
+		document.addEventListener("keyup", this.keyupHandle);
 		canvas.addEventListener("wheel", this.wheelHandle, {
 			passive: false,
 		});
-		canvas.addEventListener(
-			"mousedown",
-			this.mouseDownHandle,
-		);
-		canvas.addEventListener(
-			"mouseup",
-			this.mouseUpHandle,
-		);
-		canvas.addEventListener(
-			"mousemove",
-			this.mouseMoveHandle,
-		);
+		canvas.addEventListener("mousedown", this.mouseDownHandle);
+		canvas.addEventListener("mouseup", this.mouseUpHandle);
+		canvas.addEventListener("mousemove", this.mouseMoveHandle);
 	}
 	private removeListener(canvas: HTMLCanvasElement) {
-		document.removeEventListener(
-			"keydown",
-			this.keydownHandle,
-		);
-		document.removeEventListener(
-			"keyup",
-			this.keyupHandle,
-		);
-		canvas.removeEventListener(
-			"wheel",
-			this.wheelHandle,
-		);
-		canvas.removeEventListener(
-			"mousedown",
-			this.mouseDownHandle,
-		);
-		canvas.removeEventListener(
-			"mouseup",
-			this.mouseUpHandle,
-		);
-		canvas.removeEventListener(
-			"mousemove",
-			this.mouseMoveHandle,
-		);
+		document.removeEventListener("keydown", this.keydownHandle);
+		document.removeEventListener("keyup", this.keyupHandle);
+		canvas.removeEventListener("wheel", this.wheelHandle);
+		canvas.removeEventListener("mousedown", this.mouseDownHandle);
+		canvas.removeEventListener("mouseup", this.mouseUpHandle);
+		canvas.removeEventListener("mousemove", this.mouseMoveHandle);
 	}
 	private keydownHandle(ev: KeyboardEvent) {
 		const scene = this.scene.deref();
 		const camera = this.camera?.deref();
 		if (!camera) return;
 		if (!scene) return;
-		const left = vec3.cross(
-			vec3.create(),
-			camera.front,
-			camera.up,
-		);
+		const left = vec3.cross(vec3.create(), camera.front, camera.up);
 		if (ev.code === "KeyW")
 			this.dPosition = vec3.scale(
 				this.dPosition,
 				camera.front,
-				this.getSpeed(ev.shiftKey) *
-					scene.deltaTime *
-					0.1,
+				this.getSpeed(ev.shiftKey) * scene.deltaTime * 0.1,
 			);
 		if (ev.code === "KeyS")
 			this.dPosition = vec3.scale(
 				this.dPosition,
 				camera.front,
-				-this.getSpeed(ev.shiftKey) *
-					scene.deltaTime *
-					0.1,
+				-this.getSpeed(ev.shiftKey) * scene.deltaTime * 0.1,
 			);
 		if (ev.code === "KeyA")
-			vec3.scale(
-				this.dPosition,
-				left,
-				-this.getSpeed(ev.shiftKey) *
-					scene.deltaTime *
-					0.1,
-			);
+			vec3.scale(this.dPosition, left, -this.getSpeed(ev.shiftKey) * scene.deltaTime * 0.1);
 
 		if (ev.code === "KeyD")
-			vec3.scale(
-				this.dPosition,
-				left,
-				this.getSpeed(ev.shiftKey) *
-					scene.deltaTime *
-					0.1,
-			);
+			vec3.scale(this.dPosition, left, this.getSpeed(ev.shiftKey) * scene.deltaTime * 0.1);
 	}
 	private keyupHandle(ev: KeyboardEvent) {
-		if (ev.code === "KeyW")
-			this.dPosition = vec3.fromValues(0, 0, 0);
-		if (ev.code === "KeyS")
-			this.dPosition = vec3.fromValues(0, 0, 0);
-		if (ev.code === "KeyA")
-			this.dPosition = vec3.fromValues(0, 0, 0);
-		if (ev.code === "KeyD")
-			this.dPosition = vec3.fromValues(0, 0, 0);
+		if (ev.code === "KeyW") this.dPosition = vec3.fromValues(0, 0, 0);
+		if (ev.code === "KeyS") this.dPosition = vec3.fromValues(0, 0, 0);
+		if (ev.code === "KeyA") this.dPosition = vec3.fromValues(0, 0, 0);
+		if (ev.code === "KeyD") this.dPosition = vec3.fromValues(0, 0, 0);
 	}
-	private setDzZero = debounce(function (
-		this: FPSControl,
-	) {
+	private setDzZero = debounce(function (this: FPSControl) {
 		this.dPosition = vec3.fromValues(0, 0, 0);
 	}, 100);
 	private wheelHandle(ev: WheelEvent) {
@@ -211,10 +140,7 @@ class FPSControl {
 		this.dPosition = vec3.scale(
 			this.dPosition,
 			camera.front,
-			-ev.deltaY *
-				this.sensitivity *
-				scene.deltaTime *
-				0.05,
+			-ev.deltaY * this.sensitivity * scene.deltaTime * 0.05,
 		);
 		this.setDzZero();
 		ev.stopPropagation();
@@ -234,28 +160,16 @@ class FPSControl {
 		if (this.mouseMoveEvent) {
 			const scene = this.scene.deref();
 			if (!scene) return;
-			const diffX =
-				ev.offsetX - this.mouseMoveEvent.offsetX;
-			const diffY =
-				ev.offsetY - this.mouseMoveEvent.offsetY;
-			this.PYR[0] +=
-				(-diffY *
-					this.sensitivity *
-					scene.deltaTime *
-					pi) /
-				180;
+			const diffX = ev.offsetX - this.mouseMoveEvent.offsetX;
+			const diffY = ev.offsetY - this.mouseMoveEvent.offsetY;
+			this.PYR[0] += (-diffY * this.sensitivity * scene.deltaTime * pi) / 180;
 			if (this.PYR[0] >= this.maxPitch) {
 				this.PYR[0] = this.maxPitch;
 			}
 			if (this.PYR[0] <= this.minPitch) {
 				this.PYR[0] = this.minPitch;
 			}
-			this.PYR[1] +=
-				(-diffX *
-					this.sensitivity *
-					scene.deltaTime *
-					pi) /
-				180;
+			this.PYR[1] += (-diffX * this.sensitivity * scene.deltaTime * pi) / 180;
 		}
 		this.mouseMoveEvent = ev;
 	}
@@ -263,11 +177,7 @@ class FPSControl {
 	private updatePosition() {
 		const camera = this.camera?.deref();
 		if (!camera) return;
-		vec3.add(
-			camera.position,
-			camera.position,
-			this.dPosition,
-		);
+		vec3.add(camera.position, camera.position, this.dPosition);
 	}
 	private updateDirection() {
 		const camera = this.camera?.deref();
@@ -277,10 +187,7 @@ class FPSControl {
 			vec3.transformMat4(
 				camera.front,
 				this.initFront,
-				mat4.fromQuat(
-					mat4.create(),
-					camera.quaternion,
-				),
+				mat4.fromQuat(mat4.create(), camera.quaternion),
 			),
 		);
 		// vec3.normalize(
@@ -300,51 +207,25 @@ class FPSControl {
 		if (!camera) return;
 
 		const quatYaw = quat.create();
-		quat.setAxisAngle(
-			quatYaw,
-			this.upOrigin,
-			this.PYR[1],
-		);
+		quat.setAxisAngle(quatYaw, this.upOrigin, this.PYR[1]);
 		quat.normalize(quatYaw, quatYaw);
 
 		const initialRight = vec3.create();
-		vec3.cross(
-			initialRight,
-			this.initFront,
-			this.upOrigin,
-		);
+		vec3.cross(initialRight, this.initFront, this.upOrigin);
 		vec3.normalize(initialRight, initialRight);
 
 		// rotate the initial right by the yaw so pitch axis is the right axis after yaw
-		const tmpMat = mat4.fromQuat(
-			mat4.create(),
-			quatYaw,
-		);
+		const tmpMat = mat4.fromQuat(mat4.create(), quatYaw);
 		const rotatedRight = vec3.create();
-		vec3.transformMat4(
-			rotatedRight,
-			initialRight,
-			tmpMat,
-		);
+		vec3.transformMat4(rotatedRight, initialRight, tmpMat);
 		vec3.normalize(rotatedRight, rotatedRight);
 
 		const quatPitch = quat.create();
-		quat.setAxisAngle(
-			quatPitch,
-			rotatedRight,
-			this.PYR[0],
-		);
+		quat.setAxisAngle(quatPitch, rotatedRight, this.PYR[0]);
 		quat.normalize(quatPitch, quatPitch);
 
-		quat.multiply(
-			camera.quaternion,
-			quatPitch,
-			quatYaw,
-		);
-		quat.normalize(
-			camera.quaternion,
-			camera.quaternion,
-		);
+		quat.multiply(camera.quaternion, quatPitch, quatYaw);
+		quat.normalize(camera.quaternion, camera.quaternion);
 	}
 }
 

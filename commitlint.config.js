@@ -1,6 +1,3 @@
 module.exports = {
-	extends: [
-		"@commitlint/config-conventional",
-		"@commitlint/config-pnpm-scopes",
-	],
+	extends: ["@commitlint/config-conventional", "@commitlint/config-pnpm-scopes"],
 };

@@ -32,9 +32,7 @@ function getLineMesh(length: number): Mesh {
 }
 
 export default function LineSceneReact() {
-	const canvasRef = useRef<HTMLCanvasElement | null>(
-		null,
-	);
+	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -49,11 +47,7 @@ export default function LineSceneReact() {
 			return;
 		}
 
-		const shaderInstance = new Shader(
-			gl,
-			vertexShaderSource,
-			fragmentShaderSource,
-		);
+		const shaderInstance = new Shader(gl, vertexShaderSource, fragmentShaderSource);
 		shaderInstance.use();
 
 		const mesh = getLineMesh(256);
@@ -62,73 +56,34 @@ export default function LineSceneReact() {
 		const ebo = gl.createBuffer();
 		const vao = gl.createVertexArray();
 
-		const positionAttributeLocation =
-			shaderInstance.getAttribLocation("position");
-		const tAttributeLocation =
-			shaderInstance.getAttribLocation("t");
+		const positionAttributeLocation = shaderInstance.getAttribLocation("position");
+		const tAttributeLocation = shaderInstance.getAttribLocation("t");
 
 		gl.bindVertexArray(vao);
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-		gl.bufferData(
-			gl.ARRAY_BUFFER,
-			mesh.vertexes,
-			gl.STATIC_DRAW,
-		);
+		gl.bufferData(gl.ARRAY_BUFFER, mesh.vertexes, gl.STATIC_DRAW);
 
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
-		gl.bufferData(
-			gl.ELEMENT_ARRAY_BUFFER,
-			mesh.indices,
-			gl.STATIC_DRAW,
-		);
+		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, mesh.indices, gl.STATIC_DRAW);
 
 		// stride = 4 floats * 4 bytes = 16
 		const stride = 16;
 
-		if (
-			typeof positionAttributeLocation === "number" &&
-			positionAttributeLocation >= 0
-		) {
+		if (typeof positionAttributeLocation === "number" && positionAttributeLocation >= 0) {
 			// position: vec3 at offset 0
-			gl.vertexAttribPointer(
-				positionAttributeLocation,
-				3,
-				gl.FLOAT,
-				false,
-				stride,
-				0,
-			);
-			gl.enableVertexAttribArray(
-				positionAttributeLocation,
-			);
+			gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, stride, 0);
+			gl.enableVertexAttribArray(positionAttributeLocation);
 		}
-		if (
-			typeof tAttributeLocation === "number" &&
-			tAttributeLocation >= 0
-		) {
+		if (typeof tAttributeLocation === "number" && tAttributeLocation >= 0) {
 			// t: float at offset 12
-			gl.vertexAttribPointer(
-				tAttributeLocation,
-				1,
-				gl.FLOAT,
-				false,
-				stride,
-				12,
-			);
+			gl.vertexAttribPointer(tAttributeLocation, 1, gl.FLOAT, false, stride, 12);
 			gl.enableVertexAttribArray(tAttributeLocation);
 		}
 
 		// set 4 random vec4 points into uniform array "points"
 		const points = new Array(4)
 			.fill(0)
-			.map(() =>
-				vec4.fromValues(
-					random(-1, 1, true),
-					random(-1, 1, true),
-					0,
-					1,
-				),
-			);
+			.map(() => vec4.fromValues(random(-1, 1, true), random(-1, 1, true), 0, 1));
 		shaderInstance.setVec4Array(points, "points");
 
 		// single render (matches your Vue code: no RAF loop)
@@ -141,10 +96,7 @@ export default function LineSceneReact() {
 			gl.bindVertexArray(vao);
 
 			shaderInstance.setVec2(
-				vec2.fromValues(
-					gl.canvas.width,
-					gl.canvas.height,
-				),
+				vec2.fromValues(gl.canvas.width, gl.canvas.height),
 				"resolution",
 			);
 

@@ -13,91 +13,44 @@ import box from "../../../assets/image/container.jpg"; // attribute 与 Vue 版�
 
 // attribute 与 Vue 版本保持一致
 const attribute = new Float32Array([
-	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, 0.5, -0.5, -0.5, 0, 0,
-	-1, 1, 0, 0.5, 0.5, -0.5, 0, 0, -1, 1, -1, 0.5, 0.5,
-	-0.5, 0, 0, -1, 1, -1, -0.5, 0.5, -0.5, 0, 0, -1, 0, -1,
-	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, -0.5, -0.5, 0.5, 0, 0,
-	1, 0, 0, 0.5, -0.5, 0.5, 0, 0, 1, 1, 0, 0.5, 0.5, 0.5,
-	0, 0, 1, 1, -1, 0.5, 0.5, 0.5, 0, 0, 1, 1, -1, -0.5,
-	0.5, 0.5, 0, 0, 1, 0, -1, -0.5, -0.5, 0.5, 0, 0, 1, 0,
-	0, -0.5, 0.5, 0.5, -1, 0, 0, 1, 0, -0.5, 0.5, -0.5, -1,
-	0, 0, 1, -1, -0.5, -0.5, -0.5, -1, 0, 0, 0, -1, -0.5,
-	-0.5, -0.5, -1, 0, 0, 0, -1, -0.5, -0.5, 0.5, -1, 0, 0,
-	0, 0, -0.5, 0.5, 0.5, -1, 0, 0, 1, 0, 0.5, 0.5, 0.5, 1,
-	0, 0, 1, 0, 0.5, 0.5, -0.5, 1, 0, 0, 1, -1, 0.5, -0.5,
-	-0.5, 1, 0, 0, 0, -1, 0.5, -0.5, -0.5, 1, 0, 0, 0, -1,
-	0.5, -0.5, 0.5, 1, 0, 0, 0, 0, 0.5, 0.5, 0.5, 1, 0, 0,
-	1, 0, -0.5, -0.5, -0.5, 0, -1, 0, 0, -1, 0.5, -0.5,
-	-0.5, 0, -1, 0, 1, -1, 0.5, -0.5, 0.5, 0, -1, 0, 1, 0,
-	0.5, -0.5, 0.5, 0, -1, 0, 1, 0, -0.5, -0.5, 0.5, 0, -1,
-	0, 0, 0, -0.5, -0.5, -0.5, 0, -1, 0, 0, -1, -0.5, 0.5,
-	-0.5, 0, 1, 0, 0, -1, 0.5, 0.5, -0.5, 0, 1, 0, 1, -1,
-	0.5, 0.5, 0.5, 0, 1, 0, 1, 0, 0.5, 0.5, 0.5, 0, 1, 0, 1,
-	0, -0.5, 0.5, 0.5, 0, 1, 0, 0, 0, -0.5, 0.5, -0.5, 0, 1,
-	0, 0, -1,
+	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, 0.5, -0.5, -0.5, 0, 0, -1, 1, 0, 0.5, 0.5, -0.5, 0, 0, -1, 1,
+	-1, 0.5, 0.5, -0.5, 0, 0, -1, 1, -1, -0.5, 0.5, -0.5, 0, 0, -1, 0, -1, -0.5, -0.5, -0.5, 0, 0,
+	-1, 0, 0, -0.5, -0.5, 0.5, 0, 0, 1, 0, 0, 0.5, -0.5, 0.5, 0, 0, 1, 1, 0, 0.5, 0.5, 0.5, 0, 0, 1,
+	1, -1, 0.5, 0.5, 0.5, 0, 0, 1, 1, -1, -0.5, 0.5, 0.5, 0, 0, 1, 0, -1, -0.5, -0.5, 0.5, 0, 0, 1,
+	0, 0, -0.5, 0.5, 0.5, -1, 0, 0, 1, 0, -0.5, 0.5, -0.5, -1, 0, 0, 1, -1, -0.5, -0.5, -0.5, -1, 0,
+	0, 0, -1, -0.5, -0.5, -0.5, -1, 0, 0, 0, -1, -0.5, -0.5, 0.5, -1, 0, 0, 0, 0, -0.5, 0.5, 0.5,
+	-1, 0, 0, 1, 0, 0.5, 0.5, 0.5, 1, 0, 0, 1, 0, 0.5, 0.5, -0.5, 1, 0, 0, 1, -1, 0.5, -0.5, -0.5,
+	1, 0, 0, 0, -1, 0.5, -0.5, -0.5, 1, 0, 0, 0, -1, 0.5, -0.5, 0.5, 1, 0, 0, 0, 0, 0.5, 0.5, 0.5,
+	1, 0, 0, 1, 0, -0.5, -0.5, -0.5, 0, -1, 0, 0, -1, 0.5, -0.5, -0.5, 0, -1, 0, 1, -1, 0.5, -0.5,
+	0.5, 0, -1, 0, 1, 0, 0.5, -0.5, 0.5, 0, -1, 0, 1, 0, -0.5, -0.5, 0.5, 0, -1, 0, 0, 0, -0.5,
+	-0.5, -0.5, 0, -1, 0, 0, -1, -0.5, 0.5, -0.5, 0, 1, 0, 0, -1, 0.5, 0.5, -0.5, 0, 1, 0, 1, -1,
+	0.5, 0.5, 0.5, 0, 1, 0, 1, 0, 0.5, 0.5, 0.5, 0, 1, 0, 1, 0, -0.5, 0.5, 0.5, 0, 1, 0, 0, 0, -0.5,
+	0.5, -0.5, 0, 1, 0, 0, -1,
 ]);
 
-function boxVertexAttribPointer(
-	gl: WebGL2RenderingContext,
-	shader: Shader,
-): number {
+function boxVertexAttribPointer(gl: WebGL2RenderingContext, shader: Shader): number {
 	const stride = 8;
-	const positionAttrLocation =
-		shader.getAttribLocation("position");
-	const normalAttrLocation =
-		shader.getAttribLocation("normal");
-	const texCoordAttrLocation =
-		shader.getAttribLocation("texCoord");
+	const positionAttrLocation = shader.getAttribLocation("position");
+	const normalAttrLocation = shader.getAttribLocation("normal");
+	const texCoordAttrLocation = shader.getAttribLocation("texCoord");
 
-	if (
-		typeof positionAttrLocation === "number" &&
-		positionAttrLocation >= 0
-	) {
-		gl.vertexAttribPointer(
-			positionAttrLocation,
-			3,
-			gl.FLOAT,
-			false,
-			stride * 4,
-			0,
-		);
+	if (typeof positionAttrLocation === "number" && positionAttrLocation >= 0) {
+		gl.vertexAttribPointer(positionAttrLocation, 3, gl.FLOAT, false, stride * 4, 0);
 		gl.enableVertexAttribArray(positionAttrLocation);
 	}
-	if (
-		typeof normalAttrLocation === "number" &&
-		normalAttrLocation >= 0
-	) {
-		gl.vertexAttribPointer(
-			normalAttrLocation,
-			3,
-			gl.FLOAT,
-			false,
-			stride * 4,
-			3 * 4,
-		);
+	if (typeof normalAttrLocation === "number" && normalAttrLocation >= 0) {
+		gl.vertexAttribPointer(normalAttrLocation, 3, gl.FLOAT, false, stride * 4, 3 * 4);
 		gl.enableVertexAttribArray(normalAttrLocation);
 	}
-	if (
-		typeof texCoordAttrLocation === "number" &&
-		texCoordAttrLocation >= 0
-	) {
-		gl.vertexAttribPointer(
-			texCoordAttrLocation,
-			2,
-			gl.FLOAT,
-			false,
-			stride * 4,
-			6 * 4,
-		);
+	if (typeof texCoordAttrLocation === "number" && texCoordAttrLocation >= 0) {
+		gl.vertexAttribPointer(texCoordAttrLocation, 2, gl.FLOAT, false, stride * 4, 6 * 4);
 		gl.enableVertexAttribArray(texCoordAttrLocation);
 	}
 	return stride;
 }
 
 export default function CanvasComponent() {
-	const canvasRef = useRef<HTMLCanvasElement | null>(
-		null,
-	);
+	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const sceneRef = useRef<Scene | null>(null);
 	const intervalRef = useRef<number | null>(null);
 
@@ -118,19 +71,11 @@ export default function CanvasComponent() {
 
 		// initial angle & light pos
 		let angle = Date.now() * 0.001;
-		const lightPos = vec3.fromValues(
-			Math.sin(angle) * 2,
-			Math.cos(angle) * 2,
-			-3,
-		);
+		const lightPos = vec3.fromValues(Math.sin(angle) * 2, Math.cos(angle) * 2, -3);
 
 		// shaders
 		const boxShader = new Shader(gl, boxVert, boxFrag);
-		const lightShader = new Shader(
-			gl,
-			boxVert,
-			lightFrag,
-		);
+		const lightShader = new Shader(gl, boxVert, lightFrag);
 
 		// geometry & instances
 		const boxGeometry = new Geometry({
@@ -151,46 +96,16 @@ export default function CanvasComponent() {
 					textureUnit: 1, // 注意：原 Vue 里第二个也写了 0，通常应为 1
 				},
 			],
-			uniformsSetter(
-				glInner: WebGL2RenderingContext,
-				shaderInner: Shader,
-			) {
-				shaderInner.setVec3(
-					scene.camera.position,
-					"cameraPos",
-				);
-				shaderInner.setVec3(
-					vec3.fromValues(0.2, 0.2, 0.2),
-					"light.ambient",
-				);
-				shaderInner.setVec3(
-					vec3.fromValues(0.9, 0.2, 0.9),
-					"light.diffuse",
-				);
-				shaderInner.setVec3(
-					vec3.fromValues(1, 1, 1),
-					"light.specular",
-				);
-				shaderInner.setVec3(
-					lightPos,
-					"light.position",
-				);
-				shaderInner.setVec3(
-					vec3.fromValues(1.0, 0.5, 0.31),
-					"material.ambient",
-				);
-				shaderInner.setVec3(
-					vec3.fromValues(1.0, 0.5, 0.31),
-					"material.diffuse",
-				);
-				shaderInner.setVec3(
-					vec3.fromValues(0.5, 0.5, 0.5),
-					"material.specular",
-				);
-				shaderInner.setFloat(
-					32.0,
-					"material.shininess",
-				);
+			uniformsSetter(glInner: WebGL2RenderingContext, shaderInner: Shader) {
+				shaderInner.setVec3(scene.camera.position, "cameraPos");
+				shaderInner.setVec3(vec3.fromValues(0.2, 0.2, 0.2), "light.ambient");
+				shaderInner.setVec3(vec3.fromValues(0.9, 0.2, 0.9), "light.diffuse");
+				shaderInner.setVec3(vec3.fromValues(1, 1, 1), "light.specular");
+				shaderInner.setVec3(lightPos, "light.position");
+				shaderInner.setVec3(vec3.fromValues(1.0, 0.5, 0.31), "material.ambient");
+				shaderInner.setVec3(vec3.fromValues(1.0, 0.5, 0.31), "material.diffuse");
+				shaderInner.setVec3(vec3.fromValues(0.5, 0.5, 0.5), "material.specular");
+				shaderInner.setFloat(32.0, "material.shininess");
 			},
 		});
 
@@ -204,14 +119,8 @@ export default function CanvasComponent() {
 			geometry: boxGeometry,
 			matrix: mat4.multiply(
 				mat4.create(),
-				mat4.fromTranslation(
-					mat4.create(),
-					vec3.fromValues(0, 0, 0),
-				),
-				mat4.fromScaling(
-					mat4.create(),
-					vec3.fromValues(1.5, 1.5, 1.5),
-				),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, 0)),
+				mat4.fromScaling(mat4.create(), vec3.fromValues(1.5, 1.5, 1.5)),
 			),
 		});
 
@@ -219,26 +128,14 @@ export default function CanvasComponent() {
 			geometry: lightGeometry,
 			matrix: mat4.multiply(
 				mat4.create(),
-				mat4.fromTranslation(
-					mat4.create(),
-					lightPos,
-				),
-				mat4.fromScaling(
-					mat4.create(),
-					vec3.fromValues(0.1, 0.1, 0.1),
-				),
+				mat4.fromTranslation(mat4.create(), lightPos),
+				mat4.fromScaling(mat4.create(), vec3.fromValues(0.1, 0.1, 0.1)),
 			),
 		});
 
 		// register to scene (保持原逻辑)
-		scene.geometryMap.set(
-			boxGeometryInstance,
-			boxGeometryInstance,
-		);
-		scene.geometryMap.set(
-			lightGeometryInstance,
-			lightGeometryInstance,
-		);
+		scene.geometryMap.set(boxGeometryInstance, boxGeometryInstance);
+		scene.geometryMap.set(lightGeometryInstance, lightGeometryInstance);
 
 		// setInterval 更新 lightPos（保留你要求的方案）
 		const id = window.setInterval(() => {
@@ -251,14 +148,8 @@ export default function CanvasComponent() {
 			// 更新实例的矩阵
 			lightGeometryInstance.matrix = mat4.multiply(
 				mat4.create(),
-				mat4.fromTranslation(
-					mat4.create(),
-					lightPos,
-				),
-				mat4.fromScaling(
-					mat4.create(),
-					vec3.fromValues(0.1, 0.1, 0.1),
-				),
+				mat4.fromTranslation(mat4.create(), lightPos),
+				mat4.fromScaling(mat4.create(), vec3.fromValues(0.1, 0.1, 0.1)),
 			);
 		}, 1); // interval 1ms 与 Vue 保持一致
 

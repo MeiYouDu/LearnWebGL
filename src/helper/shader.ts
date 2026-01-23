@@ -4,28 +4,12 @@ import { mat4, vec2, vec3, vec4 } from "gl-matrix";
  * 保存 shader
  */
 class Shader {
-	constructor(
-		gl: WebGL2RenderingContext,
-		vertexShaderCode: string,
-		fragmentShaderCode: string,
-	) {
+	constructor(gl: WebGL2RenderingContext, vertexShaderCode: string, fragmentShaderCode: string) {
 		this.gl = new WeakRef(gl);
-		const vertexShader = this.createShader(
-			gl,
-			gl.VERTEX_SHADER,
-			vertexShaderCode,
-		);
-		const fragmentShader = this.createShader(
-			gl,
-			gl.FRAGMENT_SHADER,
-			fragmentShaderCode,
-		);
+		const vertexShader = this.createShader(gl, gl.VERTEX_SHADER, vertexShaderCode);
+		const fragmentShader = this.createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderCode);
 		if (vertexShader && fragmentShader) {
-			this.program = this.createProgram(
-				gl,
-				vertexShader,
-				fragmentShader,
-			);
+			this.program = this.createProgram(gl, vertexShader, fragmentShader);
 		}
 	}
 	/**
@@ -42,19 +26,14 @@ class Shader {
 	 */
 	private createShader(
 		gl: WebGL2RenderingContext,
-		type: WebGL2RenderingContext[
-			| "FRAGMENT_SHADER"
-			| "VERTEX_SHADER"],
+		type: WebGL2RenderingContext["FRAGMENT_SHADER" | "VERTEX_SHADER"],
 		source: string,
 	): WebGLShader | undefined {
 		const shader = gl.createShader(type);
 		if (!shader) return;
 		gl.shaderSource(shader, source);
 		gl.compileShader(shader);
-		const success = gl.getShaderParameter(
-			shader,
-			gl.COMPILE_STATUS,
-		);
+		const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
 		if (success) {
 			return shader;
 		}
@@ -77,10 +56,7 @@ class Shader {
 		gl.attachShader(program, vertex);
 		gl.attachShader(program, fragment);
 		gl.linkProgram(program);
-		const res = gl.getProgramParameter(
-			program,
-			gl.LINK_STATUS,
-		);
+		const res = gl.getProgramParameter(program, gl.LINK_STATUS);
 		if (res) {
 			return program;
 		}
@@ -93,13 +69,8 @@ class Shader {
 	 */
 	public gl: WeakRef<WebGL2RenderingContext>;
 
-	public getAttribLocation(
-		name: string,
-	): number | undefined {
-		if (this.program)
-			return this.gl
-				.deref()
-				?.getAttribLocation(this.program, name);
+	public getAttribLocation(name: string): number | undefined {
+		if (this.program) return this.gl.deref()?.getAttribLocation(this.program, name);
 	}
 
 	public setMatrix4(matrix4: mat4, name: string) {
@@ -118,11 +89,7 @@ class Shader {
 		const gl = this.gl.deref();
 		if (!gl) return;
 		if (this.program) {
-			gl.uniform2f(
-				gl.getUniformLocation(this.program, name),
-				vec[0],
-				vec[1],
-			);
+			gl.uniform2f(gl.getUniformLocation(this.program, name), vec[0], vec[1]);
 		}
 	}
 
@@ -132,10 +99,7 @@ class Shader {
 		if (this.program) {
 			arr.forEach((item, index) => {
 				gl.uniform4fv(
-					gl.getUniformLocation(
-						this.program as WebGLProgram,
-						`${name}[${index}]`,
-					),
+					gl.getUniformLocation(this.program as WebGLProgram, `${name}[${index}]`),
 					Float32Array.from(item),
 				);
 			});
@@ -146,25 +110,14 @@ class Shader {
 		const gl = this.gl.deref();
 		if (!gl) return;
 		if (this.program) {
-			gl.uniform3f(
-				gl.getUniformLocation(this.program, name),
-				vec[0],
-				vec[1],
-				vec[2],
-			);
+			gl.uniform3f(gl.getUniformLocation(this.program, name), vec[0], vec[1], vec[2]);
 		}
 	}
 	public setVec4(vec: vec4, name: string) {
 		const gl = this.gl.deref();
 		if (!gl) return;
 		if (this.program) {
-			gl.uniform4f(
-				gl.getUniformLocation(this.program, name),
-				vec[0],
-				vec[1],
-				vec[2],
-				vec[3],
-			);
+			gl.uniform4f(gl.getUniformLocation(this.program, name), vec[0], vec[1], vec[2], vec[3]);
 		}
 	}
 
@@ -172,10 +125,7 @@ class Shader {
 		const gl = this.gl.deref();
 		if (!gl) return;
 		if (this.program) {
-			gl.uniform1i(
-				gl.getUniformLocation(this.program, name),
-				val,
-			);
+			gl.uniform1i(gl.getUniformLocation(this.program, name), val);
 		}
 	}
 
@@ -183,16 +133,12 @@ class Shader {
 		const gl = this.gl.deref();
 		if (!gl) return;
 		if (this.program) {
-			gl.uniform1f(
-				gl.getUniformLocation(this.program, name),
-				val,
-			);
+			gl.uniform1f(gl.getUniformLocation(this.program, name), val);
 		}
 	}
 
 	public use(): void {
-		if (this.program)
-			this.gl.deref()?.useProgram(this.program);
+		if (this.program) this.gl.deref()?.useProgram(this.program);
 	}
 }
 export { Shader };

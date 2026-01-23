@@ -8,9 +8,7 @@ import { random } from "lodash";
 import { mat4 } from "gl-matrix";
 
 export default function WebglTriangles() {
-	const canvasRef = useRef<HTMLCanvasElement | null>(
-		null,
-	);
+	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const rafRef = useRef<number | null>(null);
 
 	useEffect(() => {
@@ -27,11 +25,7 @@ export default function WebglTriangles() {
 		}
 
 		// Shader
-		const shaderInstance = new Shader(
-			gl,
-			vertexShaderSource,
-			fragmentShaderSource,
-		);
+		const shaderInstance = new Shader(gl, vertexShaderSource, fragmentShaderSource);
 		shaderInstance.use();
 
 		// 构建顶点与索引数据（与原实现一致）
@@ -58,62 +52,31 @@ export default function WebglTriangles() {
 		const ebo = gl.createBuffer();
 		const vao = gl.createVertexArray();
 
-		const positionAttributeLocation =
-			shaderInstance.getAttribLocation("position");
-		const colorAttributeLocation =
-			shaderInstance.getAttribLocation("color");
+		const positionAttributeLocation = shaderInstance.getAttribLocation("position");
+		const colorAttributeLocation = shaderInstance.getAttribLocation("color");
 
 		gl.bindVertexArray(vao);
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
 
-		gl.bufferData(
-			gl.ARRAY_BUFFER,
-			vertexes,
-			gl.STATIC_DRAW,
-		);
-		gl.bufferData(
-			gl.ELEMENT_ARRAY_BUFFER,
-			indices,
-			gl.STATIC_DRAW,
-		);
+		gl.bufferData(gl.ARRAY_BUFFER, vertexes, gl.STATIC_DRAW);
+		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
 		const STRIDE = 6 * 4; // 6 floats per vertex * 4 bytes
 
 		if (typeof positionAttributeLocation === "number") {
-			gl.vertexAttribPointer(
-				positionAttributeLocation,
-				3,
-				gl.FLOAT,
-				false,
-				STRIDE,
-				0,
-			);
-			gl.enableVertexAttribArray(
-				positionAttributeLocation,
-			);
+			gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, STRIDE, 0);
+			gl.enableVertexAttribArray(positionAttributeLocation);
 		}
 
 		if (typeof colorAttributeLocation === "number") {
-			gl.vertexAttribPointer(
-				colorAttributeLocation,
-				3,
-				gl.FLOAT,
-				false,
-				STRIDE,
-				12,
-			);
-			gl.enableVertexAttribArray(
-				colorAttributeLocation,
-			);
+			gl.vertexAttribPointer(colorAttributeLocation, 3, gl.FLOAT, false, STRIDE, 12);
+			gl.enableVertexAttribArray(colorAttributeLocation);
 		}
 
 		// 初始变换
 		let angle = 0;
-		shaderInstance.setMatrix4(
-			mat4.fromZRotation(mat4.create(), angle),
-			"modelTrans",
-		);
+		shaderInstance.setMatrix4(mat4.fromZRotation(mat4.create(), angle), "modelTrans");
 
 		// Render loop
 		function render() {
@@ -128,17 +91,9 @@ export default function WebglTriangles() {
 			gl.bindVertexArray(vao);
 
 			angle += 0.005;
-			shaderInstance.setMatrix4(
-				mat4.fromZRotation(mat4.create(), angle),
-				"modelTrans",
-			);
+			shaderInstance.setMatrix4(mat4.fromZRotation(mat4.create(), angle), "modelTrans");
 
-			gl.drawElements(
-				gl.TRIANGLES,
-				indicesArr.length,
-				gl.UNSIGNED_INT,
-				0,
-			);
+			gl.drawElements(gl.TRIANGLES, indicesArr.length, gl.UNSIGNED_INT, 0);
 
 			rafRef.current = requestAnimationFrame(render);
 		}
@@ -156,10 +111,7 @@ export default function WebglTriangles() {
 				// 解绑 VAO / buffer
 				gl.bindVertexArray(null);
 				gl.bindBuffer(gl.ARRAY_BUFFER, null);
-				gl.bindBuffer(
-					gl.ELEMENT_ARRAY_BUFFER,
-					null,
-				);
+				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
 				if (vao) gl.deleteVertexArray(vao);
 				if (vbo) gl.deleteBuffer(vbo);

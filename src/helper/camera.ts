@@ -11,10 +11,8 @@ interface CameraConstructorOptions {
  */
 class Camera {
 	constructor(options?: CameraConstructorOptions) {
-		this.position =
-			options?.position || vec3.fromValues(0, -3, 0);
-		this.front =
-			options?.front || vec3.fromValues(0, 1, 0);
+		this.position = options?.position || vec3.fromValues(0, -3, 0);
+		this.front = options?.front || vec3.fromValues(0, 1, 0);
 		this.up = options?.up || vec3.fromValues(0, 0, 1);
 	}
 	public position: vec3;
@@ -22,9 +20,7 @@ class Camera {
 	public up: vec3;
 	public viewMatrix: mat4 = mat4.identity(mat4.create());
 	public quaternion: quat = quat.create();
-	public projectionMatrix: mat4 = mat4.identity(
-		mat4.create(),
-	);
+	public projectionMatrix: mat4 = mat4.identity(mat4.create());
 
 	public render(gl: WebGL2RenderingContext) {
 		this.updateViewMatrix();
@@ -37,9 +33,7 @@ class Camera {
 		// const canvas = this.scene.deref()?.canvas.deref();
 		// if (!canvas) return;
 	}
-	private updateProjectionMatrix(
-		gl: WebGL2RenderingContext,
-	) {
+	private updateProjectionMatrix(gl: WebGL2RenderingContext) {
 		mat4.perspective(
 			this.projectionMatrix,
 			pi / 4,
@@ -52,11 +46,7 @@ class Camera {
 		mat4.lookAt(
 			this.viewMatrix,
 			this.position,
-			vec3.add(
-				vec3.create(),
-				this.position,
-				this.front,
-			),
+			vec3.add(vec3.create(), this.position, this.front),
 			this.up,
 		);
 	}
