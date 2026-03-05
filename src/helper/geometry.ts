@@ -1,7 +1,7 @@
-import { Scene } from "./scene.ts";
-import { GeometryInstance } from "./geometryInstance.ts";
-import { Shader } from "./shader.ts";
 import { vec2 } from "gl-matrix";
+import { GeometryInstance } from "./geometryInstance.ts";
+import { Scene } from "./scene.ts";
+import { Shader } from "./shader.ts";
 
 interface GeometryOptions {
 	attributes: Float32Array;
