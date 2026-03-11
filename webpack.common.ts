@@ -1,12 +1,11 @@
-import { env } from "node:process";
-import { resolve } from "node:path";
 import EslintWebpackPlugin from "eslint-webpack-plugin";
-import StylelintWebpackPlugin from "stylelint-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
-import NodePolyfillWebpackPlugin from "node-polyfill-webpack-plugin";
-import { Configuration, DefinePlugin } from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
-import CopyWebpackPlugin from "copy-webpack-plugin";
+import NodePolyfillWebpackPlugin from "node-polyfill-webpack-plugin";
+import { resolve } from "node:path";
+import { env } from "node:process";
+import StylelintWebpackPlugin from "stylelint-webpack-plugin";
+import { Configuration, DefinePlugin } from "webpack";
 import { CONTEXT, EXAMPLE_ENTRY, EXAMPLE_OUTPUT_PATH, EXCLUDE, HTML_TEMPLATE } from "./constant.ts";
 
 const config: Configuration = {
@@ -142,43 +141,43 @@ const config: Configuration = {
 			context: resolve(__dirname, "./"),
 			lintDirtyModulesOnly: env.NODE_ENV === "development",
 		}),
-		new CopyWebpackPlugin({
-			patterns: [
-				{
-					from: resolve(__dirname, "src/assets/model"),
-					to: "assets/model",
-				},
-				// {
-				// 	from: resolve(
-				// 		__dirname,
-				// 		"./node_modules/cesium/Source/ThirdParty",
-				// 	),
-				// 	to: "cesiumAssets/ThirdParty",
-				// },
-				// {
-				// 	from: resolve(
-				// 		__dirname,
-				// 		"./node_modules/cesium/Source/Assets",
-				// 	),
-				// 	to: "cesiumAssets/Assets",
-				// },
-				// {
-				// 	from: resolve(
-				// 		__dirname,
-				// 		"./node_modules/cesium/Source/Widgets",
-				// 	),
-				// 	to: "cesiumAssets/Widgets",
-				// },
-				// {
-				// 	from: resolve(
-				// 		__dirname,
-				// 		"./node_modules/cesium/Source/Cesium.d.ts",
-				// 	),
-				// 	to: "assets/declare",
-				// },
-				// ...PATTERNS,
-			],
-		}),
+		// new CopyWebpackPlugin({
+		// 	patterns: [
+		// 		{
+		// 			from: resolve(__dirname, "src/assets/model"),
+		// 			to: "assets/model",
+		// 		},
+		// 		// {
+		// 		// 	from: resolve(
+		// 		// 		__dirname,
+		// 		// 		"./node_modules/cesium/Source/ThirdParty",
+		// 		// 	),
+		// 		// 	to: "cesiumAssets/ThirdParty",
+		// 		// },
+		// 		// {
+		// 		// 	from: resolve(
+		// 		// 		__dirname,
+		// 		// 		"./node_modules/cesium/Source/Assets",
+		// 		// 	),
+		// 		// 	to: "cesiumAssets/Assets",
+		// 		// },
+		// 		// {
+		// 		// 	from: resolve(
+		// 		// 		__dirname,
+		// 		// 		"./node_modules/cesium/Source/Widgets",
+		// 		// 	),
+		// 		// 	to: "cesiumAssets/Widgets",
+		// 		// },
+		// 		// {
+		// 		// 	from: resolve(
+		// 		// 		__dirname,
+		// 		// 		"./node_modules/cesium/Source/Cesium.d.ts",
+		// 		// 	),
+		// 		// 	to: "assets/declare",
+		// 		// },
+		// 		// ...PATTERNS,
+		// 	],
+		// }),
 		new DefinePlugin({
 			CESIUM_BASE_URL: JSON.stringify("/cesiumAssets"),
 		}),
