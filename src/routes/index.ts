@@ -251,7 +251,7 @@ const routes: RouteObject[] = [
 							await import(
 								/* webpackChunkName: "load" */
 								/* webpackPrefetch: true */
-								"@/views/model"
+								"@/views/modelLoad"
 							)
 						).default,
 					};
