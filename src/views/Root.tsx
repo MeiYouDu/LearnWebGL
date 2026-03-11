@@ -1,9 +1,9 @@
-import { StrictMode, useContext, useState } from "react";
-import { Outlet, RouteObject, useNavigate } from "react-router";
-import { Button, Layout, Menu, MenuProps } from "antd";
+import { routes } from "@/routes";
 import { GlobalContext, GlobalContextProvider } from "@/store";
 import { MenuFoldOutlined, MenuUnfoldOutlined, PieChartOutlined } from "@ant-design/icons";
-import { routes } from "@/routes";
+import { Button, ConfigProvider, Layout, Menu, MenuProps, ThemeConfig } from "antd";
+import { StrictMode, useContext, useState } from "react";
+import { Outlet, RouteObject, useNavigate } from "react-router";
 
 function menuItemFactory(routes: RouteObject[]): Required<MenuProps>["items"] {
 	return routes
@@ -48,29 +48,31 @@ function Root() {
 		setCollapsed(!collapsed);
 	}
 	return (
-		<GlobalContextProvider>
-			<StrictMode>
-				<Layout className="h-full w-full">
-					<Layout.Header>
-						<Button type="primary" onClick={toggleCollapsed}>
-							{collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-						</Button>
-					</Layout.Header>
-					<Layout>
-						<Layout.Sider className="">
-							<Navigator collapsed={collapsed} />
-						</Layout.Sider>
-						<Layout.Content>
-							<Outlet></Outlet>
-						</Layout.Content>
-					</Layout>
+		<ConfigProvider theme={{ zeroRuntime: true } as ThemeConfig}>
+			<GlobalContextProvider>
+				<StrictMode>
+					<Layout className="h-full w-full">
+						<Layout.Header>
+							<Button type="primary" onClick={toggleCollapsed}>
+								{collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+							</Button>
+						</Layout.Header>
+						<Layout>
+							<Layout.Sider className="">
+								<Navigator collapsed={collapsed} />
+							</Layout.Sider>
+							<Layout.Content>
+								<Outlet></Outlet>
+							</Layout.Content>
+						</Layout>
 
-					{/*<Layout.Footer>*/}
-					{/*	Footer*/}
-					{/*</Layout.Footer>*/}
-				</Layout>
-			</StrictMode>
-		</GlobalContextProvider>
+						{/*<Layout.Footer>*/}
+						{/*	Footer*/}
+						{/*</Layout.Footer>*/}
+					</Layout>
+				</StrictMode>
+			</GlobalContextProvider>
+		</ConfigProvider>
 	);
 }
 

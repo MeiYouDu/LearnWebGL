@@ -1,8 +1,8 @@
-import "./styles/index.scss";
-import { createRoot } from "react-dom/client";
-import "@ant-design/v5-patch-for-react-19";
 import router from "@/routes";
+import "@ant-design/v5-patch-for-react-19";
+import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router";
+import "./styles/global.css";
 
 const root = document.getElementById("app");
 

@@ -99,7 +99,6 @@
 		"stylelint-config-standard": "^39.0.0",
 		"stylelint-config-standard-scss": "^15.0.1",
 		"stylelint-webpack-plugin": "^5.0.1",
-		"tailwindcss": "^4.1.13",
 		"terser-webpack-plugin": "^5.3.14",
 		"thread-loader": "^4.0.4",
 		"ts-node": "^10.9.2",
@@ -114,6 +113,7 @@
 		"webpack-merge": "^6.0.1"
 	},
 	"dependencies": {
+		"@ant-design/cssinjs": "^2.1.2",
 		"@ant-design/icons": "^5.6.1",
 		"@ant-design/v5-patch-for-react-19": "^1.0.3",
 		"@mkkellogg/gaussian-splats-3d": "^0.4.7",
@@ -135,6 +135,7 @@
 		"react-router": "^7.8.2",
 		"react-use": "^17.6.0",
 		"satellite.js": "^5.0.0",
+		"tailwindcss": "~3.4.19",
 		"three": "^0.181.2",
 		"three-mesh-bvh": "^0.9.3"
 	}
