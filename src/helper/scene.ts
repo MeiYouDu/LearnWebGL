@@ -1,6 +1,6 @@
-import { GeometryInstance } from "./geometryInstance.ts";
-import { Camera } from "./camera.ts";
 import { FPSControl } from "@/helper/control/FPSControl.ts";
+import { Camera } from "./camera.ts";
+import { GeometryInstance } from "./geometryInstance.ts";
 
 /**
  * 场景类
@@ -17,7 +17,7 @@ class Scene {
 			scene: this,
 		});
 		gl.enable(gl.DEPTH_TEST);
-		requestAnimationFrame(() => this.render());
+		this.requestID = this.render();
 	}
 	public canvas: WeakRef<HTMLCanvasElement>;
 	public gl: WeakRef<WebGL2RenderingContext>;
@@ -36,6 +36,7 @@ class Scene {
 	 */
 	public deltaTime: number = 0;
 	public dispatch() {
+		cancelAnimationFrame(this.requestID);
 		this.camera.dispatch();
 		this.control.dispatch();
 	}
@@ -46,6 +47,7 @@ class Scene {
 		gl.canvas.height = (gl.canvas as HTMLCanvasElement).offsetHeight;
 		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 	}
+	private requestID: number = 0;
 	/**
 	 * 当前时间
 	 * @private
@@ -77,7 +79,10 @@ class Scene {
 	 */
 	private render() {
 		const gl = this.gl?.deref();
-		if (!gl) throw new Error("gl is undefined");
+		if (!gl) {
+			cancelAnimationFrame(this.requestID);
+			return 0;
+		}
 		this.updateDeltaTime();
 		this.resize();
 		this.clearScreen(gl);
@@ -85,7 +90,8 @@ class Scene {
 		this.geometryMap.forEach((item) => {
 			item.render(this);
 		});
-		requestAnimationFrame(() => this.render());
+		this.requestID = requestAnimationFrame(() => this.render());
+		return this.requestID;
 	}
 }
 
