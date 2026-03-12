@@ -79,7 +79,7 @@ class Geometry {
 		this.shader.setMatrix4(scene.camera.viewMatrix, "view");
 		this.shader.setMatrix4(scene.camera.projectionMatrix, "projection");
 		if (this.indices) {
-			gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_BYTE, 0);
+			gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_INT, 0);
 		} else {
 			gl.drawArrays(gl.TRIANGLES, 0, this.attributes.length / this.stride);
 		}
