@@ -100,7 +100,7 @@ export default function CanvasComponent() {
 						shader: boxShader,
 						attributes: attribute,
 						vertexAttribPointer: boxVertexAttribPointer,
-						// indices: obj.geometry.index.array,
+						indices: obj.geometry.index.array,
 						// texture: [
 						// 	{
 						// 		image: box,
