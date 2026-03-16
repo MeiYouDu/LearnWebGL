@@ -1,9 +1,9 @@
 // TextureDemo.tsx
 import { useEffect, useRef } from "react";
-import { resizeHandle } from "@/helper/resize.ts"; // 路径按你的项目调整
+import { resizeHandle } from "@/helper/resize"; // 路径按你的项目调整
 import vertexShaderSource from "./vertex.glsl";
 import fragmentShaderSource from "./fragment.glsl";
-import { Shader } from "@/helper/shader.ts";
+import { Shader } from "@/helper/shader";
 import { vec2 } from "gl-matrix";
 import smile from "../../../assets/image/awesomeface.png";
 import box from "../../../assets/image/container.jpg";

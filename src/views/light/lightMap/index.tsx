@@ -1,10 +1,10 @@
 // BoxScene.tsx
 import { useEffect, useRef } from "react";
 import { mat4, vec3 } from "gl-matrix";
-import { Scene } from "@/helper/scene.ts";
-import { Shader } from "@/helper/shader.ts";
-import { Geometry } from "@/helper/geometry.ts";
-import { GeometryInstance } from "@/helper/geometryInstance.ts";
+import { Scene } from "@/helper/scene";
+import { Shader } from "@/helper/shader";
+import { Geometry } from "@/helper/geometry";
+import { GeometryInstance } from "@/helper/geometryInstance";
 import boxVert from "./box.vert";
 import boxFrag from "./box.frag";
 import lightFrag from "./light.frag";

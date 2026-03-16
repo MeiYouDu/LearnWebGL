@@ -1,9 +1,9 @@
 // WebglTriangles.tsx
 import { useEffect, useRef } from "react";
-import { resizeHandle } from "@/helper/resize.ts"; // 调整为你项目实际路径
+import { resizeHandle } from "@/helper/resize"; // 调整为你项目实际路径
 import vertexShaderSource from "./vertex.glsl";
 import fragmentShaderSource from "./fragment.glsl";
-import { Shader } from "@/helper/shader.ts"; // 调整路径
+import { Shader } from "@/helper/shader"; // 调整路径
 import { random } from "lodash";
 import { mat4 } from "gl-matrix";
 

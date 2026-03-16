@@ -1,17 +1,17 @@
 // CanvasComponent.tsx
-import { Scene } from "@/helper/scene.ts"; // 调整路径
-import { Shader } from "@/helper/shader.ts";
+import { Scene } from "@/helper/scene"; // 调整路径
+import { Shader } from "@/helper/shader";
 import { SelectOutlined } from "@ant-design/icons";
 import { Button, Upload } from "antd";
 import { UploadChangeParam, UploadFile } from "antd/es/upload";
 import { useEffect, useRef } from "react";
-import { Mesh } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 import { Geometry } from "@/helper/geometry";
 import { GeometryInstance } from "@/helper/geometryInstance";
 import { mat4, vec3 } from "gl-matrix";
 import { cos, sin } from "mathjs";
+import { Mesh } from "three";
 import boxFrag from "./box.frag";
 import boxVert from "./box.vert";
 // import lightFrag from "./light.frag";
@@ -145,7 +145,6 @@ export default function CanvasComponent() {
 					scene.geometryMap.set(boxGeometryInstance, boxGeometryInstance);
 				}
 			});
-			console.log();
 		}
 	}
 
