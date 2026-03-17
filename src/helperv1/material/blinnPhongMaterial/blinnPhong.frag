@@ -49,5 +49,6 @@ void main() {
 	vec3 reflectDir = reflect(-lightDir, norm);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 	vec4 specular = vec4(texSpecular * spec * light.specular, 1.0);
-	fragmentColor = vec4(((ambient + specular + diffuse) * attenuation).rgb, 1.0);
+	// fragmentColor = vec4(((ambient + specular + diffuse) * attenuation).rgb, 1.0);
+	fragmentColor = vec4(norm.rgb, 1.0);
 }

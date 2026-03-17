@@ -1,41 +1,13 @@
 // CanvasComponent.tsx
-import { Scene } from "@/helper/scene"; // 调整路径
-import { Shader } from "@/helper/shader";
+import { Scene, BlinnPhongMaterial, Geometry, GeometryInstance } from "@/helperv1"; // 调整路径
 import { SelectOutlined } from "@ant-design/icons";
 import { Button, Upload } from "antd";
 import { UploadChangeParam, UploadFile } from "antd/es/upload";
 import { useEffect, useRef } from "react";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-
-import { Geometry } from "@/helper/geometry";
-import { GeometryInstance } from "@/helper/geometryInstance";
 import { mat4, vec3 } from "gl-matrix";
 import { cos, sin } from "mathjs";
 import { Mesh } from "three";
-import boxFrag from "./box.frag";
-import boxVert from "./box.vert";
-// import lightFrag from "./light.frag";
-
-function boxVertexAttribPointer(gl: WebGL2RenderingContext, shader: Shader): number {
-	const stride = 8;
-	const positionAttrLocation = shader.getAttribLocation("position");
-	const normalAttrLocation = shader.getAttribLocation("normal");
-	const texCoordAttrLocation = shader.getAttribLocation("texCoord");
-
-	if (typeof positionAttrLocation === "number" && positionAttrLocation >= 0) {
-		gl.vertexAttribPointer(positionAttrLocation, 3, gl.FLOAT, false, stride * 4, 0);
-		gl.enableVertexAttribArray(positionAttrLocation);
-	}
-	if (typeof normalAttrLocation === "number" && normalAttrLocation >= 0) {
-		gl.vertexAttribPointer(normalAttrLocation, 3, gl.FLOAT, false, stride * 4, 3 * 4);
-		gl.enableVertexAttribArray(normalAttrLocation);
-	}
-	if (typeof texCoordAttrLocation === "number" && texCoordAttrLocation >= 0) {
-		gl.vertexAttribPointer(texCoordAttrLocation, 2, gl.FLOAT, false, stride * 4, 6 * 4);
-		gl.enableVertexAttribArray(texCoordAttrLocation);
-	}
-	return stride;
-}
 
 export default function CanvasComponent() {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -91,31 +63,11 @@ export default function CanvasComponent() {
 						arr.push(x, y, z, nx, ny, nz, u, v);
 					}
 					const attribute = Float32Array.from(arr);
-					// shaders
-					const boxShader = new Shader(gl, boxVert, boxFrag);
-					// const lightShader = new Shader(gl, boxVert, lightFrag);
 					const angle = Date.now() * 0.001;
 					const lightPos = vec3.fromValues(sin(angle) * 6.5, cos(angle) * 6.5 - 5, -3);
-					const boxGeometry = new Geometry({
-						shader: boxShader,
-						attributes: attribute,
-						vertexAttribPointer: boxVertexAttribPointer,
-						indices: obj.geometry.index.array,
-						// texture: [
-						// 	{
-						// 		image: box,
-						// 		width: 512,
-						// 		height: 512,
-						// 		textureUnit: 0,
-						// 	},
-						// 	{
-						// 		image: smile,
-						// 		width: 476,
-						// 		height: 476,
-						// 		textureUnit: 1, // 注意：原 Vue 里第二个也写了 0，通常应为 1
-						// 	},
-						// ],
-						uniformsSetter(glInner: WebGL2RenderingContext, shaderInner: Shader) {
+					// shaders
+					const material = new BlinnPhongMaterial({
+						uniformsSetter(glInner: WebGL2RenderingContext, shaderInner) {
 							shaderInner.setVec3(scene.camera.position, "cameraPos");
 							shaderInner.setVec3(vec3.fromValues(0.3, 0.3, 0.3), "light.ambient");
 							shaderInner.setVec3(vec3.fromValues(0.9, 0.9, 0.9), "light.diffuse");
@@ -131,7 +83,27 @@ export default function CanvasComponent() {
 							shaderInner.setFloat(64.0, "material.shininess");
 						},
 					});
+					// const lightShader = new Shader(gl, boxVert, lightFrag);
+					// texture: [
+					// 	{
+					// 		image: box,
+					// 		width: 512,
+					// 		height: 512,
+					// 		textureUnit: 0,
+					// 	},
+					// 	{
+					// 		image: smile,
+					// 		width: 476,
+					// 		height: 476,
+					// 		textureUnit: 1, // 注意：原 Vue 里第二个也写了 0，通常应为 1
+					// 	},
+					// ],
 
+					const boxGeometry = new Geometry({
+						material,
+						attributes: attribute,
+						indices: obj.geometry.index.array,
+					});
 					const boxGeometryInstance = new GeometryInstance({
 						geometry: boxGeometry,
 						matrix: mat4.multiply(
@@ -140,9 +112,8 @@ export default function CanvasComponent() {
 							mat4.fromScaling(mat4.create(), vec3.fromValues(1.5, 1.5, 1.5)),
 						),
 					});
-
 					// register to scene (保持原逻辑)
-					scene.geometryMap.set(boxGeometryInstance, boxGeometryInstance);
+					scene.add(boxGeometryInstance);
 				}
 			});
 		}
