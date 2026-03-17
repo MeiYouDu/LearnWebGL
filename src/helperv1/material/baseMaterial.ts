@@ -19,14 +19,14 @@ interface MaterialOptions {
 	 * attribute解析方式
 	 * @param gl
 	 */
-	vertexAttribPointer?(gl: WebGL2RenderingContext, shader: Shader): number;
+	vertexAttribPointer?(gl: WebGL2RenderingContext, shader: Material): number;
 
 	/**
 	 * 每一帧都会调用
 	 * @param gl
 	 * @param shader
 	 */
-	uniformsSetter?(gl: WebGL2RenderingContext, shader: Shader): void;
+	uniformsSetter?(gl: WebGL2RenderingContext, shader: Material): void;
 }
 
 /**
@@ -194,16 +194,15 @@ class Material extends Base {
 		}
 	}
 
-	public render(scene: Scene, instance: GeometryInstance): number {
+	public render(scene: Scene, instance: GeometryInstance) {
 		const gl = scene.gl.deref();
 		if (!gl) throw new Error("gl is undefined");
-		this.shader.use(gl);
-		this.uniformsSetter?.(gl, this.shader);
+		this.shader.render(scene);
+		this.uniformsSetter?.(gl, this);
 		this.setVec2(vec2.fromValues(gl.canvas.width, gl.canvas.height), "resolution");
 		this.setMatrix4(instance.matrix, "model");
 		this.setMatrix4(scene.camera.viewMatrix, "view");
 		this.setMatrix4(scene.camera.projectionMatrix, "projection");
-		return this.vertexAttribPointer?.(gl, this.shader) ?? 1;
 	}
 
 	public setScene(scene: Scene): void {

@@ -32,7 +32,6 @@ class Geometry extends Base {
 		this.material.setScene(scene);
 		const gl = this.getGl();
 		if (!gl) throw new Error("gl is undefined");
-		this.material.shader.use(gl);
 		const vbo = gl.createBuffer(),
 			ebo = gl.createBuffer();
 		this.vao = gl.createVertexArray();
@@ -41,6 +40,7 @@ class Geometry extends Base {
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
 		// 传递数据
 		gl.bufferData(gl.ARRAY_BUFFER, this.attributes, gl.STATIC_DRAW);
+		this.stride = this.material.vertexAttribPointer?.(gl, this.material) ?? 1;
 		if (this.indices) gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
 	}
 	public render(scene: Scene, instance: GeometryInstance) {
@@ -48,7 +48,7 @@ class Geometry extends Base {
 		const gl = scene.gl.deref();
 		if (!gl) throw new Error("gl is undefined");
 		gl.bindVertexArray(this.vao);
-		this.stride = this.material.render(scene, instance);
+		this.material.render(scene, instance);
 		if (this.indices) {
 			gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_INT, 0);
 		} else {

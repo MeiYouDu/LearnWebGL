@@ -1,4 +1,4 @@
-import { FPSControl } from "@/helper/control/FPSControl.ts";
+import { FPSControl } from "./";
 import { Camera } from "./camera.ts";
 import { GeometryInstance } from "./geometryInstance.ts";
 
@@ -22,10 +22,6 @@ class Scene {
 	public canvas: WeakRef<HTMLCanvasElement>;
 	public gl: WeakRef<WebGL2RenderingContext>;
 	/**
-	 * 几何体实例
-	 */
-	public geometryMap: Map<GeometryInstance, GeometryInstance> = new Map();
-	/**
 	 * 相机
 	 */
 	public camera: Camera;
@@ -39,9 +35,19 @@ class Scene {
 	 * 增加 geometry
 	 * @param geo
 	 */
-	public add(geo: GeometryInstance) {
+	public add(geo: GeometryInstance): this {
 		geo.setScene(this);
 		this.geometryMap.set(geo, geo);
+		return this;
+	}
+	/**
+	 * 移除几何体
+	 * @param geo
+	 * @returns
+	 */
+	public remove(geo: GeometryInstance) {
+		this.geometryMap.delete(geo);
+		return this;
 	}
 	public dispatch() {
 		cancelAnimationFrame(this.requestID);
@@ -56,6 +62,10 @@ class Scene {
 		gl.canvas.height = (gl.canvas as HTMLCanvasElement).offsetHeight;
 		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 	}
+	/**
+	 * 几何体实例
+	 */
+	private geometryMap: Map<GeometryInstance, GeometryInstance> = new Map();
 	private requestID: number = 0;
 	/**
 	 * 当前时间

@@ -1,8 +1,7 @@
-import { Camera } from "@/helper/camera";
+import { Camera, Scene } from "../";
 import { mat4, quat, vec3 } from "gl-matrix";
 import { debounce } from "lodash";
 import { pi } from "mathjs";
-import { Scene } from "@/helper/scene";
 
 interface CameraConstructorOptions {
 	speed?: number;

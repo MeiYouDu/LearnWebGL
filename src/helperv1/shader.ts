@@ -66,6 +66,11 @@ class Shader extends Base {
 		if (this.program) gl.useProgram(this.program);
 	}
 
+	public setScene(scene: Scene): void {
+		super.setScene(scene);
+		this.render(scene);
+	}
+
 	public render(scene: Scene) {
 		const gl = scene.gl.deref();
 		if (!gl) return;
