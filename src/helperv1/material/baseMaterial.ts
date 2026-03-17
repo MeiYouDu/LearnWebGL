@@ -5,7 +5,7 @@ import { Shader } from "../shader";
 import { Base } from "../base";
 
 interface Texture {
-	image: string;
+	image: string | ImageBitmap;
 	width: number;
 	height: number;
 	textureUnit: number;
@@ -55,15 +55,13 @@ class Material extends Base {
 	private resolveTexture(
 		gl: WebGL2RenderingContext,
 		shaderInstance: Shader,
-		image: string,
+		image: Texture["image"],
 		width: number,
 		height: number,
 		textureUnit: number,
 		textureLocationName?: string,
 	) {
-		const imgInstance = new Image(width, height);
-		imgInstance.addEventListener("load", () => {
-			shaderInstance.use(gl);
+		if (image instanceof ImageBitmap) {
 			const texture = gl.createTexture();
 			gl.activeTexture(gl.TEXTURE0 + textureUnit);
 			gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -78,12 +76,34 @@ class Material extends Base {
 				0,
 				gl.RGBA,
 				gl.UNSIGNED_BYTE,
-				imgInstance,
+				image,
 			);
 			gl.generateMipmap(gl.TEXTURE_2D);
-			imgInstance.remove();
-		});
-		imgInstance.src = image;
+		} else {
+			const imgInstance = new Image(width, height);
+			imgInstance.addEventListener("load", () => {
+				shaderInstance.use(gl);
+				const texture = gl.createTexture();
+				gl.activeTexture(gl.TEXTURE0 + textureUnit);
+				gl.bindTexture(gl.TEXTURE_2D, texture);
+				this.setInt(textureUnit, textureLocationName || `texture${textureUnit}`);
+				this.setTextureParams(gl);
+				gl.texImage2D(
+					gl.TEXTURE_2D,
+					0,
+					gl.RGBA,
+					width,
+					height,
+					0,
+					gl.RGBA,
+					gl.UNSIGNED_BYTE,
+					imgInstance,
+				);
+				gl.generateMipmap(gl.TEXTURE_2D);
+				imgInstance.remove();
+			});
+			imgInstance.src = image;
+		}
 	}
 	private setDefaultTexture() {
 		const hasSpecular = this.textures?.find((item) =>

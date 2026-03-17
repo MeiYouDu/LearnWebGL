@@ -1,5 +1,7 @@
 #version 300 es
 precision highp float;
+precision highp int;
+precision highp sampler2DArray;
 
 struct Material {
 	vec3 ambient;
