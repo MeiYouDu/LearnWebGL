@@ -1,5 +1,11 @@
 // CanvasComponent.tsx
-import { Scene, BlinnPhongMaterial, Geometry, GeometryInstance } from "@/helperv1"; // 调整路径
+import {
+	Scene,
+	BlinnPhongMaterial,
+	Geometry,
+	GeometryInstance,
+	Texture as TextureStruct,
+} from "@/helperv1"; // 调整路径
 import { SelectOutlined } from "@ant-design/icons";
 import { Button, Upload } from "antd";
 import { UploadChangeParam, UploadFile } from "antd/es/upload";
@@ -7,7 +13,7 @@ import { useEffect, useRef } from "react";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { mat4, vec3 } from "gl-matrix";
 import { cos, sin } from "mathjs";
-import { Mesh } from "three";
+import { Mesh, Texture } from "three";
 
 export default function CanvasComponent() {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -47,9 +53,23 @@ export default function CanvasComponent() {
 			const gltf = await loader.current.loadAsync(url);
 			gltf.scene.traverse((obj) => {
 				if (obj instanceof Mesh) {
+					const textures: TextureStruct[] = [];
+					if ("material" in obj && obj.material) {
+						const map = obj.material.map;
+						if (map instanceof Texture) {
+							textures.push({
+								image: map.source.data,
+								width: map.width,
+								height: map.height,
+								textureUnit: 1,
+								textureLocationName: "material.diffuse",
+							});
+						}
+					}
 					const position = obj.geometry.attributes.position;
 					const normal = obj.geometry.attributes.normal;
 					const uv = obj.geometry.attributes.uv;
+					obj.updateMatrixWorld(true);
 					const arr = [];
 					for (let i = 0; i < position.count; i++) {
 						const x = position.array[i * 3];
@@ -63,42 +83,29 @@ export default function CanvasComponent() {
 						arr.push(x, y, z, nx, ny, nz, u, v);
 					}
 					const attribute = Float32Array.from(arr);
-					const angle = Date.now() * 0.001;
-					const lightPos = vec3.fromValues(sin(angle) * 6.5, cos(angle) * 6.5 - 5, -3);
+					let angle = Date.now() * 0.001;
+					let lightPos = vec3.fromValues(sin(angle) * 10, cos(angle) * 10 - 5, 0);
 					// shaders
 					const material = new BlinnPhongMaterial({
+						textures,
 						uniformsSetter(glInner: WebGL2RenderingContext, shaderInner) {
 							shaderInner.setVec3(scene.camera.position, "cameraPos");
-							shaderInner.setVec3(vec3.fromValues(0.3, 0.3, 0.3), "light.ambient");
-							shaderInner.setVec3(vec3.fromValues(0.9, 0.9, 0.9), "light.diffuse");
+							shaderInner.setVec3(vec3.fromValues(0.6, 0.6, 0.6), "light.ambient");
+							shaderInner.setVec3(vec3.fromValues(0.96, 0.96, 0.96), "light.diffuse");
 							shaderInner.setVec3(vec3.fromValues(1, 1, 1), "light.specular");
 							shaderInner.setVec3(lightPos, "light.position");
 							shaderInner.setVec3(
 								vec3.fromValues(1.0, 0.5, 0.31),
 								"material.ambient",
 							);
-							shaderInner.setFloat(1.0, "light.constant");
+							shaderInner.setFloat(0.5, "light.constant");
 							shaderInner.setFloat(0.045, "light.linear");
 							shaderInner.setFloat(0.0075, "light.quadratic");
-							shaderInner.setFloat(64.0, "material.shininess");
+							shaderInner.setFloat(128.0, "material.shininess");
+							angle = Date.now() * 0.001;
+							lightPos = vec3.fromValues(sin(angle) * 10, cos(angle) * 10 - 5, 0);
 						},
 					});
-					// const lightShader = new Shader(gl, boxVert, lightFrag);
-					// texture: [
-					// 	{
-					// 		image: box,
-					// 		width: 512,
-					// 		height: 512,
-					// 		textureUnit: 0,
-					// 	},
-					// 	{
-					// 		image: smile,
-					// 		width: 476,
-					// 		height: 476,
-					// 		textureUnit: 1, // 注意：原 Vue 里第二个也写了 0，通常应为 1
-					// 	},
-					// ],
-
 					const boxGeometry = new Geometry({
 						material,
 						attributes: attribute,
@@ -109,10 +116,10 @@ export default function CanvasComponent() {
 						matrix: mat4.multiply(
 							mat4.create(),
 							mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, 0)),
-							mat4.fromScaling(mat4.create(), vec3.fromValues(1.5, 1.5, 1.5)),
+							mat4.fromScaling(mat4.create(), vec3.fromValues(1.0, 1.0, 1.0)),
 						),
 					});
-					// register to scene (保持原逻辑)
+
 					scene.add(boxGeometryInstance);
 				}
 			});
