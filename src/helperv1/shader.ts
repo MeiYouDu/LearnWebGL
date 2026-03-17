@@ -85,9 +85,7 @@ class Shader extends Base {
 				this.program = this.createProgram(gl, vertexShader, fragmentShader);
 			}
 		}
-		if (this.program) {
-			gl.useProgram(this.program);
-		}
+		this.use(gl);
 	}
 }
 export { Shader };

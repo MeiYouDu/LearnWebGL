@@ -29,18 +29,31 @@ class Geometry extends Base {
 	public indices?: Uint32Array;
 	public setScene(scene: Scene): void {
 		super.setScene(scene);
+		// material.setScene内部会创建 shader program，并调用 shader.use
 		this.material.setScene(scene);
 		const gl = this.getGl();
 		if (!gl) throw new Error("gl is undefined");
+		/**
+		 * 顶点缓冲对象
+		 */
 		const vbo = gl.createBuffer(),
+			/**
+			 * 索引
+			 */
 			ebo = gl.createBuffer();
+		/**
+		 * 顶点数组对象(顶点属性)
+		 */
 		this.vao = gl.createVertexArray();
+		// 先绑定 vao，再绑定vbo 和 ebo
 		gl.bindVertexArray(this.vao);
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
-		// 传递数据
+		// 传递vbo数据
 		gl.bufferData(gl.ARRAY_BUFFER, this.attributes, gl.STATIC_DRAW);
+		// 确定 vertex attributes 解析方式，并确定间隔
 		this.stride = this.material.vertexAttribPointer?.(gl, this.material) ?? 1;
+		// 如果有 ebo 数据则传递
 		if (this.indices) gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
 	}
 	public render(scene: Scene, instance: GeometryInstance) {

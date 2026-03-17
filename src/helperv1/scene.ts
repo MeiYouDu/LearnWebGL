@@ -11,7 +11,9 @@ class Scene {
 		const gl = canvas.getContext("webgl2");
 		if (!gl) throw new Error("fail to create webgl2 context");
 		this.gl = new WeakRef(gl);
+		//TODO 后面做成可配置的
 		this.camera = new Camera();
+		//TODO 后面做成可配置的
 		this.control = new FPSControl({
 			camera: this.camera,
 			scene: this,
