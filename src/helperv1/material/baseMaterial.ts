@@ -108,7 +108,7 @@ class Material extends Base {
 				0,
 				gl.RGBA,
 				gl.UNSIGNED_BYTE,
-				new Uint8Array([1, 1, 1, 1]),
+				new Uint8Array([255, 255, 255, 255]),
 			);
 			this.setTextureParams(gl);
 			if (!hasDiffuse) {
