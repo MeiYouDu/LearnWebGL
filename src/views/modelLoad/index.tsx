@@ -25,7 +25,7 @@ export default function CanvasComponent() {
 		if (!canvas) return;
 
 		// create scene (保持与原来一致)
-		const scene = new Scene(canvas);
+		const scene = new Scene({ canvas });
 		sceneRef.current = scene;
 
 		return () => {

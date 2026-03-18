@@ -26,6 +26,23 @@ const advanced: RouteObject[] = [
 					};
 				},
 			},
+			{
+				path: "stencilTest",
+				id: "stencilTest",
+				index: true,
+				hydrateFallbackElement: HydrateFallback,
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "stencilTest" */
+								/* webpackPrefetch: true */
+								"@/views/advanced/stencilTest"
+							)
+						).default,
+					};
+				},
+			},
 		],
 	},
 ];

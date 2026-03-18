@@ -1,8 +1,9 @@
 // CanvasComponent.tsx
 import { useEffect, useRef } from "react";
 import { mat4, vec3 } from "gl-matrix";
-import { Scene, Geometry, GeometryInstance } from "@/helperv1";
-import { DepthMaterial } from "./depthMaterial";
+import { Scene, Geometry, GeometryInstance, BlinnPhongMaterial } from "@/helperv1";
+import groundImage from "@/assets/textures/metal.png";
+import boxImage from "@/assets/textures/marble.jpg";
 
 // attribute 与 Vue 版本保持一致
 const attribute = new Float32Array([
@@ -43,30 +44,60 @@ export default function CanvasComponent() {
 
 		// initial angle & light pos
 		const angle = Date.now() * 0.001;
-		const lightPos = vec3.fromValues(Math.sin(angle) * 2, Math.cos(angle) * 2, -3);
+		const lightPos = vec3.fromValues(Math.sin(angle) * 20, Math.cos(angle) * 20, 20);
 
-		// shaders
-		// const boxShader = new Shader(gl, boxVert, boxFrag);
-		// const lightShader = new Shader(gl, boxVert, lightFrag);
-		const material = new DepthMaterial({
+		const boxMaterial = new BlinnPhongMaterial({
+			textures: [
+				{
+					image: boxImage,
+					width: 1024,
+					height: 1024,
+					textureUnit: 0,
+					textureLocationName: "material.diffuse",
+				},
+			],
 			uniformsSetter(glInner: WebGL2RenderingContext, shaderInner) {
 				shaderInner.setVec3(scene.camera.position, "cameraPos");
 				shaderInner.setVec3(vec3.fromValues(0.2, 0.2, 0.2), "light.ambient");
 				shaderInner.setVec3(vec3.fromValues(0.9, 0.2, 0.9), "light.diffuse");
 				shaderInner.setVec3(vec3.fromValues(1, 1, 1), "light.specular");
 				shaderInner.setVec3(lightPos, "light.position");
-				shaderInner.setVec3(vec3.fromValues(1.0, 0.5, 0.31), "material.ambient");
-				shaderInner.setVec3(vec3.fromValues(1.0, 0.5, 0.31), "material.diffuse");
-				shaderInner.setVec3(vec3.fromValues(0.5, 0.5, 0.5), "material.specular");
-				shaderInner.setFloat(32.0, "material.shininess");
-				shaderInner.setFloat(1000, "far");
-				shaderInner.setFloat(1, "near");
+				shaderInner.setFloat(1.0, "light.constant");
+				shaderInner.setFloat(0.07, "light.linear");
+				shaderInner.setFloat(0.017, "light.quadratic");
+				shaderInner.setFloat(64.0, "material.shininess");
+			},
+		});
+		const groundMaterial = new BlinnPhongMaterial({
+			textures: [
+				{
+					image: groundImage,
+					width: 1024,
+					height: 1024,
+					textureUnit: 1,
+					textureLocationName: "material.diffuse",
+				},
+			],
+			uniformsSetter(glInner: WebGL2RenderingContext, shaderInner) {
+				shaderInner.setVec3(scene.camera.position, "cameraPos");
+				shaderInner.setVec3(vec3.fromValues(0.2, 0.2, 0.2), "light.ambient");
+				shaderInner.setVec3(vec3.fromValues(0.9, 0.2, 0.9), "light.diffuse");
+				shaderInner.setVec3(vec3.fromValues(1, 1, 1), "light.specular");
+				shaderInner.setVec3(lightPos, "light.position");
+				shaderInner.setFloat(1.0, "light.constant");
+				shaderInner.setFloat(0.07, "light.linear");
+				shaderInner.setFloat(0.017, "light.quadratic");
+				shaderInner.setFloat(64.0, "material.shininess");
 			},
 		});
 		// geometry & instances
 		const boxGeometry = new Geometry({
 			attributes: attribute,
-			material,
+			material: boxMaterial,
+		});
+		const groundGeometry = new Geometry({
+			attributes: attribute,
+			material: groundMaterial,
 		});
 		const boxGeometryInstance = new GeometryInstance({
 			geometry: boxGeometry,
@@ -84,10 +115,19 @@ export default function CanvasComponent() {
 				mat4.fromScaling(mat4.create(), vec3.fromValues(10.0, 10.0, 10.0)),
 			),
 		});
+		const groundGeometryInstance = new GeometryInstance({
+			geometry: groundGeometry,
+			matrix: mat4.multiply(
+				mat4.create(),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, -10)),
+				mat4.fromScaling(mat4.create(), vec3.fromValues(1000.0, 1000.0, 1.0)),
+			),
+		});
 
 		// register to scene (保持原逻辑)
 		scene.add(boxGeometryInstance);
 		scene.add(boxGeometryInstance2);
+		scene.add(groundGeometryInstance);
 
 		return () => {
 			try {
