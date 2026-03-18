@@ -1,7 +1,7 @@
 import { routes } from "@/routes";
 import { GlobalContext, GlobalContextProvider } from "@/store";
-import { MenuFoldOutlined, MenuUnfoldOutlined, PieChartOutlined } from "@ant-design/icons";
-import { Button, ConfigProvider, Layout, Menu, MenuProps, ThemeConfig } from "antd";
+import { PieChartOutlined, RobotFilled } from "@ant-design/icons";
+import { ConfigProvider, Layout, Menu, MenuProps, ThemeConfig } from "antd";
 import { StrictMode, useContext, useState } from "react";
 import { Outlet, RouteObject, useNavigate } from "react-router";
 
@@ -32,7 +32,7 @@ function Navigator({ collapsed }: { collapsed: boolean }) {
 	};
 	return (
 		<Menu
-			className={"w-[auto]"}
+			className={"w-max-[128px]"}
 			mode={"inline"}
 			inlineCollapsed={collapsed}
 			items={menuItems}
@@ -43,7 +43,7 @@ function Navigator({ collapsed }: { collapsed: boolean }) {
 }
 
 function Root() {
-	const [collapsed, setCollapsed] = useState(false);
+	const [collapsed, setCollapsed] = useState(true);
 	function toggleCollapsed() {
 		setCollapsed(!collapsed);
 	}
@@ -52,18 +52,15 @@ function Root() {
 			<GlobalContextProvider>
 				<StrictMode>
 					<Layout className="h-full w-full">
-						<Layout.Header>
-							<Button type="primary" onClick={toggleCollapsed}>
+						<Layout.Header className="flex items-center px-5">
+							<RobotFilled className="text-4xl text-white" />
+							{/* <Button type="primary" onClick={toggleCollapsed}>
 								{collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-							</Button>
+							</Button> */}
 						</Layout.Header>
-						<Layout>
-							<Layout.Sider className="">
-								<Navigator collapsed={collapsed} />
-							</Layout.Sider>
-							<Layout.Content>
-								<Outlet></Outlet>
-							</Layout.Content>
+						<Layout className="flex-row">
+							<Navigator collapsed={collapsed} />
+							<Outlet></Outlet>
 						</Layout>
 
 						{/*<Layout.Footer>*/}
