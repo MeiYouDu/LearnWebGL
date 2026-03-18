@@ -3,21 +3,29 @@ import { Camera } from "./camera.ts";
 import { GeometryInstance } from "./geometryInstance.ts";
 
 /**
+ * 场景配置
+ */
+interface SceneOptions {
+	canvas: HTMLCanvasElement;
+	camera?: Camera;
+	control?: FPSControl;
+}
+/**
  * 场景类
  */
 class Scene {
-	constructor(canvas: HTMLCanvasElement) {
-		this.canvas = new WeakRef(canvas);
-		const gl = canvas.getContext("webgl2");
+	constructor(options: SceneOptions) {
+		this.canvas = new WeakRef(options.canvas);
+		const gl = options.canvas.getContext("webgl2");
 		if (!gl) throw new Error("fail to create webgl2 context");
 		this.gl = new WeakRef(gl);
-		//TODO 后面做成可配置的
-		this.camera = new Camera();
-		//TODO 后面做成可配置的
-		this.control = new FPSControl({
-			camera: this.camera,
-			scene: this,
-		});
+		this.camera = options.camera ?? new Camera();
+		this.control =
+			options.control ??
+			new FPSControl({
+				camera: this.camera,
+				scene: this,
+			});
 		gl.enable(gl.DEPTH_TEST);
 		this.requestID = this.render();
 	}
@@ -117,3 +125,4 @@ class Scene {
 }
 
 export { Scene };
+export type { SceneOptions };
