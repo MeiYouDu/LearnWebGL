@@ -1,6 +1,6 @@
 import { merge } from "lodash";
 import { Material, MaterialOptions } from "../baseMaterial";
-import vert from "./bilnnPhong.vert";
+import vert from "./blinnPhong.vert";
 import frag from "./blinnPhong.frag";
 import { PNTAttribPointer, Shader } from "../..";
 
