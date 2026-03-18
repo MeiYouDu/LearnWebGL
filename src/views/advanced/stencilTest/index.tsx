@@ -1,10 +1,20 @@
 // CanvasComponent.tsx
 import { useEffect, useRef } from "react";
 import { mat4, vec3 } from "gl-matrix";
-import { Scene, Geometry, GeometryInstance, BlinnPhongMaterial } from "@/helperv1";
+import {
+	Scene,
+	Geometry,
+	GeometryInstance,
+	FPSControl,
+	Camera,
+	Shader,
+	SpotLightMaterial,
+} from "@/helperv1";
 import groundImage from "@/assets/textures/metal.png";
 import boxImage from "@/assets/textures/marble.jpg";
-
+import vert from "@/helperv1/material/blinnPhongMaterial/blinnPhong.vert";
+import frag from "./stencliTest.frag";
+import { cos, pi } from "mathjs";
 // attribute 与 Vue 版本保持一致
 const attribute = new Float32Array([
 	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, 0.5, -0.5, -0.5, 0, 0, -1, 1, 0, 0.5, 0.5, -0.5, 0, 0, -1, 1,
@@ -29,11 +39,16 @@ export default function CanvasComponent() {
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
-
+		const camera = new Camera();
 		// create scene (保持与原来一致)
-		const scene = new Scene({ canvas });
+		const scene = new Scene({
+			canvas,
+			control: new FPSControl({
+				speed: 0.5,
+				camera,
+			}),
+		});
 		sceneRef.current = scene;
-
 		// deref gl，兼容你的 Scene 实现（如果是 WeakRef）
 		const gl = scene.gl?.deref();
 		if (!gl) {
@@ -41,12 +56,11 @@ export default function CanvasComponent() {
 			return;
 		}
 		scene.camera.position = vec3.fromValues(0, -50, 0);
-
 		// initial angle & light pos
 		const angle = Date.now() * 0.001;
-		const lightPos = vec3.fromValues(Math.sin(angle) * 20, Math.cos(angle) * 20, 20);
-
-		const boxMaterial = new BlinnPhongMaterial({
+		const lightPos = vec3.fromValues(0, 0, 20);
+		const shader = new Shader(vert, frag);
+		const boxMaterial = new SpotLightMaterial({
 			textures: [
 				{
 					image: boxImage,
@@ -57,18 +71,22 @@ export default function CanvasComponent() {
 				},
 			],
 			uniformsSetter(glInner: WebGL2RenderingContext, shaderInner) {
-				shaderInner.setVec3(scene.camera.position, "cameraPos");
-				shaderInner.setVec3(vec3.fromValues(0.2, 0.2, 0.2), "light.ambient");
-				shaderInner.setVec3(vec3.fromValues(0.9, 0.2, 0.9), "light.diffuse");
+				shaderInner.setVec3(camera.position, "cameraPos");
+				shaderInner.setVec3(vec3.fromValues(0, 0, -1), "light.direction");
+				shaderInner.setFloat(cos(pi / 6), "light.cutOff");
+				shaderInner.setFloat(cos(pi / 3), "light.outerCutOff");
+				shaderInner.setVec3(vec3.fromValues(0.4, 0.4, 0.4), "light.ambient");
+				shaderInner.setVec3(vec3.fromValues(0.9, 0.9, 0.9), "light.diffuse");
 				shaderInner.setVec3(vec3.fromValues(1, 1, 1), "light.specular");
 				shaderInner.setVec3(lightPos, "light.position");
 				shaderInner.setFloat(1.0, "light.constant");
-				shaderInner.setFloat(0.07, "light.linear");
-				shaderInner.setFloat(0.017, "light.quadratic");
+				shaderInner.setFloat(0.007, "light.linear");
+				shaderInner.setFloat(0.0002, "light.quadratic");
+				shaderInner.setVec3(vec3.fromValues(1.0, 0.5, 0.31), "material.ambient");
 				shaderInner.setFloat(64.0, "material.shininess");
 			},
 		});
-		const groundMaterial = new BlinnPhongMaterial({
+		const groundMaterial = new SpotLightMaterial({
 			textures: [
 				{
 					image: groundImage,
@@ -79,14 +97,18 @@ export default function CanvasComponent() {
 				},
 			],
 			uniformsSetter(glInner: WebGL2RenderingContext, shaderInner) {
-				shaderInner.setVec3(scene.camera.position, "cameraPos");
-				shaderInner.setVec3(vec3.fromValues(0.2, 0.2, 0.2), "light.ambient");
-				shaderInner.setVec3(vec3.fromValues(0.9, 0.2, 0.9), "light.diffuse");
+				shaderInner.setVec3(camera.position, "cameraPos");
+				shaderInner.setVec3(vec3.fromValues(0, 0, -1), "light.direction");
+				shaderInner.setFloat(cos(pi / 6), "light.cutOff");
+				shaderInner.setFloat(cos(pi / 3), "light.outerCutOff");
+				shaderInner.setVec3(vec3.fromValues(0.4, 0.4, 0.4), "light.ambient");
+				shaderInner.setVec3(vec3.fromValues(0.9, 0.9, 0.9), "light.diffuse");
 				shaderInner.setVec3(vec3.fromValues(1, 1, 1), "light.specular");
 				shaderInner.setVec3(lightPos, "light.position");
 				shaderInner.setFloat(1.0, "light.constant");
-				shaderInner.setFloat(0.07, "light.linear");
-				shaderInner.setFloat(0.017, "light.quadratic");
+				shaderInner.setFloat(0.007, "light.linear");
+				shaderInner.setFloat(0.0002, "light.quadratic");
+				shaderInner.setVec3(vec3.fromValues(1.0, 0.5, 0.31), "material.ambient");
 				shaderInner.setFloat(64.0, "material.shininess");
 			},
 		});
