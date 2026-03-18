@@ -19,13 +19,13 @@ class Scene {
 		const gl = options.canvas.getContext("webgl2");
 		if (!gl) throw new Error("fail to create webgl2 context");
 		this.gl = new WeakRef(gl);
-		this.camera = options.camera ?? new Camera();
+		this.camera = options.camera ?? options.control?.camera?.deref() ?? new Camera();
 		this.control =
 			options.control ??
 			new FPSControl({
 				camera: this.camera,
-				scene: this,
 			});
+		this.control.setScene(this);
 		gl.enable(gl.DEPTH_TEST);
 		this.requestID = this.render();
 	}

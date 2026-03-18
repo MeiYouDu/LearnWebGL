@@ -1,4 +1,4 @@
-import { Camera, Scene } from "../";
+import { Base, Camera, Scene } from "../";
 import { mat4, quat, vec3 } from "gl-matrix";
 import { debounce } from "lodash";
 import { pi } from "mathjs";
@@ -7,22 +7,24 @@ interface CameraConstructorOptions {
 	speed?: number;
 	sensitivity?: number;
 	camera: Camera;
-	scene: Scene;
 }
 
-class FPSControl {
+class FPSControl extends Base {
 	constructor(options: CameraConstructorOptions) {
+		super();
 		this.camera = new WeakRef(options.camera);
 		this._speed = options.speed || 0.05;
 		this.sensitivity = options.sensitivity || 0.005;
 		this.initFront = vec3.copy(vec3.create(), options.camera.front);
 		this.upOrigin = vec3.copy(vec3.create(), options.camera.up);
-		this.scene = new WeakRef(options.scene);
-		const canvas = options.scene.canvas.deref();
+	}
+	public scene?: WeakRef<Scene>;
+	public readonly sensitivity;
+	public setScene(scene: Scene): void {
+		this.scene = new WeakRef(scene);
+		const canvas = scene.canvas.deref();
 		if (canvas) this.addListener(canvas);
 	}
-	public readonly scene: WeakRef<Scene>;
-	public readonly sensitivity;
 	public camera?: WeakRef<Camera>;
 	public render(gl: WebGL2RenderingContext) {
 		this.updatePosition();
@@ -44,7 +46,7 @@ class FPSControl {
 	 * 销毁实例
 	 */
 	public dispatch() {
-		const canvas = this.scene.deref()?.canvas.deref();
+		const canvas = this.scene?.deref()?.canvas.deref();
 		if (!canvas) return;
 		this.removeListener(canvas);
 	}
@@ -99,7 +101,7 @@ class FPSControl {
 		canvas.removeEventListener("mousemove", this.mouseMoveHandle);
 	}
 	private keydownHandle(ev: KeyboardEvent) {
-		const scene = this.scene.deref();
+		const scene = this.scene?.deref();
 		const camera = this.camera?.deref();
 		if (!camera) return;
 		if (!scene) return;
@@ -133,7 +135,7 @@ class FPSControl {
 	}, 100);
 	private wheelHandle(ev: WheelEvent) {
 		const camera = this.camera?.deref();
-		const scene = this.scene.deref();
+		const scene = this.scene?.deref();
 		if (!scene) return;
 		if (!camera) return;
 		this.dPosition = vec3.scale(
@@ -157,7 +159,7 @@ class FPSControl {
 	private mouseMoveHandle(ev: MouseEvent) {
 		if (!this.mouseIsDown) return;
 		if (this.mouseMoveEvent) {
-			const scene = this.scene.deref();
+			const scene = this.scene?.deref();
 			if (!scene) return;
 			const diffX = ev.offsetX - this.mouseMoveEvent.offsetX;
 			const diffY = ev.offsetY - this.mouseMoveEvent.offsetY;
