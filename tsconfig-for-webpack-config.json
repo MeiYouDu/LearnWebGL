@@ -3,6 +3,7 @@
 		"module": "CommonJS",
 		"target": "ESNext",
 		"esModuleInterop": true,
-		"allowImportingTsExtensions": true
+		"allowImportingTsExtensions": true,
+		"resolveJsonModule": true
 	}
 }

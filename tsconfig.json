@@ -1,8 +1,8 @@
 {
 	"compilerOptions": {
 		"target": "esnext",
-		"module": "CommonJS",
-		"moduleResolution": "node",
+		"module": "commonjs",
+		"moduleResolution": "node10",
 		"allowImportingTsExtensions": true,
 		"emitDeclarationOnly": true,
 		"resolveJsonModule": true,
@@ -23,8 +23,8 @@
 		"lib": ["esnext", "dom"],
 		"jsx": "preserve",
 		"paths": {
-			"@/*": ["src/*"],
-			"@test/*": ["test/*"]
+			"@/*": ["./src/*"],
+			"@test/*": ["./test/*"]
 		}
 	},
 	"include": ["src/**/*", "test/**/*", "*.ts"],
