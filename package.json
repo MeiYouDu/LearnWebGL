@@ -1,7 +1,7 @@
 {
-	"name": "LearnWebGL",
+	"name": "LearnOpenGL",
 	"version": "0.0.0",
-	"description": "学习webgl",
+	"description": "学习OpenGL",
 	"private": false,
 	"packageManager": "pnpm@10.14.0",
 	"repository": {

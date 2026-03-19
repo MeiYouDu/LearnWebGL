@@ -7,6 +7,7 @@ import { env } from "node:process";
 import StylelintWebpackPlugin from "stylelint-webpack-plugin";
 import { Configuration, DefinePlugin } from "webpack";
 import { CONTEXT, EXAMPLE_ENTRY, EXAMPLE_OUTPUT_PATH, EXCLUDE, HTML_TEMPLATE } from "./constant.ts";
+import packageJson from "./package.json";
 
 const config: Configuration = {
 	context: CONTEXT,
@@ -117,7 +118,7 @@ const config: Configuration = {
 	},
 	plugins: [
 		new HtmlWebpackPlugin({
-			title: "Learn OpenGL",
+			title: packageJson.name,
 			filename: "index.html",
 			chunks: ["index"],
 			template: HTML_TEMPLATE,
