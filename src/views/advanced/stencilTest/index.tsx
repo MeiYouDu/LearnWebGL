@@ -14,6 +14,7 @@ import groundImage from "@/assets/textures/metal.png";
 import boxImage from "@/assets/textures/marble.jpg";
 import vert from "@/helperv1/material/spotLightMaterial/spotLight.vert";
 import frag from "./stencliTest.frag";
+import outlineFrag from "./outline.frag";
 import { cos, pi } from "mathjs";
 // attribute 与 Vue 版本保持一致
 const attribute = new Float32Array([
@@ -47,6 +48,7 @@ export default function CanvasComponent() {
 				speed: 0.5,
 				camera,
 			}),
+			stencil: true,
 		});
 		sceneRef.current = scene;
 		// deref gl，兼容你的 Scene 实现（如果是 WeakRef）
@@ -56,22 +58,14 @@ export default function CanvasComponent() {
 			return;
 		}
 		{
-			/**
-			 * 模板测试实现绘制物体边框
-			 */
-			gl.enable(gl.STENCIL_TEST);
-			// 如果通过模板测试和深度测试则替换stencilFunc指定的值
 			gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
-			gl.stencilFunc(gl.ALWAYS, 1, 0xff);
-			gl.stencilMask(0xff);
 		}
 		scene.camera.position = vec3.fromValues(0, -50, 0);
 		// initial angle & light pos
 		const angle = Date.now() * 0.001;
 		const lightPos = vec3.fromValues(0, 0, 20);
-		const shader = new Shader(vert, frag);
 		const boxMaterial = new SpotLightMaterial({
-			shader,
+			shader: new Shader(vert, frag),
 			textures: [
 				{
 					image: boxImage,
@@ -81,7 +75,7 @@ export default function CanvasComponent() {
 					textureLocationName: "material.diffuse",
 				},
 			],
-			uniformsSetter(glInner: WebGL2RenderingContext, shaderInner) {
+			uniformsSetter(gl: WebGL2RenderingContext, shaderInner) {
 				shaderInner.setVec3(camera.position, "cameraPos");
 				shaderInner.setVec3(vec3.fromValues(0, 0, -1), "light.direction");
 				shaderInner.setFloat(cos(pi / 6), "light.cutOff");
@@ -96,9 +90,24 @@ export default function CanvasComponent() {
 				shaderInner.setVec3(vec3.fromValues(1.0, 0.5, 0.31), "material.ambient");
 				shaderInner.setFloat(64.0, "material.shininess");
 			},
+			beforeDraw() {
+				gl.stencilMask(0xff);
+				gl.stencilFunc(gl.ALWAYS, 1, 0xff);
+			},
+		});
+		const outlineMaterial = new SpotLightMaterial({
+			shader: new Shader(vert, outlineFrag),
+			beforeDraw() {
+				gl.stencilMask(0x00);
+				gl.stencilFunc(gl.NOTEQUAL, 1, 0xff);
+			},
+			afterDraw() {
+				gl.stencilMask(0xff);
+				gl.stencilFunc(gl.ALWAYS, 0, 0xff);
+			},
 		});
 		const groundMaterial = new SpotLightMaterial({
-			shader,
+			shader: new Shader(vert, frag),
 			textures: [
 				{
 					image: groundImage,
@@ -129,6 +138,10 @@ export default function CanvasComponent() {
 			attributes: attribute,
 			material: boxMaterial,
 		});
+		const boxOutline = new Geometry({
+			attributes: attribute,
+			material: outlineMaterial,
+		});
 		const groundGeometry = new Geometry({
 			attributes: attribute,
 			material: groundMaterial,
@@ -149,18 +162,37 @@ export default function CanvasComponent() {
 				mat4.fromScaling(mat4.create(), vec3.fromValues(10.0, 10.0, 10.0)),
 			),
 		});
+		const outline1 = new GeometryInstance({
+			geometry: boxOutline,
+			matrix: mat4.multiply(
+				mat4.create(),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, 0)),
+				mat4.fromScaling(mat4.create(), vec3.fromValues(10.5, 10.5, 10.5)),
+			),
+		});
+		const outline2 = new GeometryInstance({
+			geometry: boxOutline,
+			matrix: mat4.multiply(
+				mat4.create(),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(10.0, 15.0, 3.0)),
+				mat4.fromScaling(mat4.create(), vec3.fromValues(10.5, 10.5, 10.5)),
+			),
+		});
 		const groundGeometryInstance = new GeometryInstance({
 			geometry: groundGeometry,
 			matrix: mat4.multiply(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, -10)),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, -5)),
 				mat4.fromScaling(mat4.create(), vec3.fromValues(1000.0, 1000.0, 1.0)),
 			),
 		});
 
 		// register to scene (保持原逻辑)
 		scene.add(boxGeometryInstance);
+		scene.add(outline1);
+
 		scene.add(boxGeometryInstance2);
+		scene.add(outline2);
 		scene.add(groundGeometryInstance);
 
 		return () => {
