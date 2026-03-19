@@ -117,7 +117,7 @@ const config: Configuration = {
 	},
 	plugins: [
 		new HtmlWebpackPlugin({
-			title: "ReactTemplate",
+			title: "Learn OpenGL",
 			filename: "index.html",
 			chunks: ["index"],
 			template: HTML_TEMPLATE,
