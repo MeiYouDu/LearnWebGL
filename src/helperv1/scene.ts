@@ -5,18 +5,10 @@ import { GeometryInstance } from "./geometryInstance.ts";
 /**
  * 场景配置
  */
-interface SceneOptions {
+interface SceneOptions extends WebGLContextAttributes {
 	canvas: HTMLCanvasElement;
 	camera?: Camera;
 	control?: FPSControl;
-	/**
-	 * 深度测试
-	 */
-	depthTest?: boolean;
-	/**
-	 * 模板缓冲
-	 */
-	stencilTest?: boolean;
 }
 /**
  * 场景类
@@ -24,7 +16,7 @@ interface SceneOptions {
 class Scene {
 	constructor(options: SceneOptions) {
 		this.canvas = new WeakRef(options.canvas);
-		const gl = options.canvas.getContext("webgl2");
+		const gl = options.canvas.getContext("webgl2", options);
 		if (!gl) throw new Error("fail to create webgl2 context");
 		this.gl = new WeakRef(gl);
 		this.camera = options.camera ?? options.control?.camera?.deref() ?? new Camera();
@@ -34,10 +26,10 @@ class Scene {
 				camera: this.camera,
 			});
 		this.control.setScene(this);
-		if (options.depthTest !== false) {
+		if (options.depth !== false) {
 			gl.enable(gl.DEPTH_TEST);
 		}
-		if (options.stencilTest) {
+		if (options.stencil) {
 			gl.enable(gl.STENCIL_TEST);
 		}
 		this.requestID = this.render();

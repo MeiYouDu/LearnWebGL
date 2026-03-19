@@ -27,6 +27,18 @@ interface MaterialOptions {
 	 * @param shader
 	 */
 	uniformsSetter?(gl: WebGL2RenderingContext, shader: Material): void;
+	/**
+	 * 绘制前
+	 * @param scene
+	 * @param material
+	 */
+	beforeDraw?(scene: Scene, material: Material): void;
+	/**
+	 * 绘制后
+	 * @param scene
+	 * @param material
+	 */
+	afterDraw?(scene: Scene, material: Material): void;
 }
 
 /**
@@ -41,6 +53,8 @@ class Material extends Base {
 		this.shader = options.shader;
 		this.vertexAttribPointer = options.vertexAttribPointer;
 		this.uniformsSetter = options.uniformsSetter;
+		this.beforeDraw = options.beforeDraw ?? this.beforeDraw;
+		this.afterDraw = options.afterDraw ?? this.afterDraw;
 	}
 	public shader: Shader;
 	public textures: MaterialOptions["textures"];
@@ -242,6 +256,16 @@ class Material extends Base {
 				texture.textureLocationName,
 			);
 		});
+	}
+
+	public beforeDraw(scene: Scene, material: Material) {
+		void scene;
+		void material;
+	}
+
+	public afterDraw(scene: Scene, material: Material) {
+		void scene;
+		void material;
 	}
 }
 export { Material };

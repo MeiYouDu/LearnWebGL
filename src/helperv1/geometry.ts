@@ -61,12 +61,14 @@ class Geometry extends Base {
 		const gl = scene.gl.deref();
 		if (!gl) throw new Error("gl is undefined");
 		gl.bindVertexArray(this.vao);
+		this.material.beforeDraw(scene, this.material);
 		this.material.render(scene, instance);
 		if (this.indices) {
 			gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_INT, 0);
 		} else {
 			gl.drawArrays(gl.TRIANGLES, 0, this.attributes.length / this.stride);
 		}
+		this.material.afterDraw(scene, this.material);
 	}
 }
 
