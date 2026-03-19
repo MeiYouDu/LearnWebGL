@@ -1,6 +1,6 @@
 ## 介绍
 
-一个使用webpack作为构建系统，vue作为web框架的基础工程 pnpm9.x || pnpm10.x作为包管理工具。
+学习opengl的一些 demo
 
 ```shell
 git clone xx #本仓库地址
