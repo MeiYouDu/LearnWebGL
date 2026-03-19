@@ -12,7 +12,7 @@ import {
 } from "@/helperv1";
 import groundImage from "@/assets/textures/metal.png";
 import boxImage from "@/assets/textures/marble.jpg";
-import vert from "@/helperv1/material/blinnPhongMaterial/blinnPhong.vert";
+import vert from "@/helperv1/material/spotLightMaterial/spotLight.vert";
 import frag from "./stencliTest.frag";
 import { cos, pi } from "mathjs";
 // attribute 与 Vue 版本保持一致
