@@ -61,6 +61,7 @@ export default function CanvasComponent() {
 		const lightPos = vec3.fromValues(0, 0, 20);
 		const shader = new Shader(vert, frag);
 		const boxMaterial = new SpotLightMaterial({
+			shader,
 			textures: [
 				{
 					image: boxImage,
@@ -87,6 +88,7 @@ export default function CanvasComponent() {
 			},
 		});
 		const groundMaterial = new SpotLightMaterial({
+			shader,
 			textures: [
 				{
 					image: groundImage,
