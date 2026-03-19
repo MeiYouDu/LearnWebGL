@@ -98,12 +98,14 @@ export default function CanvasComponent() {
 		const outlineMaterial = new SpotLightMaterial({
 			shader: new Shader(vert, outlineFrag),
 			beforeDraw() {
+				// gl.disable(gl.DEPTH_TEST);
 				gl.stencilMask(0x00);
 				gl.stencilFunc(gl.NOTEQUAL, 1, 0xff);
 			},
 			afterDraw() {
-				gl.stencilMask(0xff);
-				gl.stencilFunc(gl.ALWAYS, 0, 0xff);
+				// gl.enable(gl.DEPTH_TEST);
+				// gl.stencilMask(0xff);
+				// gl.stencilFunc(gl.ALWAYS, 1, 0xff);
 			},
 		});
 		const groundMaterial = new SpotLightMaterial({
@@ -188,13 +190,11 @@ export default function CanvasComponent() {
 		});
 
 		// register to scene (保持原逻辑)
-		scene.add(boxGeometryInstance);
-		scene.add(outline1);
-
-		scene.add(boxGeometryInstance2);
-		scene.add(outline2);
 		scene.add(groundGeometryInstance);
-
+		scene.add(boxGeometryInstance);
+		scene.add(boxGeometryInstance2);
+		scene.add(outline1);
+		scene.add(outline2);
 		return () => {
 			try {
 				sceneRef.current?.dispatch?.();
