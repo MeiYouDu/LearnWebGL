@@ -80,7 +80,7 @@ export default function CanvasComponent() {
 			geometry: boxGeometry,
 			matrix: mat4.multiply(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(10.0, 15.0, 3.0)),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(50.0, 200.0, 3.0)),
 				mat4.fromScaling(mat4.create(), vec3.fromValues(10.0, 10.0, 10.0)),
 			),
 		});
