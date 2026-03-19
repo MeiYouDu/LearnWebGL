@@ -55,6 +55,16 @@ export default function CanvasComponent() {
 			console.error("webgl2 context unavailable");
 			return;
 		}
+		{
+			/**
+			 * 模板测试实现绘制物体边框
+			 */
+			gl.enable(gl.STENCIL_TEST);
+			// 如果通过模板测试和深度测试则替换stencilFunc指定的值
+			gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
+			gl.stencilFunc(gl.ALWAYS, 1, 0xff);
+			gl.stencilMask(0xff);
+		}
 		scene.camera.position = vec3.fromValues(0, -50, 0);
 		// initial angle & light pos
 		const angle = Date.now() * 0.001;

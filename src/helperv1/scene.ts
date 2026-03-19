@@ -9,6 +9,14 @@ interface SceneOptions {
 	canvas: HTMLCanvasElement;
 	camera?: Camera;
 	control?: FPSControl;
+	/**
+	 * 深度测试
+	 */
+	depthTest?: boolean;
+	/**
+	 * 模板缓冲
+	 */
+	stencilTest?: boolean;
 }
 /**
  * 场景类
@@ -26,7 +34,12 @@ class Scene {
 				camera: this.camera,
 			});
 		this.control.setScene(this);
-		gl.enable(gl.DEPTH_TEST);
+		if (options.depthTest !== false) {
+			gl.enable(gl.DEPTH_TEST);
+		}
+		if (options.stencilTest) {
+			gl.enable(gl.STENCIL_TEST);
+		}
 		this.requestID = this.render();
 	}
 	public canvas: WeakRef<HTMLCanvasElement>;
@@ -98,7 +111,7 @@ class Scene {
 	 * @private
 	 */
 	private clearScreen(gl: WebGL2RenderingContext) {
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 		gl.clearColor(0.0, 0.0, 0.0, 1);
 	}
 
