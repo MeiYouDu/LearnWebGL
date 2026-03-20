@@ -43,6 +43,23 @@ const advanced: RouteObject[] = [
 					};
 				},
 			},
+			{
+				path: "blend",
+				id: "blend",
+				index: true,
+				hydrateFallbackElement: HydrateFallback,
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "blend" */
+								/* webpackPrefetch: true */
+								"@/views/advanced/blend"
+							)
+						).default,
+					};
+				},
+			},
 		],
 	},
 ];
