@@ -17,6 +17,7 @@ import boxImage from "@/assets/textures/marble.jpg";
 import glassImage from "@/assets/textures/grass.png";
 import vert from "./texture.vert";
 import frag from "./texture.frag";
+import lightFrag from "./light.frag";
 // attribute 与 Vue 版本保持一致
 const boxAttribute = new Float32Array([
 	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, 0.5, -0.5, -0.5, 0, 0, -1, 1, 0, 0.5, 0.5, -0.5, 0, 0, -1, 1,
@@ -42,6 +43,20 @@ const glassAttribute = new Float32Array([
 export default function CanvasComponent() {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const sceneRef = useRef<Scene | null>(null);
+	const intervalRef = useRef<NodeJS.Timeout>(undefined);
+
+	function uniformsSetter(shaderInner: Material, lightPos: vec3) {
+		shaderInner.setVec3((sceneRef.current as Scene).camera.position, "cameraPos");
+		shaderInner.setVec3(vec3.fromValues(0.3, 0.3, 0.3), "light.ambient");
+		shaderInner.setVec3(vec3.fromValues(0.9, 0.9, 0.9), "light.diffuse");
+		shaderInner.setVec3(vec3.fromValues(1, 1, 1), "light.specular");
+		shaderInner.setVec3(lightPos, "light.position");
+		shaderInner.setVec3(vec3.fromValues(1.0, 0.5, 0.31), "material.ambient");
+		shaderInner.setFloat(1.0, "light.constant");
+		shaderInner.setFloat(0.027, "light.linear");
+		shaderInner.setFloat(0.0028, "light.quadratic");
+		shaderInner.setFloat(64.0, "material.shininess");
+	}
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -67,7 +82,8 @@ export default function CanvasComponent() {
 			gl.enable(gl.BLEND);
 		}
 		scene.camera.position = vec3.fromValues(0, -50, 0);
-
+		let angle = 0;
+		const lightPos = vec3.fromValues(Math.cos(angle) * 20, Math.sin(angle) * 20, 0);
 		const boxMaterial = new Material({
 			shader: new Shader(vert, frag),
 			textures: [
@@ -79,6 +95,11 @@ export default function CanvasComponent() {
 					textureLocationName: "material.diffuse",
 				},
 			],
+			vertexAttribPointer: PNTAttribPointer,
+			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
+		});
+		const lightMaterial = new Material({
+			shader: new Shader(vert, lightFrag),
 			vertexAttribPointer: PNTAttribPointer,
 		});
 		const glassMaterial = new Material({
@@ -93,6 +114,7 @@ export default function CanvasComponent() {
 				},
 			],
 			vertexAttribPointer: PTAttribPointer,
+			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
 		});
 		const groundMaterial = new Material({
 			shader: new Shader(vert, frag),
@@ -106,6 +128,11 @@ export default function CanvasComponent() {
 				},
 			],
 			vertexAttribPointer: PNTAttribPointer,
+			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
+		});
+		const lightGeometry = new Geometry({
+			attributes: boxAttribute,
+			material: lightMaterial,
 		});
 		// geometry & instances
 		const boxGeometry = new Geometry({
@@ -124,54 +151,78 @@ export default function CanvasComponent() {
 			geometry: boxGeometry,
 			matrix: mat4.multiply(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(-10, 0, 0)),
-				mat4.fromScaling(mat4.create(), vec3.fromValues(10.0, 10.0, 10.0)),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(-2, 0, 0)),
+				mat4.fromScaling(mat4.create(), vec3.fromValues(2.0, 2.0, 2.0)),
 			),
 		});
 		const boxGeometryInstance2 = new GeometryInstance({
 			geometry: boxGeometry,
 			matrix: mat4.multiply(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(10.0, 15.0, 3.0)),
-				mat4.fromScaling(mat4.create(), vec3.fromValues(10.0, 10.0, 10.0)),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(2, 2, 0)),
+				mat4.fromScaling(mat4.create(), vec3.fromValues(2.0, 2.0, 2.0)),
 			),
 		});
 		const outline1 = new GeometryInstance({
 			geometry: glassGeometry,
 			matrix: mat4.mul(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(-20.0, -25.0, 0.0)),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(-2.0, -2.0, 0.0)),
 				mat4.multiply(
 					mat4.create(),
 					mat4.fromXRotation(mat4.create(), -Math.PI / 2),
-					mat4.fromScaling(mat4.create(), vec3.fromValues(10.5, 10.5, 10.5)),
+					mat4.fromScaling(mat4.create(), vec3.fromValues(1, 1, 1)),
 				),
 			),
 		});
 		const outline2 = new GeometryInstance({
 			geometry: glassGeometry,
-			matrix: mat4.multiply(
+			matrix: mat4.mul(
 				mat4.create(),
-				mat4.fromXRotation(mat4.create(), -Math.PI / 2),
-				mat4.fromScaling(mat4.create(), vec3.fromValues(10.5, 10.5, 10.5)),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(2.0, -2.0, 0.0)),
+				mat4.multiply(
+					mat4.create(),
+					mat4.fromXRotation(mat4.create(), -Math.PI / 2),
+					mat4.fromScaling(mat4.create(), vec3.fromValues(1, 1, 1)),
+				),
 			),
 		});
 		const groundGeometryInstance = new GeometryInstance({
 			geometry: groundGeometry,
 			matrix: mat4.multiply(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, -5)),
-				mat4.fromScaling(mat4.create(), vec3.fromValues(1000.0, 1000.0, 1.0)),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, -1)),
+				mat4.fromScaling(mat4.create(), vec3.fromValues(100, 100, 1.0)),
+			),
+		});
+		const lightGeometryInstance = new GeometryInstance({
+			geometry: lightGeometry,
+			matrix: mat4.multiply(
+				mat4.create(),
+				mat4.fromTranslation(mat4.create(), lightPos),
+				mat4.fromScaling(mat4.create(), vec3.fromValues(0.5, 0.5, 0.5)),
 			),
 		});
 
 		// register to scene (保持原逻辑)
 		scene.add(groundGeometryInstance);
+		scene.add(lightGeometryInstance);
 		scene.add(boxGeometryInstance);
 		scene.add(boxGeometryInstance2);
 		scene.add(outline1);
 		scene.add(outline2);
+		intervalRef.current = setInterval(() => {
+			angle = new Date().getTime() * 0.001;
+			lightPos[0] = Math.cos(angle) * 5;
+			lightPos[1] = Math.sin(angle) * 5;
+			lightGeometryInstance.matrix = mat4.multiply(
+				mat4.create(),
+				mat4.fromTranslation(mat4.create(), lightPos),
+				mat4.fromScaling(mat4.create(), vec3.fromValues(0.5, 0.5, 0.5)),
+			);
+		}, 16);
 		return () => {
+			clearInterval(intervalRef.current);
 			try {
 				sceneRef.current?.dispatch?.();
 			} catch (e) {
