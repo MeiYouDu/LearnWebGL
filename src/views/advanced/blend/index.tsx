@@ -1,6 +1,6 @@
 // CanvasComponent.tsx
 import { useEffect, useRef } from "react";
-import { mat4, vec3 } from "gl-matrix";
+import { mat4, vec3, vec4 } from "gl-matrix";
 import {
 	Scene,
 	Geometry,
@@ -15,6 +15,7 @@ import {
 import groundImage from "@/assets/textures/metal.png";
 import boxImage from "@/assets/textures/marble.jpg";
 import glassImage from "@/assets/textures/grass.png";
+import windowImage from "@/assets/textures/window.png";
 import vert from "./texture.vert";
 import frag from "./texture.frag";
 import lightFrag from "./light.frag";
@@ -47,9 +48,9 @@ export default function CanvasComponent() {
 
 	function uniformsSetter(shaderInner: Material, lightPos: vec3) {
 		shaderInner.setVec3((sceneRef.current as Scene).camera.position, "cameraPos");
-		shaderInner.setVec3(vec3.fromValues(0.3, 0.3, 0.3), "light.ambient");
-		shaderInner.setVec3(vec3.fromValues(0.9, 0.9, 0.9), "light.diffuse");
-		shaderInner.setVec3(vec3.fromValues(1, 1, 1), "light.specular");
+		shaderInner.setFloat(0.3, "light.ambient");
+		shaderInner.setFloat(0.9, "light.diffuse");
+		shaderInner.setFloat(1.0, "light.specular");
 		shaderInner.setVec3(lightPos, "light.position");
 		shaderInner.setVec3(vec3.fromValues(1.0, 0.5, 0.31), "material.ambient");
 		shaderInner.setFloat(1.0, "light.constant");
@@ -57,7 +58,6 @@ export default function CanvasComponent() {
 		shaderInner.setFloat(0.0028, "light.quadratic");
 		shaderInner.setFloat(64.0, "material.shininess");
 	}
-
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
@@ -66,7 +66,7 @@ export default function CanvasComponent() {
 		const scene = new Scene({
 			canvas,
 			control: new FPSControl({
-				speed: 1,
+				speed: 0.1,
 				camera,
 			}),
 			alpha: true,
@@ -80,6 +80,7 @@ export default function CanvasComponent() {
 		}
 		{
 			gl.enable(gl.BLEND);
+			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		}
 		scene.camera.position = vec3.fromValues(0, -50, 0);
 		let angle = 0;
@@ -93,6 +94,13 @@ export default function CanvasComponent() {
 					height: 1024,
 					textureUnit: 0,
 					textureLocationName: "material.diffuse",
+				},
+				{
+					image: boxImage,
+					width: 256,
+					height: 256,
+					textureUnit: 5,
+					textureLocationName: "material.specular",
 				},
 			],
 			vertexAttribPointer: PNTAttribPointer,
@@ -126,8 +134,36 @@ export default function CanvasComponent() {
 					textureUnit: 2,
 					textureLocationName: "material.diffuse",
 				},
+				{
+					image: groundImage,
+					width: 1024,
+					height: 1024,
+					textureUnit: 6,
+					textureLocationName: "material.specular",
+				},
 			],
 			vertexAttribPointer: PNTAttribPointer,
+			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
+		});
+		const windowMaterial = new Material({
+			shader: new Shader(vert, frag),
+			textures: [
+				{
+					image: windowImage,
+					width: 256,
+					height: 256,
+					textureUnit: 3,
+					textureLocationName: "material.diffuse",
+				},
+				{
+					image: windowImage,
+					width: 256,
+					height: 256,
+					textureUnit: 4,
+					textureLocationName: "material.specular",
+				},
+			],
+			vertexAttribPointer: PTAttribPointer,
 			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
 		});
 		const lightGeometry = new Geometry({
@@ -142,6 +178,10 @@ export default function CanvasComponent() {
 		const glassGeometry = new Geometry({
 			attributes: glassAttribute,
 			material: glassMaterial,
+		});
+		const windowGeometry = new Geometry({
+			attributes: glassAttribute,
+			material: windowMaterial,
 		});
 		const groundGeometry = new Geometry({
 			attributes: boxAttribute,
@@ -187,6 +227,30 @@ export default function CanvasComponent() {
 				),
 			),
 		});
+		const windowInstance = new GeometryInstance({
+			geometry: windowGeometry,
+			matrix: mat4.mul(
+				mat4.create(),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(3.0, -4.0, 0.0)),
+				mat4.multiply(
+					mat4.create(),
+					mat4.fromXRotation(mat4.create(), -Math.PI / 2),
+					mat4.fromScaling(mat4.create(), vec3.fromValues(1, 1, 1)),
+				),
+			),
+		});
+		const windowInstance2 = new GeometryInstance({
+			geometry: windowGeometry,
+			matrix: mat4.mul(
+				mat4.create(),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(4.0, -6.0, 0.0)),
+				mat4.multiply(
+					mat4.create(),
+					mat4.fromXRotation(mat4.create(), -Math.PI / 2),
+					mat4.fromScaling(mat4.create(), vec3.fromValues(1, 1, 1)),
+				),
+			),
+		});
 		const groundGeometryInstance = new GeometryInstance({
 			geometry: groundGeometry,
 			matrix: mat4.multiply(
@@ -211,6 +275,8 @@ export default function CanvasComponent() {
 		scene.add(boxGeometryInstance2);
 		scene.add(outline1);
 		scene.add(outline2);
+		scene.add(windowInstance);
+		scene.add(windowInstance2);
 		intervalRef.current = setInterval(() => {
 			angle = new Date().getTime() * 0.001;
 			lightPos[0] = Math.cos(angle) * 5;
