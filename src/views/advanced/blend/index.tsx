@@ -56,7 +56,7 @@ export default function CanvasComponent() {
 		shaderInner.setFloat(1.0, "light.constant");
 		shaderInner.setFloat(0.027, "light.linear");
 		shaderInner.setFloat(0.0028, "light.quadratic");
-		shaderInner.setFloat(64.0, "material.shininess");
+		shaderInner.setFloat(128.0, "material.shininess");
 	}
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -278,7 +278,7 @@ export default function CanvasComponent() {
 		scene.add(windowInstance);
 		scene.add(windowInstance2);
 		intervalRef.current = setInterval(() => {
-			angle = new Date().getTime() * 0.001;
+			angle = new Date().getTime() * 0.0005;
 			lightPos[0] = Math.cos(angle) * 5;
 			lightPos[1] = Math.sin(angle) * 5;
 			lightGeometryInstance.matrix = mat4.multiply(
