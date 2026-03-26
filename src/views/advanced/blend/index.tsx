@@ -123,6 +123,7 @@ export default function CanvasComponent() {
 			],
 			vertexAttribPointer: PTAttribPointer,
 			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
+			blend: true,
 		});
 		const groundMaterial = new Material({
 			shader: new Shader(vert, frag),
@@ -165,6 +166,7 @@ export default function CanvasComponent() {
 			],
 			vertexAttribPointer: PTAttribPointer,
 			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
+			blend: true,
 		});
 		const lightGeometry = new Geometry({
 			attributes: boxAttribute,
