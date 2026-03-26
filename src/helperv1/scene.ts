@@ -1,3 +1,4 @@
+import { mat3, mat4, vec2, vec3 } from "gl-matrix";
 import { FPSControl } from "./";
 import { Camera } from "./camera.ts";
 import { GeometryInstance } from "./geometryInstance.ts";
@@ -121,10 +122,23 @@ class Scene {
 		this.resize();
 		this.clearScreen(gl);
 		this.control.render(gl);
-		//TODO 混合排序
+		const noBlend: GeometryInstance[] = [];
+		const blend: GeometryInstance[] = [];
 		this.geometryMap.forEach((item) => {
-			item.render(this);
+			if (item.geometry.material.blend) {
+				blend.push(item);
+			} else {
+				noBlend.push(item);
+			}
 		});
+		blend.sort((a, b) => {
+			const aPos = mat4.getTranslation(vec3.create(), a.matrix);
+			const bPos = mat4.getTranslation(vec3.create(), b.matrix);
+			const cPos = this.camera.position;
+			return vec3.sqrDist(bPos, cPos) - vec3.sqrDist(aPos, cPos);
+		});
+		noBlend.forEach((item) => item.render(this));
+		blend.forEach((item) => item.render(this));
 		this.requestID = requestAnimationFrame(() => this.render());
 		return this.requestID;
 	}
