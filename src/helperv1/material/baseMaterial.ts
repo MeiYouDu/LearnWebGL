@@ -39,6 +39,10 @@ interface MaterialOptions {
 	 * @param material
 	 */
 	afterDraw?(scene: Scene, material: Material): void;
+	/**
+	 * 开启混合
+	 */
+	blend?: boolean;
 }
 
 /**
@@ -55,11 +59,13 @@ class Material extends Base {
 		this.uniformsSetter = options.uniformsSetter;
 		this.beforeDraw = options.beforeDraw ?? this.beforeDraw;
 		this.afterDraw = options.afterDraw ?? this.afterDraw;
+		this.blend = options.blend ?? this.blend;
 	}
 	public shader: Shader;
 	public textures: MaterialOptions["textures"];
 	public vertexAttribPointer: MaterialOptions["vertexAttribPointer"];
 	public uniformsSetter: MaterialOptions["uniformsSetter"];
+	public blend = false;
 	private setTextureParams(gl: WebGL2RenderingContext) {
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);

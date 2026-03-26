@@ -24,7 +24,7 @@ class Geometry extends Base {
 	}
 	private stride: number = 1;
 	private vao?: WebGLVertexArrayObject;
-	private readonly material: Required<GeometryOptions>["material"];
+	public readonly material: Required<GeometryOptions>["material"];
 	public attributes: Float32Array;
 	public indices?: Uint32Array;
 	public setScene(scene: Scene): void {

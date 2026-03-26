@@ -121,6 +121,7 @@ class Scene {
 		this.resize();
 		this.clearScreen(gl);
 		this.control.render(gl);
+		//TODO 混合排序
 		this.geometryMap.forEach((item) => {
 			item.render(this);
 		});
