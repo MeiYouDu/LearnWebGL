@@ -77,6 +77,23 @@ const advanced: RouteObject[] = [
 					};
 				},
 			},
+			{
+				path: "frameBuffer",
+				id: "frameBuffer",
+				index: true,
+				hydrateFallbackElement: HydrateFallback,
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "frameBuffer" */
+								/* webpackPrefetch: true */
+								"@/views/advanced/frameBuffer"
+							)
+						).default,
+					};
+				},
+			},
 		],
 	},
 ];
