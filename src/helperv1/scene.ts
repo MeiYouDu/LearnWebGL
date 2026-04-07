@@ -137,8 +137,22 @@ class Scene {
 			const cPos = this.camera.position;
 			return vec3.sqrDist(bPos, cPos) - vec3.sqrDist(aPos, cPos);
 		});
-		noBlend.forEach((item) => item.render(this));
-		blend.forEach((item) => item.render(this));
+		noBlend.forEach((item) => {
+			if (item.geometry.material.culling) {
+				gl.enable(gl.CULL_FACE);
+			} else {
+				gl.disable(gl.CULL_FACE);
+			}
+			item.render(this);
+		});
+		blend.forEach((item) => {
+			if (item.geometry.material.culling) {
+				gl.enable(gl.CULL_FACE);
+			} else {
+				gl.disable(gl.CULL_FACE);
+			}
+			item.render(this);
+		});
 		this.requestID = requestAnimationFrame(() => this.render());
 		return this.requestID;
 	}

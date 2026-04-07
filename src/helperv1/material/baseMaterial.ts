@@ -43,6 +43,10 @@ interface MaterialOptions {
 	 * 开启混合
 	 */
 	blend?: boolean;
+	/**
+	 * 面剔除
+	 */
+	culling?: boolean;
 }
 
 /**
@@ -60,12 +64,14 @@ class Material extends Base {
 		this.beforeDraw = options.beforeDraw ?? this.beforeDraw;
 		this.afterDraw = options.afterDraw ?? this.afterDraw;
 		this.blend = options.blend ?? this.blend;
+		this.culling = options.culling ?? this.culling;
 	}
 	public shader: Shader;
 	public textures: MaterialOptions["textures"];
 	public vertexAttribPointer: MaterialOptions["vertexAttribPointer"];
 	public uniformsSetter: MaterialOptions["uniformsSetter"];
 	public blend = false;
+	public culling = false;
 	private setTextureParams(gl: WebGL2RenderingContext) {
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
