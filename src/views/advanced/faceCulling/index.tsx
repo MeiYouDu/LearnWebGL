@@ -59,6 +59,7 @@ export default function CanvasComponent() {
 	const intervalRef = useRef<NodeJS.Timeout>(undefined);
 	const [enableCullFace] = useState(true);
 	const [backCull] = useState(true);
+	const needCullMaterial = useRef<Array<Material>>([]);
 
 	function uniformsSetter(shaderInner: Material, lightPos: vec3) {
 		shaderInner.setVec3((sceneRef.current as Scene).camera.position, "cameraPos");
@@ -95,7 +96,6 @@ export default function CanvasComponent() {
 		{
 			gl.enable(gl.BLEND);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-			gl.enable(gl.CULL_FACE);
 		}
 		scene.camera.position = vec3.fromValues(0, -50, 0);
 		let angle = 0;
@@ -120,16 +120,12 @@ export default function CanvasComponent() {
 			],
 			vertexAttribPointer: PNTAttribPointer,
 			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
-			beforeDraw() {
-				gl.enable(gl.CULL_FACE);
-			},
+			culling: true,
 		});
+		needCullMaterial.current.push(boxMaterial);
 		const lightMaterial = new Material({
 			shader: new Shader(vert, lightFrag),
 			vertexAttribPointer: PNTAttribPointer,
-			beforeDraw() {
-				gl.enable(gl.CULL_FACE);
-			},
 		});
 		const glassMaterial = new Material({
 			shader: new Shader(vert, frag),
@@ -145,9 +141,6 @@ export default function CanvasComponent() {
 			vertexAttribPointer: PTAttribPointer,
 			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
 			blend: true,
-			beforeDraw() {
-				gl.disable(gl.CULL_FACE);
-			},
 		});
 		const groundMaterial = new Material({
 			shader: new Shader(vert, frag),
@@ -169,9 +162,6 @@ export default function CanvasComponent() {
 			],
 			vertexAttribPointer: PNTAttribPointer,
 			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
-			beforeDraw() {
-				gl.disable(gl.CULL_FACE);
-			},
 		});
 		const windowMaterial = new Material({
 			shader: new Shader(vert, frag),
@@ -194,9 +184,6 @@ export default function CanvasComponent() {
 			vertexAttribPointer: PTAttribPointer,
 			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
 			blend: true,
-			beforeDraw() {
-				gl.disable(gl.CULL_FACE);
-			},
 		});
 		const lightGeometry = new Geometry({
 			attributes: boxAttribute,
@@ -340,11 +327,9 @@ export default function CanvasComponent() {
 					onChange={(val) => {
 						const gl = sceneRef.current?.gl.deref();
 						if (!gl) return;
-						if (val.target.checked) {
-							gl.enable(gl.CULL_FACE);
-						} else {
-							gl.disable(gl.CULL_FACE);
-						}
+						needCullMaterial.current.forEach(
+							(item) => (item.culling = val.target.checked),
+						);
 					}}>
 					开启面剔除
 				</Checkbox>
