@@ -60,6 +60,23 @@ const advanced: RouteObject[] = [
 					};
 				},
 			},
+			{
+				path: "faceCulling",
+				id: "faceCulling",
+				index: true,
+				hydrateFallbackElement: HydrateFallback,
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "faceCulling" */
+								/* webpackPrefetch: true */
+								"@/views/advanced/faceCulling"
+							)
+						).default,
+					};
+				},
+			},
 		],
 	},
 ];
