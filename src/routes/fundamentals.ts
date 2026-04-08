@@ -100,6 +100,22 @@ const fundamentals: RouteObject[] = [
 					};
 				},
 			},
+			{
+				path: "quaternion",
+				id: "quaternion",
+				hydrateFallbackElement: HydrateFallback,
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "quaternion" */
+								/* webpackPrefetch: true */
+								"@/views/fundamentals/quaternion"
+							)
+						).default,
+					};
+				},
+			},
 		],
 	},
 ];
