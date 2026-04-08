@@ -182,16 +182,14 @@ export default function CanvasComponent() {
 			if (index === 0) {
 				// X轴：通常使用局部轴旋转 (Pitch)
 				quat.setAxisAngle(deltaQuat, [1, 0, 0], dif);
-				// quat.multiply(initQuat, initQuat, deltaQuat); // 右乘 = 局部
-				quat.multiply(initQuat, deltaQuat, initQuat); // 左乘 = 全局
+				quat.multiply(initQuat, initQuat, deltaQuat); // 右乘 = 局部
 			} else if (index === 1) {
-				// Y轴：建议使用全局轴旋转 (Yaw)，符合操作直觉
+				// roll
 				quat.setAxisAngle(deltaQuat, [0, 1, 0], dif);
-				quat.multiply(initQuat, deltaQuat, initQuat); // 左乘 = 全局
+				quat.multiply(initQuat, initQuat, deltaQuat);
 			} else if (index === 2) {
-				// Z轴：局部旋转 (Roll)
+				// yaw
 				quat.setAxisAngle(deltaQuat, [0, 0, 1], dif);
-				// quat.multiply(initQuat, initQuat, deltaQuat);
 				quat.multiply(initQuat, deltaQuat, initQuat); // 左乘 = 全局
 			}
 			geometry.current.matrix = mat4.mul(
