@@ -1,25 +1,20 @@
 // CanvasComponent.tsx
-import { useEffect, useRef, useState } from "react";
-import { mat4, vec3, vec4 } from "gl-matrix";
+import boxImage from "@/assets/textures/marble.jpg";
 import {
-	Scene,
+	Camera,
+	FPSControl,
 	Geometry,
 	GeometryInstance,
-	FPSControl,
-	Camera,
-	Shader,
-	PTAttribPointer,
 	Material,
 	PNTAttribPointer,
+	Scene,
+	Shader,
 } from "@/helperv1";
-import groundImage from "@/assets/textures/metal.png";
-import boxImage from "@/assets/textures/marble.jpg";
-import glassImage from "@/assets/textures/grass.png";
-import windowImage from "@/assets/textures/window.png";
-import vert from "./texture.vert";
+import { Slider, Switch } from "antd";
+import { mat4, quat, vec3 } from "gl-matrix";
+import { useEffect, useRef, useState } from "react";
 import frag from "./texture.frag";
-import lightFrag from "./light.frag";
-import { Checkbox, Switch } from "antd";
+import vert from "./texture.vert";
 // attribute 与 Vue 版本保持一致
 const boxAttribute = new Float32Array([
 	// Back face
@@ -48,29 +43,24 @@ const boxAttribute = new Float32Array([
 	0, 1, 0, 0.0, 0.0,
 ]);
 
-const glassAttribute = new Float32Array([
-	-0.5, -0.5, 0.0, 0.0, 0.0, -0.5, 0.5, 0.0, 0.0, 1.0, 0.5, 0.5, 0.0, 1.0, 1.0, -0.5, -0.5, 0.0,
-	0.0, 0.0, 0.5, 0.5, 0.0, 1.0, 1.0, 0.5, -0.5, 0.0, 1.0, 0.0,
-]);
-
 export default function CanvasComponent() {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const sceneRef = useRef<Scene | null>(null);
 	const intervalRef = useRef<NodeJS.Timeout>(undefined);
-	const [enableCullFace] = useState(true);
-	const [backCull] = useState(true);
-	const needCullMaterial = useRef<Array<Material>>([]);
+	const [mode, setMode] = useState(true);
+	const geometry = useRef<GeometryInstance | undefined>(undefined);
+	const angleRef = useRef<vec3>(vec3.create());
 
 	function uniformsSetter(shaderInner: Material, lightPos: vec3) {
 		shaderInner.setVec3((sceneRef.current as Scene).camera.position, "cameraPos");
-		shaderInner.setFloat(0.3, "light.ambient");
-		shaderInner.setFloat(0.9, "light.diffuse");
+		shaderInner.setFloat(0.7, "light.ambient");
+		shaderInner.setFloat(0.95, "light.diffuse");
 		shaderInner.setFloat(1.0, "light.specular");
 		shaderInner.setVec3(lightPos, "light.position");
 		shaderInner.setVec3(vec3.fromValues(1.0, 0.5, 0.31), "material.ambient");
 		shaderInner.setFloat(1.0, "light.constant");
-		shaderInner.setFloat(0.027, "light.linear");
-		shaderInner.setFloat(0.0028, "light.quadratic");
+		shaderInner.setFloat(0.0135, "light.linear");
+		shaderInner.setFloat(0.0014, "light.quadratic");
 		shaderInner.setFloat(128.0, "material.shininess");
 	}
 	useEffect(() => {
@@ -97,8 +87,8 @@ export default function CanvasComponent() {
 			gl.enable(gl.BLEND);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		}
-		scene.camera.position = vec3.fromValues(0, -50, 0);
-		let angle = 0;
+		scene.camera.position = vec3.fromValues(0, -8, 0);
+		const angle = 0;
 		const lightPos = vec3.fromValues(Math.cos(angle) * 20, Math.sin(angle) * 20, 0);
 		const boxMaterial = new Material({
 			shader: new Shader(vert, frag),
@@ -122,190 +112,26 @@ export default function CanvasComponent() {
 			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
 			culling: true,
 		});
-		needCullMaterial.current.push(boxMaterial);
-		const lightMaterial = new Material({
-			shader: new Shader(vert, lightFrag),
-			vertexAttribPointer: PNTAttribPointer,
-		});
-		const glassMaterial = new Material({
-			shader: new Shader(vert, frag),
-			textures: [
-				{
-					image: glassImage,
-					width: 512,
-					height: 512,
-					textureUnit: 1,
-					textureLocationName: "material.diffuse",
-				},
-			],
-			vertexAttribPointer: PTAttribPointer,
-			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
-			blend: true,
-		});
-		const groundMaterial = new Material({
-			shader: new Shader(vert, frag),
-			textures: [
-				{
-					image: groundImage,
-					width: 1024,
-					height: 1024,
-					textureUnit: 2,
-					textureLocationName: "material.diffuse",
-				},
-				{
-					image: groundImage,
-					width: 1024,
-					height: 1024,
-					textureUnit: 6,
-					textureLocationName: "material.specular",
-				},
-			],
-			vertexAttribPointer: PNTAttribPointer,
-			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
-		});
-		const windowMaterial = new Material({
-			shader: new Shader(vert, frag),
-			textures: [
-				{
-					image: windowImage,
-					width: 256,
-					height: 256,
-					textureUnit: 3,
-					textureLocationName: "material.diffuse",
-				},
-				{
-					image: windowImage,
-					width: 256,
-					height: 256,
-					textureUnit: 4,
-					textureLocationName: "material.specular",
-				},
-			],
-			vertexAttribPointer: PTAttribPointer,
-			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
-			blend: true,
-		});
-		const lightGeometry = new Geometry({
-			attributes: boxAttribute,
-			material: lightMaterial,
-		});
 		// geometry & instances
 		const boxGeometry = new Geometry({
 			attributes: boxAttribute,
 			material: boxMaterial,
 		});
-		const glassGeometry = new Geometry({
-			attributes: glassAttribute,
-			material: glassMaterial,
-		});
-		const windowGeometry = new Geometry({
-			attributes: glassAttribute,
-			material: windowMaterial,
-		});
-		const groundGeometry = new Geometry({
-			attributes: boxAttribute,
-			material: groundMaterial,
-		});
 		const boxGeometryInstance = new GeometryInstance({
 			geometry: boxGeometry,
 			matrix: mat4.multiply(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(-2, 0, 0)),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, 0)),
 				mat4.fromScaling(mat4.create(), vec3.fromValues(2.0, 2.0, 2.0)),
 			),
 		});
-		const boxGeometryInstance2 = new GeometryInstance({
-			geometry: boxGeometry,
-			matrix: mat4.multiply(
-				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(2, 2, 0)),
-				mat4.fromScaling(mat4.create(), vec3.fromValues(2.0, 2.0, 2.0)),
-			),
-		});
-		const outline1 = new GeometryInstance({
-			geometry: glassGeometry,
-			matrix: mat4.mul(
-				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(-2.0, -2.0, 0.0)),
-				mat4.multiply(
-					mat4.create(),
-					mat4.fromXRotation(mat4.create(), -Math.PI / 2),
-					mat4.fromScaling(mat4.create(), vec3.fromValues(1, 1, 1)),
-				),
-			),
-		});
-		const outline2 = new GeometryInstance({
-			geometry: glassGeometry,
-			matrix: mat4.mul(
-				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(2.0, -2.0, 0.0)),
-				mat4.multiply(
-					mat4.create(),
-					mat4.fromXRotation(mat4.create(), -Math.PI / 2),
-					mat4.fromScaling(mat4.create(), vec3.fromValues(1, 1, 1)),
-				),
-			),
-		});
-		const windowInstance = new GeometryInstance({
-			geometry: windowGeometry,
-			matrix: mat4.mul(
-				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(3.0, -4.0, 0.0)),
-				mat4.multiply(
-					mat4.create(),
-					mat4.fromXRotation(mat4.create(), -Math.PI / 2),
-					mat4.fromScaling(mat4.create(), vec3.fromValues(1, 1, 1)),
-				),
-			),
-		});
-		const windowInstance2 = new GeometryInstance({
-			geometry: windowGeometry,
-			matrix: mat4.mul(
-				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(4.0, -6.0, 0.0)),
-				mat4.multiply(
-					mat4.create(),
-					mat4.fromXRotation(mat4.create(), -Math.PI / 2),
-					mat4.fromScaling(mat4.create(), vec3.fromValues(1, 1, 1)),
-				),
-			),
-		});
-		const groundGeometryInstance = new GeometryInstance({
-			geometry: groundGeometry,
-			matrix: mat4.multiply(
-				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, -1)),
-				mat4.fromScaling(mat4.create(), vec3.fromValues(100, 100, 1.0)),
-			),
-		});
-		const lightGeometryInstance = new GeometryInstance({
-			geometry: lightGeometry,
-			matrix: mat4.multiply(
-				mat4.create(),
-				mat4.fromTranslation(mat4.create(), lightPos),
-				mat4.fromScaling(mat4.create(), vec3.fromValues(0.5, 0.5, 0.5)),
-			),
-		});
-
-		// register to scene (保持原逻辑)
-		scene.add(groundGeometryInstance);
-		scene.add(lightGeometryInstance);
+		geometry.current = boxGeometryInstance;
 		scene.add(boxGeometryInstance);
-		scene.add(boxGeometryInstance2);
-		scene.add(outline1);
-		scene.add(outline2);
-		scene.add(windowInstance);
-		scene.add(windowInstance2);
-		intervalRef.current = setInterval(() => {
-			angle = new Date().getTime() * 0.0005;
-			lightPos[0] = Math.cos(angle) * 5;
-			lightPos[1] = Math.sin(angle) * 5;
-			lightGeometryInstance.matrix = mat4.multiply(
-				mat4.create(),
-				mat4.fromTranslation(mat4.create(), lightPos),
-				mat4.fromScaling(mat4.create(), vec3.fromValues(0.5, 0.5, 0.5)),
-			);
-		}, 16);
+		// intervalRef.current = setInterval(() => {
+		// 	angle = new Date().getTime() * 0.0005;
+		// 	lightPos[0] = Math.cos(angle) * 5;
+		// 	lightPos[1] = Math.sin(angle) * 5;
+		// }, 16);
 		return () => {
 			clearInterval(intervalRef.current);
 			try {
@@ -317,35 +143,106 @@ export default function CanvasComponent() {
 			}
 		};
 	}, []); // 仅挂载一次
+	const initQuat = quat.create();
+
+	function angleChangeHandle(value: number, index: number) {
+		const radian = (value / 180) * Math.PI;
+		if (!geometry.current) return;
+		const init = mat4.multiply(
+			mat4.create(),
+			mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, 0)),
+			mat4.fromScaling(mat4.create(), vec3.fromValues(2.0, 2.0, 2.0)),
+		);
+		// 欧拉角
+		if (mode) {
+			const mx = mat4.fromRotation(
+				mat4.create(),
+				angleRef.current[0],
+				vec3.fromValues(1, 0, 0),
+			);
+			const my = mat4.fromRotation(
+				mat4.create(),
+				angleRef.current[1],
+				vec3.fromValues(0, 1, 0),
+			);
+			const mz = mat4.fromRotation(
+				mat4.create(),
+				angleRef.current[2],
+				vec3.fromValues(0, 0, 1),
+			);
+			geometry.current.matrix = mat4.mul(
+				mat4.create(),
+				init,
+				mat4.mul(mat4.create(), mz, mat4.mul(mat4.create(), my, mx)),
+			);
+		} else {
+			// 四元数
+			const dif = radian - angleRef.current[index];
+			const deltaQuat = quat.create();
+			if (index === 0) {
+				// X轴：通常使用局部轴旋转 (Pitch)
+				quat.setAxisAngle(deltaQuat, [1, 0, 0], dif);
+				// quat.multiply(initQuat, initQuat, deltaQuat); // 右乘 = 局部
+				quat.multiply(initQuat, deltaQuat, initQuat); // 左乘 = 全局
+			} else if (index === 1) {
+				// Y轴：建议使用全局轴旋转 (Yaw)，符合操作直觉
+				quat.setAxisAngle(deltaQuat, [0, 1, 0], dif);
+				quat.multiply(initQuat, deltaQuat, initQuat); // 左乘 = 全局
+			} else if (index === 2) {
+				// Z轴：局部旋转 (Roll)
+				quat.setAxisAngle(deltaQuat, [0, 0, 1], dif);
+				// quat.multiply(initQuat, initQuat, deltaQuat);
+				quat.multiply(initQuat, deltaQuat, initQuat); // 左乘 = 全局
+			}
+			geometry.current.matrix = mat4.mul(
+				mat4.create(),
+				init,
+				mat4.fromQuat(mat4.create(), initQuat),
+			);
+		}
+		angleRef.current[index] = radian;
+	}
 
 	// canvas 的样式/属性如需自定义可以把 width/height 作 props
 	return (
 		<div className="relative h-full w-full">
 			<div className="absolute left-8 top-8 flex flex-col rounded bg-[rgba(255,255,255,0.5)] p-2">
-				<Checkbox
-					defaultChecked={enableCullFace}
-					onChange={(val) => {
-						const gl = sceneRef.current?.gl.deref();
-						if (!gl) return;
-						needCullMaterial.current.forEach(
-							(item) => (item.culling = val.target.checked),
-						);
-					}}>
-					开启面剔除
-				</Checkbox>
 				<Switch
-					defaultChecked={backCull}
-					checkedChildren="剔除背面"
-					unCheckedChildren="剔除正面"
-					onChange={(val) => {
-						const gl = sceneRef.current?.gl.deref();
-						if (!gl) return;
-						if (val) {
-							gl.cullFace(gl.BACK);
-						} else {
-							gl.cullFace(gl.FRONT);
-						}
-					}}></Switch>
+					className="w-16"
+					defaultChecked={mode}
+					checkedChildren="欧拉角"
+					unCheckedChildren="四元数"
+					onChange={setMode}></Switch>
+				<div className="flex w-60 items-center text-white">
+					<span className="w-16">yaw:</span>
+					<Slider
+						className="w-[calc(100%-64px)]"
+						defaultValue={angleRef.current[2]}
+						min={-180}
+						max={180}
+						onChange={(value) => angleChangeHandle(value, 2)}
+					/>
+				</div>
+				<div className="flex w-60 items-center text-white">
+					<span className="w-16">pitch:</span>
+					<Slider
+						className="w-[calc(100%-64px)]"
+						defaultValue={angleRef.current[0]}
+						min={-180}
+						max={180}
+						onChange={(value) => angleChangeHandle(value, 0)}
+					/>
+				</div>
+				<div className="flex w-60 items-center text-white">
+					<span className="w-16">roll:</span>
+					<Slider
+						className="w-[calc(100%-64px)]"
+						defaultValue={angleRef.current[1]}
+						min={-180}
+						max={180}
+						onChange={(value) => angleChangeHandle(value, 1)}
+					/>
+				</div>
 			</div>
 			<canvas
 				ref={canvasRef}
