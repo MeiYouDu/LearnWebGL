@@ -1,7 +1,7 @@
 import { mat4, vec3 } from "gl-matrix";
 import { FPSControl } from "./";
-import { Camera } from "./camera.ts";
-import { GeometryInstance } from "./geometryInstance.ts";
+import { Camera } from "./camera/camera.ts";
+import { GeometryInstance } from "./geometry/geometryInstance.ts";
 
 /**
  * 场景配置
