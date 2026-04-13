@@ -47,5 +47,26 @@ function PTAttribPointer(gl: WebGL2RenderingContext, material: Material): number
 	}
 	return stride;
 }
+/**
+ * 后处理专用attribute Pointer
+ * @param gl
+ * @param material
+ * @returns
+ */
+function postProcessingAttribPointer(gl: WebGL2RenderingContext, material: Material): number {
+	const stride = 4;
+	const positionAttrLocation = material.getAttribLocation("position");
+	const texCoordAttrLocation = material.getAttribLocation("texCoord");
 
-export { PNTAttribPointer, PTAttribPointer };
+	if (typeof positionAttrLocation === "number" && positionAttrLocation >= 0) {
+		gl.vertexAttribPointer(positionAttrLocation, 2, gl.FLOAT, false, stride * 4, 0);
+		gl.enableVertexAttribArray(positionAttrLocation);
+	}
+	if (typeof texCoordAttrLocation === "number" && texCoordAttrLocation >= 0) {
+		gl.vertexAttribPointer(texCoordAttrLocation, 2, gl.FLOAT, false, stride * 4, 2 * 4);
+		gl.enableVertexAttribArray(texCoordAttrLocation);
+	}
+	return stride;
+}
+
+export { PNTAttribPointer, PTAttribPointer, postProcessingAttribPointer };

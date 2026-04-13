@@ -5,7 +5,7 @@ import { Base } from "../base.ts";
 
 interface GeometryInstanceConstructorOptions {
 	geometry: Geometry;
-	matrix: mat4;
+	matrix?: mat4;
 }
 /**
  * 几何体实例类
@@ -14,7 +14,7 @@ class GeometryInstance extends Base {
 	constructor(options: GeometryInstanceConstructorOptions) {
 		super();
 		this.geometry = options.geometry;
-		this.matrix = options.matrix;
+		this.matrix = options.matrix ?? this.matrix;
 	}
 	public setScene(scene: Scene): void {
 		super.setScene(scene);

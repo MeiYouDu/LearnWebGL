@@ -82,6 +82,10 @@ class Scene {
 	 * 几何体实例
 	 */
 	private geometryMap: Map<GeometryInstance, GeometryInstance> = new Map();
+	/**
+	 * 后处理
+	 */
+	private postProcess?: GeometryInstance;
 	private requestID: number = 0;
 	/**
 	 * 当前时间
@@ -137,6 +141,7 @@ class Scene {
 			const cPos = this.camera.position;
 			return vec3.sqrDist(bPos, cPos) - vec3.sqrDist(aPos, cPos);
 		});
+		// this.postProcess.?.bind();
 		noBlend.forEach((item) => {
 			if (item.geometry.material.culling) {
 				gl.enable(gl.CULL_FACE);
@@ -153,6 +158,7 @@ class Scene {
 			}
 			item.render(this);
 		});
+		this.postProcess?.render(this);
 		this.requestID = requestAnimationFrame(() => this.render());
 		return this.requestID;
 	}

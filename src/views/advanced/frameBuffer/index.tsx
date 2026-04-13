@@ -58,7 +58,6 @@ const glassAttribute = new Float32Array([
 //  1.2. 渲染其他的几何体
 //  1.3. 解绑 framebuffer，还原成默认
 //  1.4. 将纹理绑定给特殊的几何体，渲染该特殊的几何体
-//  1.5. !!!利用 before 和 after 几个钩子，并且增加这个特殊几何体类型，让它在最后渲染。
 export default function CanvasComponent() {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const sceneRef = useRef<Scene | null>(null);
