@@ -72,13 +72,13 @@ class Material extends Base {
 	public uniformsSetter: MaterialOptions["uniformsSetter"];
 	public blend = false;
 	public culling = false;
-	private setTextureParams(gl: WebGL2RenderingContext) {
+	protected setTextureParams(gl: WebGL2RenderingContext) {
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 	}
-	private resolveTexture(
+	protected resolveTexture(
 		gl: WebGL2RenderingContext,
 		shaderInstance: Shader,
 		image: Texture["image"],
@@ -131,7 +131,7 @@ class Material extends Base {
 			imgInstance.src = image;
 		}
 	}
-	private setDefaultTexture() {
+	protected setDefaultTexture() {
 		const hasSpecular = this.textures?.find((item) =>
 			item.textureLocationName?.includes("specular"),
 		);

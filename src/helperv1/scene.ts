@@ -82,10 +82,6 @@ class Scene {
 	 * 几何体实例
 	 */
 	private geometryMap: Map<GeometryInstance, GeometryInstance> = new Map();
-	/**
-	 * 后处理
-	 */
-	private postProcess?: GeometryInstance;
 	private requestID: number = 0;
 	/**
 	 * 当前时间
@@ -122,9 +118,8 @@ class Scene {
 			cancelAnimationFrame(this.requestID);
 			return 0;
 		}
-		this.updateDeltaTime();
 		this.resize();
-		this.clearScreen(gl);
+		this.updateDeltaTime();
 		this.control.render(gl);
 		const noBlend: GeometryInstance[] = [];
 		const blend: GeometryInstance[] = [];
@@ -151,6 +146,8 @@ class Scene {
 				item.bind();
 			}
 		});
+		// 放到 bind 后面，bind 中可能切换framebuffer
+		this.clearScreen(gl);
 		// FBO 绑定之后正常绘制
 		noBlend.forEach((item) => {
 			if (item.geometry.material.culling) {
@@ -168,7 +165,9 @@ class Scene {
 			}
 			item.render(this);
 		});
-		this.postProcess?.render(this);
+		postProcess.forEach((item) => {
+			item.render(this);
+		});
 		this.requestID = requestAnimationFrame(() => this.render());
 		return this.requestID;
 	}
