@@ -1,5 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
-import { FPSControl } from "./";
+import { FPSControl, PostProcessingGeometry, PostProcessingGeometryInstance } from "./";
 import { Camera } from "./camera/camera.ts";
 import { GeometryInstance } from "./geometry/geometryInstance.ts";
 
@@ -128,7 +128,11 @@ class Scene {
 		this.control.render(gl);
 		const noBlend: GeometryInstance[] = [];
 		const blend: GeometryInstance[] = [];
+		const postProcess: Array<PostProcessingGeometryInstance> = [];
 		this.geometryMap.forEach((item) => {
+			if (item instanceof PostProcessingGeometryInstance) {
+				return postProcess.push(item);
+			}
 			if (item.geometry.material.blend) {
 				blend.push(item);
 			} else {
@@ -141,7 +145,13 @@ class Scene {
 			const cPos = this.camera.position;
 			return vec3.sqrDist(bPos, cPos) - vec3.sqrDist(aPos, cPos);
 		});
-		// this.postProcess.?.bind();
+		postProcess.forEach((item) => {
+			// 如果存在后处理几何体几何体则先执行绑定 FBO
+			if (item instanceof PostProcessingGeometry) {
+				item.bind();
+			}
+		});
+		// FBO 绑定之后正常绘制
 		noBlend.forEach((item) => {
 			if (item.geometry.material.culling) {
 				gl.enable(gl.CULL_FACE);

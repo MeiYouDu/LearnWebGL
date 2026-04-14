@@ -1,6 +1,7 @@
 import { PostProcessingMaterial } from "../material";
 import { Scene } from "../scene";
 import { Geometry } from "./geometry";
+import { GeometryInstance } from "./geometryInstance";
 
 /**
  * 默认 attribute
@@ -35,4 +36,12 @@ class PostProcessingGeometry extends Geometry {
 	private fbo?: WebGLFramebuffer;
 }
 
-export { PostProcessingGeometry };
+class PostProcessingGeometryInstance extends GeometryInstance {
+	constructor() {
+		super({
+			geometry: new PostProcessingGeometry(),
+		});
+	}
+}
+
+export { PostProcessingGeometry, PostProcessingGeometryInstance };
