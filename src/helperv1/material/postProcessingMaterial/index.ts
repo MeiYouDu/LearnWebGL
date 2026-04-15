@@ -73,7 +73,14 @@ class PostProcessingMaterial extends Material {
 			gl.UNSIGNED_BYTE,
 			null,
 		);
-		this.setTextureParams(gl);
+		/**
+		 *  缺失的多级渐远纹理（Mipmaps）当你渲染场景到 Framebuffer 的纹理时，你只是在往该纹理的 Level 0（原始大小）写入数据。LINEAR_MIPMAP_LINEAR 告诉 WebGL：“请根据物体距离，在多层不同尺寸的贴图之间进行线性插值。”但是，你并没有调用 gl.generateMipmap(gl.TEXTURE_2D)。结果：WebGL 发现除了 Level 0 以外，其他的 Level 1, Level 2... 全是空的。它认为这个纹理是“不完整的”，为了安全起见，采样结果直接返回 (0, 0, 0, 1) 透明黑。2. 非 2 的幂限制 (仅限 WebGL 1.0)如果你的画布尺寸（比如 1920x1080）不是 $2^n$（如 1024 或 2048）：在 WebGL 1.0 中，非 2 幂（NPOT）纹理严禁生成和使用 Mipmaps。一旦你开启了 Mipmap 过滤，WebGL 会立即判定该纹理无效。
+		 */
+		// gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 		this.setInt(10, "postProcessingTexture");
 		gl.framebufferTexture2D(
 			gl.FRAMEBUFFER,
