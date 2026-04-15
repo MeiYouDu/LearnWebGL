@@ -1,5 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
-import { FPSControl, PostProcessingGeometry, PostProcessingGeometryInstance } from "./";
+import { FPSControl, PostProcessingGeometryInstance, PostProcessingMaterial } from "./";
 import { Camera } from "./camera/camera.ts";
 import { GeometryInstance } from "./geometry/geometryInstance.ts";
 
@@ -142,8 +142,8 @@ class Scene {
 		});
 		postProcess.forEach((item) => {
 			// 如果存在后处理几何体几何体则先执行绑定 FBO
-			if (item instanceof PostProcessingGeometry) {
-				item.bind();
+			if (item.geometry.material instanceof PostProcessingMaterial) {
+				item.geometry.material.bind();
 			}
 		});
 		// 放到 bind 后面，bind 中可能切换framebuffer

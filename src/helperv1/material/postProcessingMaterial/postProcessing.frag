@@ -9,5 +9,6 @@ in vec2 outTexCoord;
 out vec4 fragmentColor;
 
 void main() {
-	fragmentColor = vec4(texture(postProcessingTexture, outTexCoord).xyz, 1.0);
+	vec4 color = texture(postProcessingTexture, outTexCoord);
+	fragmentColor = vec4(color.xyz, 1.0);
 }
