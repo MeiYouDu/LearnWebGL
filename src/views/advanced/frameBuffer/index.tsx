@@ -11,7 +11,10 @@ import {
 	PTAttribPointer,
 	Material,
 	PNTAttribPointer,
-	PostProcessingGeometryInstance,
+	PostProcessingMaterial,
+	postProcessDefaultVert,
+	PostProcessingGeometry,
+	postProcessInversionFrag,
 } from "@/helperv1";
 import groundImage from "@/assets/textures/metal.png";
 import boxImage from "@/assets/textures/marble.jpg";
@@ -292,10 +295,17 @@ export default function CanvasComponent() {
 				mat4.fromScaling(mat4.create(), vec3.fromValues(0.5, 0.5, 0.5)),
 			),
 		});
-		const postProcessInstance = new PostProcessingGeometryInstance();
-
-		// register to scene (保持原逻辑)
-		scene.add(postProcessInstance);
+		const inversionEffect = new PostProcessingMaterial({
+			shader: new Shader(postProcessDefaultVert, postProcessInversionFrag),
+		});
+		const ppGeo = new PostProcessingGeometry({
+			material: inversionEffect,
+		});
+		const ppGeoIns = new GeometryInstance({
+			geometry: ppGeo,
+		});
+		// const postProcessInstance = new PostProcessingGeometryInstance();
+		scene.add(ppGeoIns);
 		scene.add(groundGeometryInstance);
 		scene.add(lightGeometryInstance);
 		scene.add(boxGeometryInstance);
