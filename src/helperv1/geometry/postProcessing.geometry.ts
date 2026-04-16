@@ -1,6 +1,7 @@
+import { merge } from "lodash";
 import { PostProcessingMaterial } from "../material";
 import { Scene } from "../scene";
-import { Geometry } from "./geometry";
+import { Geometry, GeometryOptions } from "./geometry";
 import { GeometryInstance } from "./geometryInstance";
 
 /**
@@ -15,11 +16,15 @@ const attributes = new Float32Array([
  * 后处理 geometry
  */
 class PostProcessingGeometry extends Geometry {
-	constructor() {
-		super({
-			attributes,
-			material: new PostProcessingMaterial(),
-		});
+	constructor(options?: Partial<GeometryOptions>) {
+		const mergedOptions = merge(
+			{
+				attributes,
+				material: new PostProcessingMaterial(),
+			},
+			options,
+		);
+		super(mergedOptions);
 	}
 
 	public render(scene: Scene, instance: GeometryInstance): void {

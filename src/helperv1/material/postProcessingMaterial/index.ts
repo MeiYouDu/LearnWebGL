@@ -2,6 +2,7 @@ import { merge } from "lodash";
 import { Material, MaterialOptions } from "../baseMaterial";
 import vert from "./postProcessing.vert";
 import frag from "./postProcessing.frag";
+import inversion from "./inversion.frag";
 import { GeometryInstance, postProcessingAttribPointer, Scene, Shader } from "../..";
 
 class PostProcessingMaterial extends Material {
@@ -100,4 +101,9 @@ class PostProcessingMaterial extends Material {
 	}
 }
 
-export { PostProcessingMaterial };
+export {
+	PostProcessingMaterial,
+	vert as postProcessDefaultVert,
+	frag as postProcessDefaultFrag,
+	inversion as postProcessInversionFrag,
+};

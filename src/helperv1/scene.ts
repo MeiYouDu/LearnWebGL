@@ -1,5 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
-import { FPSControl, PostProcessingGeometryInstance, PostProcessingMaterial } from "./";
+import { FPSControl, PostProcessingGeometry, PostProcessingMaterial } from "./";
 import { Camera } from "./camera/camera.ts";
 import { GeometryInstance } from "./geometry/geometryInstance.ts";
 
@@ -123,9 +123,12 @@ class Scene {
 		this.control.render(gl);
 		const noBlend: GeometryInstance[] = [];
 		const blend: GeometryInstance[] = [];
-		const postProcess: Array<PostProcessingGeometryInstance> = [];
+		const postProcess: Array<GeometryInstance> = [];
 		this.geometryMap.forEach((item) => {
-			if (item instanceof PostProcessingGeometryInstance) {
+			if (
+				item.geometry instanceof PostProcessingGeometry &&
+				item.geometry.material instanceof PostProcessingMaterial
+			) {
 				return postProcess.push(item);
 			}
 			if (item.geometry.material.blend) {

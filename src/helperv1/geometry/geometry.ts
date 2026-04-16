@@ -73,3 +73,4 @@ class Geometry extends Base {
 }
 
 export { Geometry };
+export type { GeometryOptions };
