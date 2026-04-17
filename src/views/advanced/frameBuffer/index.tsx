@@ -15,6 +15,7 @@ import {
 	postProcessDefaultVert,
 	PostProcessingGeometry,
 	postProcessInversionFrag,
+	postProcessDefaultFrag,
 } from "@/helperv1";
 import groundImage from "@/assets/textures/metal.png";
 import boxImage from "@/assets/textures/marble.jpg";
@@ -23,7 +24,7 @@ import windowImage from "@/assets/textures/window.png";
 import vert from "./texture.vert";
 import frag from "./texture.frag";
 import lightFrag from "./light.frag";
-import { Checkbox, Switch } from "antd";
+import { Checkbox, Select, Switch } from "antd";
 // attribute 与 Vue 版本保持一致
 const boxAttribute = new Float32Array([
 	// Back face
@@ -56,7 +57,9 @@ const glassAttribute = new Float32Array([
 	-0.5, -0.5, 0.0, 0.0, 0.0, -0.5, 0.5, 0.0, 0.0, 1.0, 0.5, 0.5, 0.0, 1.0, 1.0, -0.5, -0.5, 0.0,
 	0.0, 0.0, 0.5, 0.5, 0.0, 1.0, 1.0, 0.5, -0.5, 0.0, 1.0, 0.0,
 ]);
-// TODO 思路
+
+type EffectType = "default" | "inversion" | "kernel";
+// 思路
 // 1. 设计一个特殊几何体类
 // 	1.1. 每次渲染前绑定 frameBuffer
 //  1.2. 渲染其他的几何体
@@ -69,6 +72,38 @@ export default function CanvasComponent() {
 	const [enableCullFace] = useState(true);
 	const [backCull] = useState(true);
 	const needCullMaterial = useRef<Array<Material>>([]);
+	const [currEffect, setCurrEffect] = useState<EffectType>("default");
+	const effects = useRef<
+		Array<{
+			name: EffectType;
+			instance: GeometryInstance;
+		}>
+	>([]);
+	effects.current.length = 0;
+	const inversionEffect = new GeometryInstance({
+		geometry: new PostProcessingGeometry({
+			material: new PostProcessingMaterial({
+				shader: new Shader(postProcessDefaultVert, postProcessInversionFrag),
+			}),
+		}),
+	});
+	const defaultEffect = new GeometryInstance({
+		geometry: new PostProcessingGeometry({
+			material: new PostProcessingMaterial({
+				shader: new Shader(postProcessDefaultVert, postProcessDefaultFrag),
+			}),
+		}),
+	});
+	effects.current.push(
+		{
+			name: "inversion",
+			instance: inversionEffect,
+		},
+		{
+			name: "default",
+			instance: defaultEffect,
+		},
+	);
 
 	function uniformsSetter(shaderInner: Material, lightPos: vec3) {
 		shaderInner.setVec3((sceneRef.current as Scene).camera.position, "cameraPos");
@@ -295,17 +330,8 @@ export default function CanvasComponent() {
 				mat4.fromScaling(mat4.create(), vec3.fromValues(0.5, 0.5, 0.5)),
 			),
 		});
-		const inversionEffect = new PostProcessingMaterial({
-			shader: new Shader(postProcessDefaultVert, postProcessInversionFrag),
-		});
-		const ppGeo = new PostProcessingGeometry({
-			material: inversionEffect,
-		});
-		const ppGeoIns = new GeometryInstance({
-			geometry: ppGeo,
-		});
-		// const postProcessInstance = new PostProcessingGeometryInstance();
-		scene.add(ppGeoIns);
+
+		scene.add(defaultEffect);
 		scene.add(groundGeometryInstance);
 		scene.add(lightGeometryInstance);
 		scene.add(boxGeometryInstance);
@@ -364,6 +390,21 @@ export default function CanvasComponent() {
 							gl.cullFace(gl.FRONT);
 						}
 					}}></Switch>
+				<Select
+					defaultValue={currEffect}
+					options={effects.current.map((item) => {
+						return {
+							label: item.name,
+							value: item.name,
+						};
+					})}
+					onChange={(val) => {
+						const last = effects.current.find((item) => item.name === currEffect);
+						if (last) sceneRef.current?.remove(last.instance);
+						setCurrEffect(val);
+						const curr = effects.current.find((item) => item.name === val);
+						if (curr) sceneRef.current?.add(curr.instance);
+					}}></Select>
 			</div>
 			<canvas
 				ref={canvasRef}
