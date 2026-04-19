@@ -16,6 +16,10 @@ import {
 	PostProcessingGeometry,
 	postProcessInversionFrag,
 	postProcessDefaultFrag,
+	postProcessSharpenFrag,
+	postProcessBlurFrag,
+	postProcessEdgeFrag,
+	postProcessGrayFrag,
 } from "@/helperv1";
 import groundImage from "@/assets/textures/metal.png";
 import boxImage from "@/assets/textures/marble.jpg";
@@ -58,12 +62,40 @@ const glassAttribute = new Float32Array([
 	0.0, 0.0, 0.5, 0.5, 0.0, 1.0, 1.0, 0.5, -0.5, 0.0, 1.0, 0.0,
 ]);
 
-type EffectType = "default" | "inversion" | "kernel";
+type EffectType = "default" | "inversion" | "sharpen" | "blur" | "edge" | "gray";
 
 const inversionEffect = new GeometryInstance({
 	geometry: new PostProcessingGeometry({
 		material: new PostProcessingMaterial({
 			shader: new Shader(postProcessDefaultVert, postProcessInversionFrag),
+		}),
+	}),
+});
+const kernelEffect = new GeometryInstance({
+	geometry: new PostProcessingGeometry({
+		material: new PostProcessingMaterial({
+			shader: new Shader(postProcessDefaultVert, postProcessSharpenFrag),
+		}),
+	}),
+});
+const blurEffect = new GeometryInstance({
+	geometry: new PostProcessingGeometry({
+		material: new PostProcessingMaterial({
+			shader: new Shader(postProcessDefaultVert, postProcessBlurFrag),
+		}),
+	}),
+});
+const edgeEffect = new GeometryInstance({
+	geometry: new PostProcessingGeometry({
+		material: new PostProcessingMaterial({
+			shader: new Shader(postProcessDefaultVert, postProcessEdgeFrag),
+		}),
+	}),
+});
+const grayEffect = new GeometryInstance({
+	geometry: new PostProcessingGeometry({
+		material: new PostProcessingMaterial({
+			shader: new Shader(postProcessDefaultVert, postProcessGrayFrag),
 		}),
 	}),
 });
@@ -95,12 +127,28 @@ export default function CanvasComponent() {
 		}>
 	>([
 		{
+			name: "default",
+			instance: defaultEffect,
+		},
+		{
+			name: "gray",
+			instance: grayEffect,
+		},
+		{
 			name: "inversion",
 			instance: inversionEffect,
 		},
 		{
-			name: "default",
-			instance: defaultEffect,
+			name: "sharpen",
+			instance: kernelEffect,
+		},
+		{
+			name: "blur",
+			instance: blurEffect,
+		},
+		{
+			name: "edge",
+			instance: edgeEffect,
 		},
 	]);
 
