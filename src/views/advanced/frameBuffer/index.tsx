@@ -59,6 +59,21 @@ const glassAttribute = new Float32Array([
 ]);
 
 type EffectType = "default" | "inversion" | "kernel";
+
+const inversionEffect = new GeometryInstance({
+	geometry: new PostProcessingGeometry({
+		material: new PostProcessingMaterial({
+			shader: new Shader(postProcessDefaultVert, postProcessInversionFrag),
+		}),
+	}),
+});
+const defaultEffect = new GeometryInstance({
+	geometry: new PostProcessingGeometry({
+		material: new PostProcessingMaterial({
+			shader: new Shader(postProcessDefaultVert, postProcessDefaultFrag),
+		}),
+	}),
+});
 // 思路
 // 1. 设计一个特殊几何体类
 // 	1.1. 每次渲染前绑定 frameBuffer
@@ -78,23 +93,7 @@ export default function CanvasComponent() {
 			name: EffectType;
 			instance: GeometryInstance;
 		}>
-	>([]);
-	effects.current.length = 0;
-	const inversionEffect = new GeometryInstance({
-		geometry: new PostProcessingGeometry({
-			material: new PostProcessingMaterial({
-				shader: new Shader(postProcessDefaultVert, postProcessInversionFrag),
-			}),
-		}),
-	});
-	const defaultEffect = new GeometryInstance({
-		geometry: new PostProcessingGeometry({
-			material: new PostProcessingMaterial({
-				shader: new Shader(postProcessDefaultVert, postProcessDefaultFrag),
-			}),
-		}),
-	});
-	effects.current.push(
+	>([
 		{
 			name: "inversion",
 			instance: inversionEffect,
@@ -103,7 +102,7 @@ export default function CanvasComponent() {
 			name: "default",
 			instance: defaultEffect,
 		},
-	);
+	]);
 
 	function uniformsSetter(shaderInner: Material, lightPos: vec3) {
 		shaderInner.setVec3((sceneRef.current as Scene).camera.position, "cameraPos");
@@ -151,7 +150,7 @@ export default function CanvasComponent() {
 					image: boxImage,
 					width: 1024,
 					height: 1024,
-					textureUnit: 0,
+					textureUnit: 7,
 					textureLocationName: "material.diffuse",
 				},
 				{
@@ -178,7 +177,7 @@ export default function CanvasComponent() {
 					image: glassImage,
 					width: 512,
 					height: 512,
-					textureUnit: 1,
+					textureUnit: 8,
 					textureLocationName: "material.diffuse",
 				},
 			],
