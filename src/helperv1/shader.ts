@@ -16,6 +16,9 @@ class Shader extends Base {
 	 */
 	public program?: WebGLProgram;
 
+	protected vert?: WebGLShader;
+	protected frag?: WebGLShader;
+
 	/**
 	 * 创建 shader
 	 * @param gl
@@ -37,6 +40,7 @@ class Shader extends Base {
 		}
 		console.log(gl.getShaderInfoLog(shader));
 		gl.deleteShader(shader);
+		return shader;
 	}
 
 	/**
@@ -60,6 +64,7 @@ class Shader extends Base {
 		}
 		console.log(gl.getProgramInfoLog(program));
 		gl.deleteProgram(program);
+		return program;
 	}
 
 	public use(gl: WebGL2RenderingContext): void {
@@ -70,19 +75,31 @@ class Shader extends Base {
 		super.setScene(scene);
 		this.render(scene);
 	}
+	public remove() {
+		const gl = this.getGl();
+		if (!gl) return;
+		if (this.vert) {
+			gl.deleteShader(this.vert);
+			this.vert = undefined;
+		}
+		if (this.frag) {
+			gl.deleteShader(this.frag);
+			this.frag = undefined;
+		}
+		if (this.program) {
+			gl.deleteProgram(this.program);
+			this.program = undefined;
+		}
+	}
 
 	public render(scene: Scene) {
 		const gl = scene.gl.deref();
 		if (!gl) return;
 		if (!this.program) {
-			const vertexShader = this.createShader(gl, gl.VERTEX_SHADER, this.vertexShaderCode);
-			const fragmentShader = this.createShader(
-				gl,
-				gl.FRAGMENT_SHADER,
-				this.fragmentShaderCode,
-			);
-			if (vertexShader && fragmentShader) {
-				this.program = this.createProgram(gl, vertexShader, fragmentShader);
+			this.vert = this.createShader(gl, gl.VERTEX_SHADER, this.vertexShaderCode);
+			this.frag = this.createShader(gl, gl.FRAGMENT_SHADER, this.fragmentShaderCode);
+			if (this.vert && this.frag) {
+				this.program = this.createProgram(gl, this.vert, this.frag);
 			}
 		}
 		this.use(gl);

@@ -72,6 +72,7 @@ class Material extends Base {
 	public uniformsSetter: MaterialOptions["uniformsSetter"];
 	public blend = false;
 	public culling = false;
+	protected textureInstances: Array<WebGLTexture> = [];
 	protected setTextureParams(gl: WebGL2RenderingContext) {
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
@@ -105,6 +106,7 @@ class Material extends Base {
 				image,
 			);
 			gl.generateMipmap(gl.TEXTURE_2D);
+			this.textureInstances.push(texture);
 		} else {
 			const imgInstance = new Image(width, height);
 			imgInstance.addEventListener("load", () => {
@@ -129,6 +131,7 @@ class Material extends Base {
 				imgInstance.remove();
 			});
 			imgInstance.src = image;
+			this.textureInstances.push(imgInstance);
 		}
 	}
 	protected setDefaultTexture() {
@@ -157,6 +160,7 @@ class Material extends Base {
 				new Uint8Array([255, 255, 255, 255]),
 			);
 			this.setTextureParams(gl);
+			this.textureInstances.push(defaultTexture);
 			if (!hasDiffuse) {
 				this.setInt(length + 1, "material.diffuse");
 			}
@@ -268,6 +272,17 @@ class Material extends Base {
 				texture.textureLocationName,
 			);
 		});
+	}
+
+	public remove() {
+		const gl = this.getGl();
+		if (!gl) return this;
+		this.textureInstances.forEach((instance) => {
+			gl.deleteTexture(instance);
+		});
+		this.textureInstances.length = 0;
+		this.shader.remove();
+		return this;
 	}
 
 	public beforeDraw(scene: Scene, material: Material) {

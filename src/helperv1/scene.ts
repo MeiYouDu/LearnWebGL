@@ -62,7 +62,10 @@ class Scene {
 	 * @returns
 	 */
 	public remove(geo: GeometryInstance) {
-		this.geometryMap.delete(geo);
+		if (this.geometryMap.has(geo)) {
+			geo.remove();
+			this.geometryMap.delete(geo);
+		}
 		return this;
 	}
 	public dispatch() {

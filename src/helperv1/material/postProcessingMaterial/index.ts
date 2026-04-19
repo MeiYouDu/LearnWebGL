@@ -34,6 +34,27 @@ class PostProcessingMaterial extends Material {
 		}
 	}
 
+	public remove(): this {
+		const gl = this.getGl();
+		if (!gl) return this;
+		if (this.texture) {
+			gl.deleteTexture(this.texture);
+			this.texture = undefined;
+		}
+		if (this.fbo) {
+			gl.deleteFramebuffer(this.fbo);
+			this.fbo = undefined;
+		}
+		if (this.rbo) {
+			gl.deleteRenderbuffer(this.rbo);
+			this.rbo = undefined;
+		}
+		super.remove();
+		// 恢复默认
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+		return this;
+	}
+
 	public setScene(scene: Scene): void {
 		super.setScene(scene);
 		const gl = this.getGl();

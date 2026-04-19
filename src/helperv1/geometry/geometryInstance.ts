@@ -34,5 +34,8 @@ class GeometryInstance extends Base {
 	public render(scene: Scene) {
 		this.geometry.render(scene, this);
 	}
+	public remove() {
+		this.geometry.remove();
+	}
 }
 export { GeometryInstance };

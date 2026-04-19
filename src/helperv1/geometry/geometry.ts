@@ -22,8 +22,10 @@ class Geometry extends Base {
 		this.indices = options.indices;
 		this.material = options.material ?? new BlinnPhongMaterial();
 	}
-	private stride: number = 1;
-	private vao?: WebGLVertexArrayObject;
+	protected stride: number = 1;
+	protected vao?: WebGLVertexArrayObject;
+	protected vbo?: WebGLBuffer;
+	protected ebo?: WebGLBuffer;
 	public readonly material: Required<GeometryOptions>["material"];
 	public attributes: Float32Array;
 	public indices?: Uint32Array;
@@ -36,19 +38,19 @@ class Geometry extends Base {
 		/**
 		 * 顶点缓冲对象
 		 */
-		const vbo = gl.createBuffer(),
-			/**
-			 * 索引
-			 */
-			ebo = gl.createBuffer();
+		this.vbo = gl.createBuffer();
+		/**
+		 * 索引
+		 */
+		this.ebo = gl.createBuffer();
 		/**
 		 * 顶点数组对象(顶点属性)
 		 */
 		this.vao = gl.createVertexArray();
 		// 先绑定 vao，再绑定vbo 和 ebo
 		gl.bindVertexArray(this.vao);
-		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ebo);
 		// 传递vbo数据
 		gl.bufferData(gl.ARRAY_BUFFER, this.attributes, gl.STATIC_DRAW);
 		// 确定 vertex attributes 解析方式，并确定间隔
@@ -69,6 +71,24 @@ class Geometry extends Base {
 			gl.drawArrays(gl.TRIANGLES, 0, this.attributes.length / this.stride);
 		}
 		this.material.afterDraw(scene, this.material);
+	}
+	public remove() {
+		const gl = this.getGl();
+		if (!gl) return this;
+		this.material.remove();
+		if (this.vao) {
+			gl.deleteVertexArray(this.vao);
+			this.vao = undefined;
+		}
+		if (this.vbo) {
+			gl.deleteBuffer(this.vbo);
+			this.vao = undefined;
+		}
+		if (this.ebo) {
+			gl.deleteBuffer(this.ebo);
+			this.ebo = undefined;
+		}
+		return this;
 	}
 }
 
