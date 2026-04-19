@@ -3,6 +3,10 @@ import { Material, MaterialOptions } from "../baseMaterial";
 import vert from "./postProcessing.vert";
 import frag from "./postProcessing.frag";
 import inversion from "./inversion.frag";
+import sharpen from "./sharpen.frag";
+import blur from "./blur.frag";
+import edge from "./edge.frag";
+import gray from "./gray.frag";
 import { GeometryInstance, postProcessingAttribPointer, Scene, Shader } from "../..";
 
 class PostProcessingMaterial extends Material {
@@ -127,4 +131,8 @@ export {
 	vert as postProcessDefaultVert,
 	frag as postProcessDefaultFrag,
 	inversion as postProcessInversionFrag,
+	sharpen as postProcessSharpenFrag,
+	blur as postProcessBlurFrag,
+	edge as postProcessEdgeFrag,
+	gray as postProcessGrayFrag,
 };
