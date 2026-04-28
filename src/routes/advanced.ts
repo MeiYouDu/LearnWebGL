@@ -94,6 +94,23 @@ const advanced: RouteObject[] = [
 					};
 				},
 			},
+			{
+				path: "cubeMaps",
+				id: "cubeMaps",
+				index: true,
+				hydrateFallbackElement: HydrateFallback,
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "cubeMaps" */
+								/* webpackPrefetch: true */
+								"@/views/advanced/cubeMaps"
+							)
+						).default,
+					};
+				},
+			},
 		],
 	},
 ];
