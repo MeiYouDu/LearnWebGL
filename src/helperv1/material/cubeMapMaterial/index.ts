@@ -2,14 +2,16 @@ import { merge } from "lodash";
 import { Material, MaterialOptions, Texture } from "../baseMaterial";
 import vert from "./cubeMap.vert";
 import frag from "./cubeMap.frag";
-import { GeometryInstance, PAttribPointer, Scene, Shader } from "../..";
+import { PAttribPointer, Scene, Shader } from "../..";
 
 interface CubeMapMaterialOptions extends MaterialOptions {
 	/**
 	 * 立方体贴图
 	 */
-	cubeMapTextures: Array<cubeMapTexture>;
+	cubeMapTextures: Array<CubeMapTexture>;
 }
+
+type CubeMapTexture = Omit<cubeMapTexture, "textureUnit">;
 
 interface cubeMapTexture extends Texture {
 	image: string;
@@ -55,9 +57,11 @@ class CubeMapMaterial extends Material {
 		this.texture = gl.createTexture();
 		gl.activeTexture(gl.TEXTURE0 + 11);
 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
+		this.setInt(11, "cubeMap");
 		this.cubeMapTextures.forEach((item, index) => {
 			const imgInstance = new Image(item.width, item.height);
 			imgInstance.addEventListener("load", () => {
+				gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture as WebGLTexture);
 				gl.texImage2D(
 					gl.TEXTURE_CUBE_MAP_POSITIVE_X + index,
 					0,
@@ -69,26 +73,25 @@ class CubeMapMaterial extends Material {
 					gl.UNSIGNED_BYTE,
 					imgInstance,
 				);
-				gl.generateMipmap(gl.TEXTURE_2D);
 				imgInstance.remove();
 			});
 			imgInstance.src = item.image;
 		});
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
-		this.setInt(11, "cubeMap");
+		// gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
 	}
 
-	public render(scene: Scene, instance: GeometryInstance): void {
-		super.render(scene, instance);
-		const gl = this.getGl();
-		if (!gl) return;
-		gl.activeTexture(gl.TEXTURE0 + 10);
-		gl.bindTexture(gl.TEXTURE_2D, this.texture ?? null);
-	}
+	// public render(scene: Scene, instance: GeometryInstance): void {
+	// 	super.render(scene, instance);
+	// 	const gl = this.getGl();
+	// 	if (!gl) return;
+	// 	gl.activeTexture(gl.TEXTURE0 + 10);
+	// 	gl.bindTexture(gl.TEXTURE_2D, this.texture ?? null);
+	// }
 }
 
 export { CubeMapMaterial };

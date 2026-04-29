@@ -13,9 +13,9 @@ interface CameraConstructorOptions {
  */
 class Camera {
 	constructor(options?: CameraConstructorOptions) {
-		this.position = options?.position || vec3.fromValues(0, -3, 0);
-		this.front = options?.front || vec3.fromValues(0, 1, 0);
-		this.up = options?.up || vec3.fromValues(0, 0, 1);
+		this.position = options?.position || vec3.fromValues(0, 0, 3);
+		this.front = options?.front || vec3.fromValues(0, 0, -1);
+		this.up = options?.up || vec3.fromValues(0, 1, 0);
 		this.near = options?.near ?? this.near;
 		this.far = options?.far ?? this.far;
 	}
