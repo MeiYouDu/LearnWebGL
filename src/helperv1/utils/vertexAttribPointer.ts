@@ -27,6 +27,43 @@ function PNTAttribPointer(gl: WebGL2RenderingContext, material: Material): numbe
 	return stride;
 }
 /**
+ * position
+ * @param gl
+ * @param material
+ * @returns
+ */
+function PAttribPointer(gl: WebGL2RenderingContext, material: Material): number {
+	const stride = 3;
+	const positionAttrLocation = material.getAttribLocation("position");
+
+	if (typeof positionAttrLocation === "number" && positionAttrLocation >= 0) {
+		gl.vertexAttribPointer(positionAttrLocation, 3, gl.FLOAT, false, stride * 4, 0);
+		gl.enableVertexAttribArray(positionAttrLocation);
+	}
+	return stride;
+}
+/**
+ * position normal
+ * @param gl
+ * @param material
+ * @returns
+ */
+function PNAttribPointer(gl: WebGL2RenderingContext, material: Material): number {
+	const stride = 6;
+	const positionAttrLocation = material.getAttribLocation("position");
+	const normalAttrLocation = material.getAttribLocation("normal");
+
+	if (typeof positionAttrLocation === "number" && positionAttrLocation >= 0) {
+		gl.vertexAttribPointer(positionAttrLocation, 3, gl.FLOAT, false, stride * 4, 0);
+		gl.enableVertexAttribArray(positionAttrLocation);
+	}
+	if (typeof normalAttrLocation === "number" && normalAttrLocation >= 0) {
+		gl.vertexAttribPointer(normalAttrLocation, 3, gl.FLOAT, false, stride * 4, 3 * 4);
+		gl.enableVertexAttribArray(normalAttrLocation);
+	}
+	return stride;
+}
+/**
  * position texture
  * @param gl
  * @param material
@@ -69,4 +106,10 @@ function postProcessingAttribPointer(gl: WebGL2RenderingContext, material: Mater
 	return stride;
 }
 
-export { PNTAttribPointer, PTAttribPointer, postProcessingAttribPointer };
+export {
+	PNTAttribPointer,
+	PTAttribPointer,
+	PNAttribPointer,
+	PAttribPointer,
+	postProcessingAttribPointer,
+};
