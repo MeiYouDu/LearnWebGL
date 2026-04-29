@@ -20,6 +20,8 @@ import {
 	postProcessBlurFrag,
 	postProcessEdgeFrag,
 	postProcessGrayFrag,
+	CubeMapGeometry,
+	CubeMapMaterial,
 } from "@/helperv1";
 import groundImage from "@/assets/textures/metal.png";
 import boxImage from "@/assets/textures/marble.jpg";
@@ -29,6 +31,12 @@ import vert from "./texture.vert";
 import frag from "./texture.frag";
 import lightFrag from "./light.frag";
 import { Checkbox, Select, Switch } from "antd";
+import right from "@/assets/textures/skybox/right.jpg";
+import left from "@/assets/textures/skybox/left.jpg";
+import top from "@/assets/textures/skybox/top.jpg";
+import bottom from "@/assets/textures/skybox/bottom.jpg";
+import front from "@/assets/textures/skybox/front.jpg";
+import back from "@/assets/textures/skybox/back.jpg";
 // attribute 与 Vue 版本保持一致
 const boxAttribute = new Float32Array([
 	// Back face
@@ -188,9 +196,9 @@ export default function CanvasComponent() {
 			gl.enable(gl.BLEND);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		}
-		scene.camera.position = vec3.fromValues(0, -50, 0);
+		scene.camera.position = vec3.fromValues(0, 0, 50);
 		let angle = 0;
-		const lightPos = vec3.fromValues(Math.cos(angle) * 20, Math.sin(angle) * 20, 0);
+		const lightPos = vec3.fromValues(Math.cos(angle) * 20, 0, Math.sin(angle) * 20);
 		const boxMaterial = new Material({
 			shader: new Shader(vert, frag),
 			textures: [
@@ -276,6 +284,18 @@ export default function CanvasComponent() {
 			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
 			blend: true,
 		});
+		const skyBox = new CubeMapGeometry({
+			material: new CubeMapMaterial({
+				cubeMapTextures: [
+					{ image: right, width: 2048, height: 2048 },
+					{ image: left, width: 2048, height: 2048 },
+					{ image: top, width: 2048, height: 2048 },
+					{ image: bottom, width: 2048, height: 2048 },
+					{ image: front, width: 2048, height: 2048 },
+					{ image: back, width: 2048, height: 2048 },
+				],
+			}),
+		});
 		const lightGeometry = new Geometry({
 			attributes: boxAttribute,
 			material: lightMaterial,
@@ -301,15 +321,18 @@ export default function CanvasComponent() {
 			geometry: boxGeometry,
 			matrix: mat4.multiply(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(-2, 0, 0)),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(-2, 0, 2)),
 				mat4.fromScaling(mat4.create(), vec3.fromValues(2.0, 2.0, 2.0)),
 			),
+		});
+		const skyBoxInstance = new GeometryInstance({
+			geometry: skyBox,
 		});
 		const boxGeometryInstance2 = new GeometryInstance({
 			geometry: boxGeometry,
 			matrix: mat4.multiply(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(2, 2, 0)),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(2, 0, 2)),
 				mat4.fromScaling(mat4.create(), vec3.fromValues(2.0, 2.0, 2.0)),
 			),
 		});
@@ -317,10 +340,10 @@ export default function CanvasComponent() {
 			geometry: glassGeometry,
 			matrix: mat4.mul(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(-2.0, -2.0, 0.0)),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(-2.0, 0, 0.0)),
 				mat4.multiply(
 					mat4.create(),
-					mat4.fromXRotation(mat4.create(), -Math.PI / 2),
+					mat4.fromZRotation(mat4.create(), Math.PI),
 					mat4.fromScaling(mat4.create(), vec3.fromValues(1, 1, 1)),
 				),
 			),
@@ -329,10 +352,10 @@ export default function CanvasComponent() {
 			geometry: glassGeometry,
 			matrix: mat4.mul(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(2.0, -2.0, 0.0)),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(2.0, 0, -2.0)),
 				mat4.multiply(
 					mat4.create(),
-					mat4.fromXRotation(mat4.create(), -Math.PI / 2),
+					mat4.fromZRotation(mat4.create(), Math.PI),
 					mat4.fromScaling(mat4.create(), vec3.fromValues(1, 1, 1)),
 				),
 			),
@@ -341,10 +364,10 @@ export default function CanvasComponent() {
 			geometry: windowGeometry,
 			matrix: mat4.mul(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(3.0, -4.0, 0.0)),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(3.0, 0.0, -4)),
 				mat4.multiply(
 					mat4.create(),
-					mat4.fromXRotation(mat4.create(), -Math.PI / 2),
+					mat4.fromXRotation(mat4.create(), 0),
 					mat4.fromScaling(mat4.create(), vec3.fromValues(1, 1, 1)),
 				),
 			),
@@ -353,10 +376,10 @@ export default function CanvasComponent() {
 			geometry: windowGeometry,
 			matrix: mat4.mul(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(4.0, -6.0, 0.0)),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(4.0, 0.0, -6.0)),
 				mat4.multiply(
 					mat4.create(),
-					mat4.fromXRotation(mat4.create(), -Math.PI / 2),
+					mat4.fromXRotation(mat4.create(), 0),
 					mat4.fromScaling(mat4.create(), vec3.fromValues(1, 1, 1)),
 				),
 			),
@@ -365,8 +388,8 @@ export default function CanvasComponent() {
 			geometry: groundGeometry,
 			matrix: mat4.multiply(
 				mat4.create(),
-				mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, -1)),
-				mat4.fromScaling(mat4.create(), vec3.fromValues(100, 100, 1.0)),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(0, -1, 0)),
+				mat4.fromScaling(mat4.create(), vec3.fromValues(100, 1, 100.0)),
 			),
 		});
 		const lightGeometryInstance = new GeometryInstance({
@@ -379,6 +402,7 @@ export default function CanvasComponent() {
 		});
 
 		scene.add(defaultEffect);
+		scene.add(skyBoxInstance);
 		scene.add(groundGeometryInstance);
 		scene.add(lightGeometryInstance);
 		scene.add(boxGeometryInstance);
@@ -387,10 +411,11 @@ export default function CanvasComponent() {
 		scene.add(outline2);
 		scene.add(windowInstance);
 		scene.add(windowInstance2);
+
 		intervalRef.current = setInterval(() => {
 			angle = new Date().getTime() * 0.0005;
 			lightPos[0] = Math.cos(angle) * 5;
-			lightPos[1] = Math.sin(angle) * 5;
+			lightPos[2] = Math.sin(angle) * 5;
 			lightGeometryInstance.matrix = mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), lightPos),
