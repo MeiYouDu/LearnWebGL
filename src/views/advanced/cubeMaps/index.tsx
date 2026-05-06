@@ -194,20 +194,29 @@ export default function CanvasComponent() {
 				return;
 			}
 			const gltf = await loader.current.loadAsync(url);
-			let textureUnit = 9;
+			let textureUnit = 8;
 			gltf.scene.traverse((obj) => {
 				if (obj instanceof Mesh) {
 					const textures: TextureStruct[] = [];
 					if ("material" in obj && obj.material) {
 						const map = obj.material.map;
 						if (map instanceof Texture) {
-							textures.push({
-								image: map.source.data,
-								width: map.width,
-								height: map.height,
-								textureUnit: textureUnit++,
-								textureLocationName: "material.diffuse",
-							});
+							textures.push(
+								{
+									image: map.source.data,
+									width: map.width,
+									height: map.height,
+									textureUnit: ++textureUnit,
+									textureLocationName: "material.diffuse",
+								},
+								{
+									image: map.source.data,
+									width: map.width,
+									height: map.height,
+									textureUnit: ++textureUnit,
+									textureLocationName: "material.specular",
+								},
+							);
 						}
 					}
 
