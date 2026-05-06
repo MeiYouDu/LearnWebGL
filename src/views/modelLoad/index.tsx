@@ -35,6 +35,7 @@ export default function CanvasComponent() {
 			control: new FPSControl({
 				speed: 1,
 				camera: new Camera({
+					far: 2000,
 					position: vec3.fromValues(0, 0, 600),
 				}),
 			}),
