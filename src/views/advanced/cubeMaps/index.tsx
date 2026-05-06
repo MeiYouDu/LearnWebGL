@@ -194,7 +194,7 @@ export default function CanvasComponent() {
 				return;
 			}
 			const gltf = await loader.current.loadAsync(url);
-			let textureUnit = 8;
+			let textureUnit = 10;
 			gltf.scene.traverse((obj) => {
 				if (obj instanceof Mesh) {
 					const textures: TextureStruct[] = [];
