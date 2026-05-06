@@ -232,8 +232,8 @@ export default function CanvasComponent() {
 						const nx = normal.array[i * 3];
 						const ny = normal.array[i * 3 + 1];
 						const nz = normal.array[i * 3 + 2];
-						const u = uv.array[i * 2];
-						const v = uv.array[i * 2 + 1];
+						const u = uv?.array[i * 2] ?? 0;
+						const v = uv?.array[i * 2 + 1] ?? 0;
 						arr.push(x, y, z, nx, ny, nz, u, v);
 					}
 					const attribute = Float32Array.from(arr);
