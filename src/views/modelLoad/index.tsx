@@ -5,6 +5,10 @@ import {
 	Geometry,
 	GeometryInstance,
 	Texture as TextureStruct,
+	Camera,
+	FPSControl,
+	Shader,
+	blinnPhongVert,
 } from "@/helperv1"; // 调整路径
 import { SelectOutlined } from "@ant-design/icons";
 import { Button, Upload } from "antd";
@@ -14,6 +18,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { mat4, vec3 } from "gl-matrix";
 import { cos, sin } from "mathjs";
 import { Mesh, Texture } from "three";
+import frag from "./fragment.frag";
 
 export default function CanvasComponent() {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -25,7 +30,15 @@ export default function CanvasComponent() {
 		if (!canvas) return;
 
 		// create scene (保持与原来一致)
-		const scene = new Scene({ canvas });
+		const scene = new Scene({
+			canvas,
+			control: new FPSControl({
+				speed: 1,
+				camera: new Camera({
+					position: vec3.fromValues(0, 0, 600),
+				}),
+			}),
+		});
 		sceneRef.current = scene;
 
 		return () => {
@@ -51,11 +64,7 @@ export default function CanvasComponent() {
 				return;
 			}
 			const gltf = await loader.current.loadAsync(url);
-			let count = 0;
-			console.log(gltf);
 			gltf.scene.traverse((obj) => {
-				count++;
-				console.log(obj);
 				if (obj instanceof Mesh) {
 					const textures: TextureStruct[] = [];
 					if ("material" in obj && obj.material) {
@@ -70,6 +79,7 @@ export default function CanvasComponent() {
 							});
 						}
 					}
+
 					const position = obj.geometry.attributes.position;
 					const normal = obj.geometry.attributes.normal;
 					const uv = obj.geometry.attributes.uv;
@@ -88,13 +98,14 @@ export default function CanvasComponent() {
 					}
 					const attribute = Float32Array.from(arr);
 					let angle = Date.now() * 0.001;
-					let lightPos = vec3.fromValues(sin(angle) * 10, cos(angle) * 10 - 5, 0);
+					let lightPos = vec3.fromValues(sin(angle) * 400, 0, cos(angle) * 400 - 5);
 					// shaders
 					const material = new BlinnPhongMaterial({
 						textures,
+						shader: new Shader(blinnPhongVert, frag),
 						uniformsSetter(glInner: WebGL2RenderingContext, shaderInner) {
 							shaderInner.setVec3(scene.camera.position, "cameraPos");
-							shaderInner.setVec3(vec3.fromValues(0.6, 0.6, 0.6), "light.ambient");
+							shaderInner.setVec3(vec3.fromValues(0.8, 0.8, 0.8), "light.ambient");
 							shaderInner.setVec3(vec3.fromValues(0.96, 0.96, 0.96), "light.diffuse");
 							shaderInner.setVec3(vec3.fromValues(1, 1, 1), "light.specular");
 							shaderInner.setVec3(lightPos, "light.position");
@@ -102,12 +113,12 @@ export default function CanvasComponent() {
 								vec3.fromValues(1.0, 0.5, 0.31),
 								"material.ambient",
 							);
-							shaderInner.setFloat(0.5, "light.constant");
-							shaderInner.setFloat(0.045, "light.linear");
-							shaderInner.setFloat(0.0075, "light.quadratic");
+							shaderInner.setFloat(1, "light.constant");
+							shaderInner.setFloat(0.0014, "light.linear");
+							shaderInner.setFloat(0.000007, "light.quadratic");
 							shaderInner.setFloat(128.0, "material.shininess");
 							angle = Date.now() * 0.001;
-							lightPos = vec3.fromValues(sin(angle) * 10, cos(angle) * 10 - 5, 0);
+							lightPos = vec3.fromValues(sin(angle) * 400, 0, cos(angle) * 400 - 5);
 						},
 					});
 					const boxGeometry = new Geometry({
@@ -115,19 +126,15 @@ export default function CanvasComponent() {
 						attributes: attribute,
 						indices: obj.geometry.index.array,
 					});
+					const matrix = mat4.fromValues(...obj.matrixWorld.elements);
 					const boxGeometryInstance = new GeometryInstance({
 						geometry: boxGeometry,
-						matrix: mat4.multiply(
-							mat4.create(),
-							mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, 0)),
-							mat4.fromScaling(mat4.create(), vec3.fromValues(1.0, 1.0, 1.0)),
-						),
+						matrix,
 					});
 
 					scene.add(boxGeometryInstance);
 				}
 			});
-			console.log(count);
 		}
 	}
 
