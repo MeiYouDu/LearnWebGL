@@ -36,7 +36,7 @@ export default function CanvasComponent() {
 				speed: 1,
 				camera: new Camera({
 					far: 2000,
-					position: vec3.fromValues(0, 0, 600),
+					position: vec3.fromValues(0, 0, 20),
 				}),
 			}),
 		});
@@ -65,6 +65,7 @@ export default function CanvasComponent() {
 				return;
 			}
 			const gltf = await loader.current.loadAsync(url);
+			let textureUnit = 3;
 			gltf.scene.traverse((obj) => {
 				if (obj instanceof Mesh) {
 					const textures: TextureStruct[] = [];
@@ -75,7 +76,7 @@ export default function CanvasComponent() {
 								image: map.source.data,
 								width: map.width,
 								height: map.height,
-								textureUnit: 1,
+								textureUnit: textureUnit++,
 								textureLocationName: "material.diffuse",
 							});
 						}
