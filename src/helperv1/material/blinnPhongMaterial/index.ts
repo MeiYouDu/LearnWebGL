@@ -17,4 +17,4 @@ class BlinnPhongMaterial extends Material {
 	}
 }
 
-export { BlinnPhongMaterial };
+export { BlinnPhongMaterial, vert as blinnPhongVert, frag as blinnPhongFrag };

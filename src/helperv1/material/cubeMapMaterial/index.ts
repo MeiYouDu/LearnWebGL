@@ -94,6 +94,6 @@ class CubeMapMaterial extends Material {
 	// }
 }
 
-export { CubeMapMaterial };
+export { CubeMapMaterial, vert as CubeMapVert, frag as CubeMapFrag };
 
 export type { CubeMapMaterialOptions, cubeMapTexture };

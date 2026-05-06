@@ -17,4 +17,4 @@ class SpotLightMaterial extends Material {
 	}
 }
 
-export { SpotLightMaterial };
+export { SpotLightMaterial, vert as spotLightVert, frag as spotLightFrag };
