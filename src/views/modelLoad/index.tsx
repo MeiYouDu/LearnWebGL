@@ -51,7 +51,11 @@ export default function CanvasComponent() {
 				return;
 			}
 			const gltf = await loader.current.loadAsync(url);
+			let count = 0;
+			console.log(gltf);
 			gltf.scene.traverse((obj) => {
+				count++;
+				console.log(obj);
 				if (obj instanceof Mesh) {
 					const textures: TextureStruct[] = [];
 					if ("material" in obj && obj.material) {
@@ -123,6 +127,7 @@ export default function CanvasComponent() {
 					scene.add(boxGeometryInstance);
 				}
 			});
+			console.log(count);
 		}
 	}
 
