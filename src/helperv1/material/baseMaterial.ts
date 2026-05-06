@@ -8,7 +8,10 @@ interface Texture {
 	image: string | ImageBitmap;
 	width: number;
 	height: number;
-	textureUnit: number;
+	/**
+	 * @deprecated
+	 */
+	textureUnit?: number;
 	textureLocationName?: string;
 }
 
@@ -72,7 +75,13 @@ class Material extends Base {
 	public uniformsSetter: MaterialOptions["uniformsSetter"];
 	public blend = false;
 	public culling = false;
-	protected textureInstances: Array<WebGLTexture> = [];
+	protected textureInstances: Array<{
+		texture: WebGLTexture;
+		type: Pick<WebGL2RenderingContext, "TEXTURE_CUBE_MAP" | "TEXTURE_2D">[keyof Pick<
+			WebGL2RenderingContext,
+			"TEXTURE_CUBE_MAP" | "TEXTURE_2D"
+		>];
+	}> = [];
 	protected setTextureParams(gl: WebGL2RenderingContext) {
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
@@ -106,7 +115,10 @@ class Material extends Base {
 				image,
 			);
 			gl.generateMipmap(gl.TEXTURE_2D);
-			this.textureInstances.push(texture);
+			this.textureInstances[textureUnit] = {
+				texture,
+				type: gl.TEXTURE_2D,
+			};
 		} else {
 			const imgInstance = new Image(width, height);
 			imgInstance.addEventListener("load", () => {
@@ -129,9 +141,12 @@ class Material extends Base {
 				);
 				gl.generateMipmap(gl.TEXTURE_2D);
 				imgInstance.remove();
+				this.textureInstances[textureUnit] = {
+					texture,
+					type: gl.TEXTURE_2D,
+				};
 			});
 			imgInstance.src = image;
-			this.textureInstances.push(imgInstance);
 		}
 	}
 	protected setDefaultTexture() {
@@ -160,7 +175,10 @@ class Material extends Base {
 				new Uint8Array([255, 255, 255, 255]),
 			);
 			this.setTextureParams(gl);
-			this.textureInstances.push(defaultTexture);
+			this.textureInstances[0] = {
+				texture: defaultTexture,
+				type: gl.TEXTURE_2D,
+			};
 			if (!hasDiffuse) {
 				this.setInt(length + 1, "material.diffuse");
 			}
@@ -248,11 +266,24 @@ class Material extends Base {
 		const gl = scene.gl.deref();
 		if (!gl) throw new Error("gl is undefined");
 		this.shader.render(scene);
+		this.textureInstances.forEach((item, index) => {
+			gl.activeTexture(gl.TEXTURE0 + index);
+			gl.bindTexture(item.type, item.texture);
+		});
 		this.uniformsSetter?.(gl, this);
 		this.setVec2(vec2.fromValues(gl.canvas.width, gl.canvas.height), "resolution");
 		this.setMatrix4(instance.matrix, "model");
 		this.setMatrix4(scene.camera.viewMatrix, "view");
 		this.setMatrix4(scene.camera.projectionMatrix, "projection");
+	}
+	public unBindTexture(scene: Scene) {
+		const gl = scene.gl.deref();
+		if (!gl) throw new Error("gl is undefined");
+		this.shader.render(scene);
+		this.textureInstances.forEach((item, index) => {
+			gl.activeTexture(gl.TEXTURE0 + index);
+			gl.bindTexture(item.type, null);
+		});
 	}
 
 	public setScene(scene: Scene): void {
@@ -261,14 +292,14 @@ class Material extends Base {
 		const gl = this.getGl();
 		if (!gl) return;
 		this.setDefaultTexture();
-		this.textures?.forEach((texture) => {
+		this.textures?.forEach((texture, index) => {
 			this.resolveTexture(
 				gl,
 				this.shader,
 				texture.image,
 				texture.width,
 				texture.height,
-				texture.textureUnit,
+				index,
 				texture.textureLocationName,
 			);
 		});

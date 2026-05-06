@@ -55,9 +55,9 @@ class CubeMapMaterial extends Material {
 		if (!gl) return;
 		if (!this.cubeMapTextures) throw new Error("cubeMapTextures is required");
 		this.texture = gl.createTexture();
-		gl.activeTexture(gl.TEXTURE0 + 11);
+		gl.activeTexture(gl.TEXTURE0 + 1);
 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
-		this.setInt(11, "cubeMap");
+		this.setInt(1, "cubeMap");
 		this.cubeMapTextures.forEach((item, index) => {
 			const imgInstance = new Image(item.width, item.height);
 			imgInstance.addEventListener("load", () => {
@@ -77,6 +77,10 @@ class CubeMapMaterial extends Material {
 			});
 			imgInstance.src = item.image;
 		});
+		this.textureInstances[1] = {
+			texture: this.texture,
+			type: gl.TEXTURE_CUBE_MAP,
+		};
 		// gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -89,8 +93,8 @@ class CubeMapMaterial extends Material {
 	// 	super.render(scene, instance);
 	// 	const gl = this.getGl();
 	// 	if (!gl) return;
-	// 	gl.activeTexture(gl.TEXTURE0 + 10);
-	// 	gl.bindTexture(gl.TEXTURE_2D, this.texture ?? null);
+	// 	gl.activeTexture(gl.TEXTURE0);
+	// 	gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture ?? null);
 	// }
 }
 

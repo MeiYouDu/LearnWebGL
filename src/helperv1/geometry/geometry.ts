@@ -70,6 +70,7 @@ class Geometry extends Base {
 		} else {
 			gl.drawArrays(gl.TRIANGLES, 0, this.attributes.length / this.stride);
 		}
+		this.material.unBindTexture(scene);
 		this.material.afterDraw(scene, this.material);
 	}
 	public remove() {

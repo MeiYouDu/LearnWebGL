@@ -7,7 +7,7 @@ import sharpen from "./sharpen.frag";
 import blur from "./blur.frag";
 import edge from "./edge.frag";
 import gray from "./gray.frag";
-import { GeometryInstance, postProcessingAttribPointer, Scene, Shader } from "../..";
+import { postProcessingAttribPointer, Scene, Shader } from "../..";
 
 class PostProcessingMaterial extends Material {
 	constructor(options?: Partial<MaterialOptions>) {
@@ -86,7 +86,7 @@ class PostProcessingMaterial extends Material {
 			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 		}
 		this.texture = gl.createTexture();
-		gl.activeTexture(gl.TEXTURE0 + 10);
+		gl.activeTexture(gl.TEXTURE0);
 		gl.bindTexture(gl.TEXTURE_2D, this.texture);
 		gl.texImage2D(
 			gl.TEXTURE_2D,
@@ -107,7 +107,12 @@ class PostProcessingMaterial extends Material {
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		this.setInt(10, "postProcessingTexture");
+		this.setInt(0, "postProcessingTexture");
+		// this.textureInstances.length = 0;
+		this.textureInstances[0] = {
+			texture: this.texture,
+			type: gl.TEXTURE_2D,
+		};
 		gl.framebufferTexture2D(
 			gl.FRAMEBUFFER,
 			gl.COLOR_ATTACHMENT0,
@@ -117,13 +122,13 @@ class PostProcessingMaterial extends Material {
 		);
 	}
 
-	public render(scene: Scene, instance: GeometryInstance): void {
-		super.render(scene, instance);
-		const gl = this.getGl();
-		if (!gl) return;
-		gl.activeTexture(gl.TEXTURE0 + 10);
-		gl.bindTexture(gl.TEXTURE_2D, this.texture ?? null);
-	}
+	// public render(scene: Scene, instance: GeometryInstance): void {
+	// 	super.render(scene, instance);
+	// 	const gl = this.getGl();
+	// 	if (!gl) return;
+	// 	gl.activeTexture(gl.TEXTURE0);
+	// 	gl.bindTexture(gl.TEXTURE_2D, this.texture ?? null);
+	// }
 }
 
 export {
