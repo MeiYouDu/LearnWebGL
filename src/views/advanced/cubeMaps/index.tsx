@@ -22,6 +22,9 @@ import {
 	postProcessGrayFrag,
 	CubeMapGeometry,
 	CubeMapMaterial,
+	Texture as TextureStruct,
+	BlinnPhongMaterial,
+	blinnPhongVert,
 } from "@/helperv1";
 import groundImage from "@/assets/textures/metal.png";
 import boxImage from "@/assets/textures/marble.jpg";
@@ -30,13 +33,17 @@ import windowImage from "@/assets/textures/window.png";
 import vert from "./texture.vert";
 import frag from "./texture.frag";
 import lightFrag from "./light.frag";
-import { Checkbox, Select, Switch } from "antd";
+import { Button, Checkbox, Select, Switch, Upload, UploadFile } from "antd";
 import right from "@/assets/textures/skybox/right.jpg";
 import left from "@/assets/textures/skybox/left.jpg";
 import top from "@/assets/textures/skybox/top.jpg";
 import bottom from "@/assets/textures/skybox/bottom.jpg";
 import front from "@/assets/textures/skybox/front.jpg";
 import back from "@/assets/textures/skybox/back.jpg";
+import { SelectOutlined } from "@ant-design/icons";
+import { UploadChangeParam } from "antd/es/upload";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { Mesh, Texture } from "three";
 // attribute 与 Vue 版本保持一致
 const boxAttribute = new Float32Array([
 	// Back face
@@ -127,7 +134,10 @@ export default function CanvasComponent() {
 	const [enableCullFace] = useState(true);
 	const [backCull] = useState(true);
 	const needCullMaterial = useRef<Array<Material>>([]);
+	const loader = useRef(new GLTFLoader());
 	const [currEffect, setCurrEffect] = useState<EffectType>("default");
+	let angle = 0;
+	const lightPos = vec3.fromValues(Math.cos(angle) * 20, 0, Math.sin(angle) * 20);
 	const effects = useRef<
 		Array<{
 			name: EffectType;
@@ -172,6 +182,73 @@ export default function CanvasComponent() {
 		shaderInner.setFloat(0.0028, "light.quadratic");
 		shaderInner.setFloat(128.0, "material.shininess");
 	}
+	async function fileSelectHandle(e: UploadChangeParam<UploadFile<File>>) {
+		if (e.file instanceof Blob) {
+			const url = URL.createObjectURL(e.file);
+			const scene = sceneRef.current;
+			if (!scene) return;
+			// deref gl，兼容你的 Scene 实现（如果是 WeakRef）
+			const gl = scene.gl?.deref();
+			if (!gl) {
+				console.error("webgl2 context unavailable");
+				return;
+			}
+			const gltf = await loader.current.loadAsync(url);
+			let textureUnit = 9;
+			gltf.scene.traverse((obj) => {
+				if (obj instanceof Mesh) {
+					const textures: TextureStruct[] = [];
+					if ("material" in obj && obj.material) {
+						const map = obj.material.map;
+						if (map instanceof Texture) {
+							textures.push({
+								image: map.source.data,
+								width: map.width,
+								height: map.height,
+								textureUnit: textureUnit++,
+								textureLocationName: "material.diffuse",
+							});
+						}
+					}
+
+					const position = obj.geometry.attributes.position;
+					const normal = obj.geometry.attributes.normal;
+					const uv = obj.geometry.attributes.uv;
+					obj.updateMatrixWorld(true);
+					const arr = [];
+					for (let i = 0; i < position.count; i++) {
+						const x = position.array[i * 3];
+						const y = position.array[i * 3 + 1];
+						const z = position.array[i * 3 + 2];
+						const nx = normal.array[i * 3];
+						const ny = normal.array[i * 3 + 1];
+						const nz = normal.array[i * 3 + 2];
+						const u = uv.array[i * 2];
+						const v = uv.array[i * 2 + 1];
+						arr.push(x, y, z, nx, ny, nz, u, v);
+					}
+					const attribute = Float32Array.from(arr);
+					const material = new BlinnPhongMaterial({
+						textures,
+						shader: new Shader(blinnPhongVert, frag),
+						uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
+					});
+					const boxGeometry = new Geometry({
+						material,
+						attributes: attribute,
+						indices: obj.geometry.index.array,
+					});
+					const matrix = mat4.fromValues(...obj.matrixWorld.elements);
+					const boxGeometryInstance = new GeometryInstance({
+						geometry: boxGeometry,
+						matrix,
+					});
+
+					scene.add(boxGeometryInstance);
+				}
+			});
+		}
+	}
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
@@ -197,8 +274,7 @@ export default function CanvasComponent() {
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		}
 		scene.camera.position = vec3.fromValues(0, 0, 50);
-		let angle = 0;
-		const lightPos = vec3.fromValues(Math.cos(angle) * 20, 0, Math.sin(angle) * 20);
+
 		const boxMaterial = new Material({
 			shader: new Shader(vert, frag),
 			textures: [
@@ -477,6 +553,11 @@ export default function CanvasComponent() {
 						const curr = effects.current.find((item) => item.name === val);
 						if (curr) sceneRef.current?.add(curr.instance);
 					}}></Select>
+				<Upload accept=".glb" beforeUpload={() => false} onChange={fileSelectHandle}>
+					<Button type="primary" icon={<SelectOutlined></SelectOutlined>}>
+						选择OBJ
+					</Button>
+				</Upload>
 			</div>
 			<canvas
 				ref={canvasRef}
