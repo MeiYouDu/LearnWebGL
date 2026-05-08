@@ -1,49 +1,49 @@
 // CanvasComponent.tsx
-import { useEffect, useRef, useState } from "react";
-import { mat4, vec3 } from "gl-matrix";
-import {
-	Scene,
-	Geometry,
-	GeometryInstance,
-	FPSControl,
-	Camera,
-	Shader,
-	PTAttribPointer,
-	Material,
-	PNTAttribPointer,
-	PostProcessingMaterial,
-	postProcessDefaultVert,
-	PostProcessingGeometry,
-	postProcessInversionFrag,
-	postProcessDefaultFrag,
-	postProcessSharpenFrag,
-	postProcessBlurFrag,
-	postProcessEdgeFrag,
-	postProcessGrayFrag,
-	CubeMapGeometry,
-	CubeMapMaterial,
-	Texture as TextureStruct,
-	BlinnPhongMaterial,
-	blinnPhongVert,
-} from "@/helperv1";
-import groundImage from "@/assets/textures/metal.png";
-import boxImage from "@/assets/textures/marble.jpg";
 import glassImage from "@/assets/textures/grass.png";
-import windowImage from "@/assets/textures/window.png";
-import vert from "./texture.vert";
-import frag from "./texture.frag";
-import lightFrag from "./light.frag";
-import { Button, Checkbox, Select, Switch, Upload, UploadFile } from "antd";
-import right from "@/assets/textures/skybox/right.jpg";
-import left from "@/assets/textures/skybox/left.jpg";
-import top from "@/assets/textures/skybox/top.jpg";
+import boxImage from "@/assets/textures/marble.jpg";
+import groundImage from "@/assets/textures/metal.png";
+import back from "@/assets/textures/skybox/back.jpg";
 import bottom from "@/assets/textures/skybox/bottom.jpg";
 import front from "@/assets/textures/skybox/front.jpg";
-import back from "@/assets/textures/skybox/back.jpg";
+import left from "@/assets/textures/skybox/left.jpg";
+import right from "@/assets/textures/skybox/right.jpg";
+import top from "@/assets/textures/skybox/top.jpg";
+import windowImage from "@/assets/textures/window.png";
+import {
+	BlinnPhongMaterial,
+	blinnPhongVert,
+	Camera,
+	CubeMapGeometry,
+	CubeMapMaterial,
+	FPSControl,
+	Geometry,
+	GeometryInstance,
+	Material,
+	PNTAttribPointer,
+	postProcessBlurFrag,
+	postProcessDefaultFrag,
+	postProcessDefaultVert,
+	postProcessEdgeFrag,
+	postProcessGrayFrag,
+	PostProcessingGeometry,
+	PostProcessingMaterial,
+	postProcessInversionFrag,
+	postProcessSharpenFrag,
+	PTAttribPointer,
+	Scene,
+	Shader,
+	Texture as TextureStruct,
+} from "@/helperv1";
 import { SelectOutlined } from "@ant-design/icons";
+import { Button, Checkbox, Select, Switch, Upload, UploadFile } from "antd";
 import { UploadChangeParam } from "antd/es/upload";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { mat4, vec3 } from "gl-matrix";
+import { useEffect, useRef, useState } from "react";
 import { Mesh, Texture } from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import lightFrag from "./light.frag";
+import frag from "./texture.frag";
+import vert from "./texture.vert";
 // attribute 与 Vue 版本保持一致
 const boxAttribute = new Float32Array([
 	// Back face

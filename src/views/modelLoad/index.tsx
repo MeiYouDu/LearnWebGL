@@ -1,23 +1,23 @@
 // CanvasComponent.tsx
 import {
-	Scene,
 	BlinnPhongMaterial,
-	Geometry,
-	GeometryInstance,
-	Texture as TextureStruct,
 	Camera,
 	FPSControl,
+	Geometry,
+	GeometryInstance,
+	Scene,
 	Shader,
+	Texture as TextureStruct,
 	blinnPhongVert,
 } from "@/helperv1"; // 调整路径
 import { SelectOutlined } from "@ant-design/icons";
 import { Button, Upload } from "antd";
 import { UploadChangeParam, UploadFile } from "antd/es/upload";
-import { useEffect, useRef } from "react";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { mat4, vec3 } from "gl-matrix";
 import { cos, sin } from "mathjs";
+import { useEffect, useRef } from "react";
 import { Mesh, Texture } from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import frag from "./fragment.frag";
 
 export default function CanvasComponent() {

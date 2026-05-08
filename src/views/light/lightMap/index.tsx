@@ -1,16 +1,16 @@
 // BoxScene.tsx
-import { useEffect, useRef } from "react";
-import { mat4, vec3 } from "gl-matrix";
-import { Scene } from "@/helper/scene";
-import { Shader } from "@/helper/shader";
 import { Geometry } from "@/helper/geometry";
 import { GeometryInstance } from "@/helper/geometryInstance";
-import boxVert from "./box.vert";
-import boxFrag from "./box.frag";
-import lightFrag from "./light.frag";
-import boxBorder from "../../../assets/textures/container2_specular.png";
+import { Scene } from "@/helper/scene";
+import { Shader } from "@/helper/shader";
+import { mat4, vec3 } from "gl-matrix";
+import { useEffect, useRef } from "react";
 import box from "../../../assets/textures/container2.png";
+import boxBorder from "../../../assets/textures/container2_specular.png";
 import code from "../../../assets/textures/matrix.jpg";
+import boxFrag from "./box.frag";
+import boxVert from "./box.vert";
+import lightFrag from "./light.frag";
 
 const attribute = new Float32Array([
 	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, 0.5, -0.5, -0.5, 0, 0, -1, 1, 0, 0.5, 0.5, -0.5, 0, 0, -1, 1,
