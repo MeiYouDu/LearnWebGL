@@ -2,10 +2,10 @@ import HydrateFallback from "@/views/hydrateFallback.tsx";
 import Root from "@/views/Root";
 import type { RouteObject } from "react-router";
 import { createBrowserRouter } from "react-router";
-import { fundamentals } from "./fundamentals";
-import { lights } from "./light";
-import { gaussian } from "./gaussian";
 import { advanced } from "./advanced";
+import { fundamentals } from "./fundamentals";
+import { gaussian } from "./gaussian";
+import { lights } from "./light";
 
 const routes: RouteObject[] = [
 	...fundamentals,

@@ -1,6 +1,6 @@
 import { GlobalContext } from "@/store/index.ts";
-import { ReactNode, useEffect } from "react";
 import { useTheme } from "ahooks";
+import { ReactNode, useEffect } from "react";
 
 function GlobalContextProvider({ children }: { children: ReactNode }) {
 	const { theme, setThemeMode } = useTheme();

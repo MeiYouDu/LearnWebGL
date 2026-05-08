@@ -1,6 +1,6 @@
+import { cpus } from "node:os";
 import { resolve } from "node:path";
 import { cwd } from "node:process";
-import { cpus } from "node:os";
 
 // const threadLoader = require("thread-loader");
 
@@ -45,11 +45,11 @@ const THREAD_LOADER_OPTIONS = {
 // ]);
 
 export {
-	EXAMPLE_ENTRY,
 	CONTEXT,
+	EXAMPLE_ENTRY,
 	EXAMPLE_OUTPUT_PATH,
-	HTML_TEMPLATE,
-	THREAD_LOADER_OPTIONS,
 	EXCLUDE,
 	EXCLUDECSS,
+	HTML_TEMPLATE,
+	THREAD_LOADER_OPTIONS,
 };

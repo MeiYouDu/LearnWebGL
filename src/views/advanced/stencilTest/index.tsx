@@ -1,21 +1,21 @@
 // CanvasComponent.tsx
-import { useEffect, useRef } from "react";
-import { mat4, vec3 } from "gl-matrix";
+import boxImage from "@/assets/textures/marble.jpg";
+import groundImage from "@/assets/textures/metal.png";
 import {
-	Scene,
+	Camera,
+	FPSControl,
 	Geometry,
 	GeometryInstance,
-	FPSControl,
-	Camera,
+	Scene,
 	Shader,
 	SpotLightMaterial,
 } from "@/helperv1";
-import groundImage from "@/assets/textures/metal.png";
-import boxImage from "@/assets/textures/marble.jpg";
 import vert from "@/helperv1/material/spotLightMaterial/spotLight.vert";
-import frag from "./stencliTest.frag";
-import outlineFrag from "./outline.frag";
+import { mat4, vec3 } from "gl-matrix";
 import { cos, pi } from "mathjs";
+import { useEffect, useRef } from "react";
+import outlineFrag from "./outline.frag";
+import frag from "./stencliTest.frag";
 // attribute 与 Vue 版本保持一致
 const attribute = new Float32Array([
 	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, 0.5, -0.5, -0.5, 0, 0, -1, 1, 0, 0.5, 0.5, -0.5, 0, 0, -1, 1,

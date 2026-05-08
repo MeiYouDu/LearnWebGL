@@ -1,11 +1,11 @@
 // WebglTriangles.tsx
-import { useEffect, useRef } from "react";
 import { resizeHandle } from "@/helper/resize"; // 调整为你项目实际路径
-import vertexShaderSource from "./vertex.glsl";
-import fragmentShaderSource from "./fragment.glsl";
 import { Shader } from "@/helper/shader"; // 调整路径
-import { random } from "lodash";
 import { mat4 } from "gl-matrix";
+import { random } from "lodash";
+import { useEffect, useRef } from "react";
+import fragmentShaderSource from "./fragment.glsl";
+import vertexShaderSource from "./vertex.glsl";
 
 export default function WebglTriangles() {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);

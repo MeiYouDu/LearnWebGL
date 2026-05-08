@@ -1,13 +1,13 @@
 // CubeSceneReact.tsx
-import { useEffect, useRef } from "react";
-import { resizeHandle } from "../../../helper/resize.ts";
-import vertexShaderSource from "./vertex.glsl";
-import fragmentShaderSource from "./fragment.glsl";
-import { Shader } from "../../../helper/shader.ts";
 import { vec2, vec3 } from "gl-matrix";
+import { useEffect, useRef } from "react";
 import smile from "../../../assets/image/awesomeface.png";
 import box from "../../../assets/image/container.jpg";
+import { resizeHandle } from "../../../helper/resize.ts";
+import { Shader } from "../../../helper/shader.ts";
 import { useInput } from "../../../hook";
+import fragmentShaderSource from "./fragment.glsl";
+import vertexShaderSource from "./vertex.glsl";
 
 interface Mesh {
 	vertexes: Float32Array;

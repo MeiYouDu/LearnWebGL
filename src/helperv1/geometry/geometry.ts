@@ -1,8 +1,8 @@
 import { Base } from "../base.ts";
-import { GeometryInstance } from "./geometryInstance.ts";
 import { Material } from "../material/baseMaterial.ts";
 import { BlinnPhongMaterial } from "../material/index.ts";
 import { Scene } from "../scene.ts";
+import { GeometryInstance } from "./geometryInstance.ts";
 
 interface GeometryOptions {
 	attributes: Float32Array;

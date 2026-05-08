@@ -1,11 +1,11 @@
+import CompressionPlugin from "compression-webpack-plugin";
+import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import TerserWebpackPlugin from "terser-webpack-plugin";
 import { Configuration, DefinePlugin } from "webpack";
 import { merge } from "webpack-merge";
-import CompressionPlugin from "compression-webpack-plugin";
-import MiniCssExtractPlugin from "mini-css-extract-plugin";
-import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
-import TerserWebpackPlugin from "terser-webpack-plugin";
-import common from "./webpack.common.ts";
 import { EXCLUDECSS } from "./constant.ts";
+import common from "./webpack.common.ts";
 
 export default merge<Configuration>(common, {
 	mode: "production",

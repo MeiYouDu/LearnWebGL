@@ -1,8 +1,8 @@
 import { merge } from "lodash";
-import { Material, MaterialOptions } from "../baseMaterial";
-import vert from "./spotLight.vert";
-import frag from "./spotLight.frag";
 import { PNTAttribPointer, Shader } from "../..";
+import { Material, MaterialOptions } from "../baseMaterial";
+import frag from "./spotLight.frag";
+import vert from "./spotLight.vert";
 
 class SpotLightMaterial extends Material {
 	constructor(options?: Partial<MaterialOptions>) {
@@ -17,4 +17,4 @@ class SpotLightMaterial extends Material {
 	}
 }
 
-export { SpotLightMaterial, vert as spotLightVert, frag as spotLightFrag };
+export { frag as spotLightFrag, SpotLightMaterial, vert as spotLightVert };

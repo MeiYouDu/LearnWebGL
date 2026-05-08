@@ -1,13 +1,13 @@
 import { merge } from "lodash";
+import { postProcessingAttribPointer, Scene, Shader } from "../..";
 import { Material, MaterialOptions } from "../baseMaterial";
-import vert from "./postProcessing.vert";
-import frag from "./postProcessing.frag";
-import inversion from "./inversion.frag";
-import sharpen from "./sharpen.frag";
 import blur from "./blur.frag";
 import edge from "./edge.frag";
 import gray from "./gray.frag";
-import { postProcessingAttribPointer, Scene, Shader } from "../..";
+import inversion from "./inversion.frag";
+import frag from "./postProcessing.frag";
+import vert from "./postProcessing.vert";
+import sharpen from "./sharpen.frag";
 
 class PostProcessingMaterial extends Material {
 	constructor(options?: Partial<MaterialOptions>) {
@@ -132,12 +132,12 @@ class PostProcessingMaterial extends Material {
 }
 
 export {
-	PostProcessingMaterial,
-	vert as postProcessDefaultVert,
-	frag as postProcessDefaultFrag,
-	inversion as postProcessInversionFrag,
-	sharpen as postProcessSharpenFrag,
 	blur as postProcessBlurFrag,
+	frag as postProcessDefaultFrag,
+	vert as postProcessDefaultVert,
 	edge as postProcessEdgeFrag,
 	gray as postProcessGrayFrag,
+	PostProcessingMaterial,
+	inversion as postProcessInversionFrag,
+	sharpen as postProcessSharpenFrag,
 };

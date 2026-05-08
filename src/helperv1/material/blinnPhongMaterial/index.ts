@@ -1,8 +1,8 @@
 import { merge } from "lodash";
-import { Material, MaterialOptions } from "../baseMaterial";
-import vert from "./blinnPhong.vert";
-import frag from "./blinnPhong.frag";
 import { PNTAttribPointer, Shader } from "../..";
+import { Material, MaterialOptions } from "../baseMaterial";
+import frag from "./blinnPhong.frag";
+import vert from "./blinnPhong.vert";
 
 class BlinnPhongMaterial extends Material {
 	constructor(options?: Partial<MaterialOptions>) {
@@ -17,4 +17,4 @@ class BlinnPhongMaterial extends Material {
 	}
 }
 
-export { BlinnPhongMaterial, vert as blinnPhongVert, frag as blinnPhongFrag };
+export { frag as blinnPhongFrag, BlinnPhongMaterial, vert as blinnPhongVert };

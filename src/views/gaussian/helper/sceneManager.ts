@@ -1,6 +1,6 @@
-import { PerspectiveCamera, Scene, WebGLRenderer } from "three";
-import { SparkControls, SparkRenderer } from "@sparkjsdev/spark";
 import { Splat } from "@/views/gaussian/helper/splat.ts";
+import { SparkControls, SparkRenderer } from "@sparkjsdev/spark";
+import { PerspectiveCamera, Scene, WebGLRenderer } from "three";
 
 class SceneManager {
 	constructor() {

@@ -1,7 +1,7 @@
 import { Material, MaterialOptions, PNTAttribPointer, Shader } from "@/helperv1";
 import { merge } from "lodash";
-import vert from "./depth.vert";
 import frag from "./depth.frag";
+import vert from "./depth.vert";
 
 class DepthMaterial extends Material {
 	constructor(options?: Partial<MaterialOptions>) {

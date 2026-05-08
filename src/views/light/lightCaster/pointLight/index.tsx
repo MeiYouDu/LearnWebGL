@@ -1,17 +1,17 @@
 // BoxSceneReact.tsx
-import { useEffect, useRef } from "react";
-import { cos, sin } from "mathjs";
 import { mat4, vec3 } from "gl-matrix";
 import { random } from "lodash";
-import { Scene } from "../../../../helper/scene.ts";
-import { Shader } from "../../../../helper/shader.ts";
+import { cos, sin } from "mathjs";
+import { useEffect, useRef } from "react";
+import box from "../../../../assets/textures/container2.png";
+import boxBorder from "../../../../assets/textures/container2_specular.png";
 import { Geometry } from "../../../../helper/geometry.ts";
 import { GeometryInstance } from "../../../../helper/geometryInstance.ts";
-import boxVert from "./box.vert";
+import { Scene } from "../../../../helper/scene.ts";
+import { Shader } from "../../../../helper/shader.ts";
 import boxFrag from "./box.frag";
+import boxVert from "./box.vert";
 import lightFrag from "./light.frag";
-import boxBorder from "../../../../assets/textures/container2_specular.png";
-import box from "../../../../assets/textures/container2.png";
 
 const attribute = new Float32Array([
 	-0.5, -0.5, -0.5, 0, 0, -1, 0, 0, 0.5, -0.5, -0.5, 0, 0, -1, 1, 0, 0.5, 0.5, -0.5, 0, 0, -1, 1,

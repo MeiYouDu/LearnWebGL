@@ -1,8 +1,8 @@
 import { merge } from "lodash";
-import { Material, MaterialOptions, Texture } from "../baseMaterial";
-import vert from "./cubeMap.vert";
-import frag from "./cubeMap.frag";
 import { PAttribPointer, Scene, Shader } from "../..";
+import { Material, MaterialOptions, Texture } from "../baseMaterial";
+import frag from "./cubeMap.frag";
+import vert from "./cubeMap.vert";
 
 interface CubeMapMaterialOptions extends MaterialOptions {
 	/**
@@ -98,6 +98,6 @@ class CubeMapMaterial extends Material {
 	// }
 }
 
-export { CubeMapMaterial, vert as CubeMapVert, frag as CubeMapFrag };
+export { frag as CubeMapFrag, CubeMapMaterial, vert as CubeMapVert };
 
 export type { CubeMapMaterialOptions, cubeMapTexture };

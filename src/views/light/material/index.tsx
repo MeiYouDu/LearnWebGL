@@ -1,15 +1,15 @@
 // CanvasComponent.tsx
-import { useEffect, useRef } from "react";
 import { mat4, vec3 } from "gl-matrix";
-import { Scene } from "../../../helper/scene.ts"; // 调整路径
-import { Shader } from "../../../helper/shader.ts";
-import { Geometry } from "../../../helper/geometry.ts";
-import { GeometryInstance } from "../../../helper/geometryInstance.ts";
-import boxVert from "./box.vert";
-import boxFrag from "./box.frag";
-import lightFrag from "./light.frag";
+import { useEffect, useRef } from "react";
 import smile from "../../../assets/image/awesomeface.png";
 import box from "../../../assets/image/container.jpg"; // attribute 与 Vue 版本保持一致
+import { Geometry } from "../../../helper/geometry.ts";
+import { GeometryInstance } from "../../../helper/geometryInstance.ts";
+import { Scene } from "../../../helper/scene.ts"; // 调整路径
+import { Shader } from "../../../helper/shader.ts";
+import boxFrag from "./box.frag";
+import boxVert from "./box.vert";
+import lightFrag from "./light.frag";
 
 // attribute 与 Vue 版本保持一致
 const attribute = new Float32Array([

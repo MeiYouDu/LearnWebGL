@@ -1,34 +1,34 @@
 // CanvasComponent.tsx
-import { useEffect, useRef, useState } from "react";
-import { mat4, vec3 } from "gl-matrix";
+import glassImage from "@/assets/textures/grass.png";
+import boxImage from "@/assets/textures/marble.jpg";
+import groundImage from "@/assets/textures/metal.png";
+import windowImage from "@/assets/textures/window.png";
 import {
-	Scene,
+	Camera,
+	FPSControl,
 	Geometry,
 	GeometryInstance,
-	FPSControl,
-	Camera,
-	Shader,
-	PTAttribPointer,
 	Material,
 	PNTAttribPointer,
-	PostProcessingMaterial,
-	postProcessDefaultVert,
-	PostProcessingGeometry,
-	postProcessInversionFrag,
-	postProcessDefaultFrag,
-	postProcessSharpenFrag,
 	postProcessBlurFrag,
+	postProcessDefaultFrag,
+	postProcessDefaultVert,
 	postProcessEdgeFrag,
 	postProcessGrayFrag,
+	PostProcessingGeometry,
+	PostProcessingMaterial,
+	postProcessInversionFrag,
+	postProcessSharpenFrag,
+	PTAttribPointer,
+	Scene,
+	Shader,
 } from "@/helperv1";
-import groundImage from "@/assets/textures/metal.png";
-import boxImage from "@/assets/textures/marble.jpg";
-import glassImage from "@/assets/textures/grass.png";
-import windowImage from "@/assets/textures/window.png";
-import vert from "./texture.vert";
-import frag from "./texture.frag";
-import lightFrag from "./light.frag";
 import { Checkbox, Select, Switch } from "antd";
+import { mat4, vec3 } from "gl-matrix";
+import { useEffect, useRef, useState } from "react";
+import lightFrag from "./light.frag";
+import frag from "./texture.frag";
+import vert from "./texture.vert";
 // attribute 与 Vue 版本保持一致
 const boxAttribute = new Float32Array([
 	// Back face

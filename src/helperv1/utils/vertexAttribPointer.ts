@@ -107,9 +107,9 @@ function postProcessingAttribPointer(gl: WebGL2RenderingContext, material: Mater
 }
 
 export {
-	PNTAttribPointer,
-	PTAttribPointer,
-	PNAttribPointer,
 	PAttribPointer,
+	PNAttribPointer,
+	PNTAttribPointer,
 	postProcessingAttribPointer,
+	PTAttribPointer,
 };

@@ -1,8 +1,8 @@
 import { mat4, vec2, vec3, vec4 } from "gl-matrix";
+import { Base } from "../base";
 import { GeometryInstance } from "../geometry/geometryInstance";
 import { Scene } from "../scene";
 import { Shader } from "../shader";
-import { Base } from "../base";
 
 interface Texture {
 	image: string | ImageBitmap;

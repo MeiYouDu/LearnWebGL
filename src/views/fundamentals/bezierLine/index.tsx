@@ -1,11 +1,11 @@
 // LineSceneReact.tsx
-import { useEffect, useRef } from "react";
-import { resizeHandle } from "../../../helper/resize.ts";
-import vertexShaderSource from "./vertex.glsl";
-import fragmentShaderSource from "./fragment.glsl";
-import { Shader } from "../../../helper/shader.ts";
 import { vec2, vec4 } from "gl-matrix";
 import { random } from "lodash";
+import { useEffect, useRef } from "react";
+import { resizeHandle } from "../../../helper/resize.ts";
+import { Shader } from "../../../helper/shader.ts";
+import fragmentShaderSource from "./fragment.glsl";
+import vertexShaderSource from "./vertex.glsl";
 
 interface Mesh {
 	vertexes: Float32Array;

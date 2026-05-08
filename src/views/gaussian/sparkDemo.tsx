@@ -1,5 +1,5 @@
-import { Switch } from "antd";
 import { useSceneHook } from "@/views/gaussian/hooks/useScene.hook.ts";
+import { Switch } from "antd";
 
 function SparkDemo() {
 	const { containerRef, switchHandle } = useSceneHook();

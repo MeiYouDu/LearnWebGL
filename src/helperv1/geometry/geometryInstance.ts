@@ -1,7 +1,7 @@
 import { mat4 } from "gl-matrix";
-import { Geometry } from "./geometry.ts";
-import { Scene } from "../scene.ts";
 import { Base } from "../base.ts";
+import { Scene } from "../scene.ts";
+import { Geometry } from "./geometry.ts";
 
 interface GeometryInstanceConstructorOptions {
 	geometry: Geometry;

@@ -1,7 +1,7 @@
 // CanvasComponent.tsx
-import { useEffect, useRef } from "react";
+import { Geometry, GeometryInstance, Scene } from "@/helperv1";
 import { mat4, vec3 } from "gl-matrix";
-import { Scene, Geometry, GeometryInstance } from "@/helperv1";
+import { useEffect, useRef } from "react";
 import { DepthMaterial } from "./depthMaterial";
 
 // attribute 与 Vue 版本保持一致

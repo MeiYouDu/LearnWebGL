@@ -1,5 +1,6 @@
-import { PackedSplats, SplatMesh } from "@sparkjsdev/spark";
+import { alphaFromColor } from "@/utils";
 import { SceneManager } from "@/views/gaussian/helper/sceneManager.ts";
+import { PackedSplats, SplatMesh } from "@sparkjsdev/spark";
 import {
 	BufferGeometry,
 	Float32BufferAttribute,
@@ -8,7 +9,6 @@ import {
 	Points,
 	PointsMaterial,
 } from "three";
-import { alphaFromColor } from "@/utils";
 import {
 	acceleratedRaycast,
 	computeBoundsTree,

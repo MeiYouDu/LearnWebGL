@@ -1,7 +1,7 @@
-import { RefObject, useEffect } from "react";
 import { mat4, quat, vec3 } from "gl-matrix";
-import { pi } from "mathjs";
 import { debounce } from "lodash";
+import { pi } from "mathjs";
+import { RefObject, useEffect } from "react";
 
 interface ReturnType {
 	render(
