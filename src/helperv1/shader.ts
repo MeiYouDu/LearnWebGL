@@ -40,7 +40,7 @@ class Shader extends Base {
 		}
 		console.log(gl.getShaderInfoLog(shader));
 		gl.deleteShader(shader);
-		return shader;
+		return undefined;
 	}
 
 	/**

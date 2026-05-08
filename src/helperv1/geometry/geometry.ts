@@ -83,7 +83,7 @@ class Geometry extends Base {
 		}
 		if (this.vbo) {
 			gl.deleteBuffer(this.vbo);
-			this.vao = undefined;
+			this.vbo = undefined;
 		}
 		if (this.ebo) {
 			gl.deleteBuffer(this.ebo);

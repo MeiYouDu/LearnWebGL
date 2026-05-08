@@ -119,10 +119,18 @@ class FPSControl extends Base {
 				-this.getSpeed(ev.shiftKey) * scene.deltaTime * 0.1,
 			);
 		if (ev.code === "KeyA")
-			vec3.scale(this.dPosition, left, -this.getSpeed(ev.shiftKey) * scene.deltaTime * 0.1);
+			this.dPosition = vec3.scale(
+				this.dPosition,
+				left,
+				-this.getSpeed(ev.shiftKey) * scene.deltaTime * 0.1,
+			);
 
 		if (ev.code === "KeyD")
-			vec3.scale(this.dPosition, left, this.getSpeed(ev.shiftKey) * scene.deltaTime * 0.1);
+			this.dPosition = vec3.scale(
+				this.dPosition,
+				left,
+				this.getSpeed(ev.shiftKey) * scene.deltaTime * 0.1,
+			);
 	}
 	private keyupHandle(ev: KeyboardEvent) {
 		if (ev.code === "KeyW") this.dPosition = vec3.fromValues(0, 0, 0);
