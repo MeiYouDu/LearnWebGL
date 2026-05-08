@@ -31,9 +31,8 @@ uniform mat4 view;
 
 out vec4 fragmentColor;
 
-
 void main() {
-	vec3 lightPosition = vec3(view * vec4(light.position, 1));
+	vec3 lightPosition = light.position;
 	vec3 texDiffuse = texture(material.diffuse, outTexCoord).rgb;
 	vec3 texSpecular = texture(material.specular, outTexCoord).rgb;
 	// 环境光
@@ -43,11 +42,11 @@ void main() {
 	vec3 lightDir = normalize(light.position);
 	// 漫反射
 	float diff = max(dot(norm, lightDir), 0.0);
-	vec4 diffuse = vec4((light.diffuse * (diff * texDiffuse)), 1.0);
+	vec4 diffuse = vec4(light.diffuse * (diff * texDiffuse), 1.0);
 	// 高光
 	vec3 viewDir = normalize(cameraPos - outFragVertexPos);
 	vec3 reflectDir = reflect(-lightDir, norm);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-	vec4 specular = vec4(((texSpecular * spec) * light.specular), 1.0);
-	fragmentColor = vec4(((ambient + specular + diffuse)).rgb, 1.0);
+	vec4 specular = vec4(texSpecular * spec * light.specular, 1.0);
+	fragmentColor = vec4((ambient + specular + diffuse).rgb, 1.0);
 }

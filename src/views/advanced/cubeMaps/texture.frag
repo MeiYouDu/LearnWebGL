@@ -34,7 +34,7 @@ uniform mat4 view;
 out vec4 fragmentColor;
 
 void main() {
-	vec3 ligthPosition = vec3(light.position);
+	vec3 ligthPosition = light.position;
 	float distance = length(ligthPosition - outFragVertexPos);
 	float attenuation =
 		1.0 / (light.constant + light.linear * distance + light.quadratic * distance * distance);
