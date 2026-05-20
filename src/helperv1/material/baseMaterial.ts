@@ -309,7 +309,7 @@ class Material extends Base {
 		const gl = this.getGl();
 		if (!gl) return this;
 		this.textureInstances.forEach((instance) => {
-			gl.deleteTexture(instance);
+			gl.deleteTexture(instance.texture);
 		});
 		this.textureInstances.length = 0;
 		this.shader.remove();
