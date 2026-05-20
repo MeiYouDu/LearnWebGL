@@ -61,6 +61,7 @@ class CubeMapMaterial extends Material {
 		this.cubeMapTextures.forEach((item, index) => {
 			const imgInstance = new Image(item.width, item.height);
 			imgInstance.addEventListener("load", () => {
+				if (!this.texture) return;
 				gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture as WebGLTexture);
 				gl.texImage2D(
 					gl.TEXTURE_CUBE_MAP_POSITIVE_X + index,
