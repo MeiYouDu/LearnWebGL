@@ -1,5 +1,5 @@
 import { Button, message } from "antd";
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import {
 	AxesHelper,
 	Box3,
@@ -24,8 +24,9 @@ function PointCloudPage() {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const resizeObserverRef = useRef<ResizeObserver | null>(null);
 	const disposedRef = useRef(false);
+	const [loading, setLoading] = useState(false);
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		disposedRef.current = false;
 
 		const container = containerRef.current;
@@ -75,6 +76,9 @@ function PointCloudPage() {
 			rendererRef.current?.setAnimationLoop(null);
 			controlsRef.current?.dispose();
 			resizeObserverRef.current?.disconnect();
+			if (rendererRef.current) {
+				container.removeChild(rendererRef.current.domElement);
+			}
 
 			if (pointCloudRef.current) {
 				pointCloudRef.current.geometry.dispose();
@@ -96,6 +100,12 @@ function PointCloudPage() {
 		const file = e.target.files?.[0];
 		if (!file) return;
 
+		if (!sceneRef.current) {
+			message.error("场景未初始化，请刷新页面");
+			return;
+		}
+
+		setLoading(true);
 		const url = URL.createObjectURL(file);
 
 		loaderRef.current
@@ -121,7 +131,10 @@ function PointCloudPage() {
 				box.getSize(size);
 				const maxDim = Math.max(size.x, size.y, size.z);
 
-				(points.material as PointsMaterial).size = Math.max(0.01, maxDim * 0.005);
+				if (points.material instanceof PointsMaterial) {
+					(points.material as PointsMaterial).size = 1;
+					(points.material as PointsMaterial).sizeAttenuation = false;
+				}
 
 				const camera = cameraRef.current;
 				const controls = controlsRef.current;
@@ -141,9 +154,10 @@ function PointCloudPage() {
 			})
 			.catch((err: unknown) => {
 				console.error("PCD load failed:", err);
-				message.error("PCD 文件解析失败");
+				message.error(`PCD 解析失败: ${err instanceof Error ? err.message : "未知错误"}`);
 			})
 			.finally(() => {
+				setLoading(false);
 				URL.revokeObjectURL(url);
 				if (fileInputRef.current) fileInputRef.current.value = "";
 			});
@@ -152,7 +166,7 @@ function PointCloudPage() {
 	return (
 		<div className="relative h-full w-full">
 			<div className="absolute top-4 left-4 z-10">
-				<Button type="primary" onClick={handleLoadClick}>
+				<Button type="primary" loading={loading} onClick={handleLoadClick}>
 					加载PCD文件
 				</Button>
 			</div>

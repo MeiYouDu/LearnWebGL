@@ -5,7 +5,10 @@
 			"Bash(git commit *)",
 			"Bash(git push *)",
 			"Bash(npx tsc *)",
-			"Bash(pnpm lint-fix *)"
+			"Bash(pnpm lint-fix *)",
+			"Bash(pnpm serve *)",
+			"Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/pointCloud/pcd)",
+			"Bash(xxd)"
 		]
 	}
 }
