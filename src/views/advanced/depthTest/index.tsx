@@ -1,5 +1,5 @@
 // CanvasComponent.tsx
-import { Geometry, GeometryInstance, Scene } from "@/helperv1";
+import { Camera, FPSControl, Geometry, GeometryInstance, Scene } from "@/helperv1";
 import { mat4, vec3 } from "gl-matrix";
 import { useEffect, useRef } from "react";
 import { DepthMaterial } from "./depthMaterial";
@@ -28,9 +28,20 @@ export default function CanvasComponent() {
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
-
+		const camera = new Camera({
+			position: vec3.fromValues(0, -50, 0),
+			front: vec3.fromValues(0, 1, 0),
+			up: vec3.fromValues(0, 0, 1),
+		});
 		// create scene (保持与原来一致)
-		const scene = new Scene({ canvas });
+		const scene = new Scene({
+			canvas,
+			control: new FPSControl({
+				speed: 1,
+				camera,
+			}),
+			alpha: true,
+		});
 		sceneRef.current = scene;
 
 		// deref gl，兼容你的 Scene 实现（如果是 WeakRef）
@@ -39,7 +50,7 @@ export default function CanvasComponent() {
 			console.error("webgl2 context unavailable");
 			return;
 		}
-		scene.camera.position = vec3.fromValues(0, -50, 0);
+		// scene.camera.position = vec3.fromValues(0, -50, 0);
 
 		// initial angle & light pos
 		const angle = Date.now() * 0.001;

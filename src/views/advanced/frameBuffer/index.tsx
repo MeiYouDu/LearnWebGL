@@ -167,7 +167,11 @@ export default function CanvasComponent() {
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
-		const camera = new Camera();
+		const camera = new Camera({
+			position: vec3.fromValues(0, -3, 0),
+			front: vec3.fromValues(0, 1, 0),
+			up: vec3.fromValues(0, 0, 1),
+		});
 		// create scene (保持与原来一致)
 		const scene = new Scene({
 			canvas,
