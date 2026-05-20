@@ -6,6 +6,7 @@ import { advanced } from "./advanced";
 import { fundamentals } from "./fundamentals";
 import { gaussian } from "./gaussian";
 import { lights } from "./light";
+import { pointCloud } from "./pointCloud";
 
 const routes: RouteObject[] = [
 	...fundamentals,
@@ -38,6 +39,7 @@ const routes: RouteObject[] = [
 	},
 	...advanced,
 	...gaussian,
+	...pointCloud,
 	{
 		path: "/imageProcess",
 		id: "imageProcess",

@@ -1,5 +1,11 @@
 {
 	"permissions": {
-		"allow": ["Bash(git add *)", "Bash(git commit *)", "Bash(git push *)"]
+		"allow": [
+			"Bash(git add *)",
+			"Bash(git commit *)",
+			"Bash(git push *)",
+			"Bash(npx tsc *)",
+			"Bash(pnpm lint-fix *)"
+		]
 	}
 }
