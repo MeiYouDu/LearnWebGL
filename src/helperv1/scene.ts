@@ -72,6 +72,7 @@ class Scene {
 		cancelAnimationFrame(this.requestID);
 		this.camera.dispatch();
 		this.control.dispatch();
+		this.geometryMap.forEach((item) => item.remove());
 		this.geometryMap.clear();
 	}
 	public resize() {
