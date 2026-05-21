@@ -7,11 +7,14 @@ import {
 	Points,
 	PointsMaterial,
 	Scene,
+	ShaderMaterial,
 	Vector3,
 	WebGLRenderer,
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { PCDLoader } from "three/examples/jsm/loaders/PCDLoader";
+import frag from "./shader.frag";
+import vert from "./shader.vert";
 
 function PointCloudPage() {
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -130,11 +133,20 @@ function PointCloudPage() {
 				const size = new Vector3();
 				box.getSize(size);
 				const maxDim = Math.max(size.x, size.y, size.z);
-
-				if (points.material instanceof PointsMaterial) {
-					(points.material as PointsMaterial).size = 1;
-					(points.material as PointsMaterial).sizeAttenuation = false;
-				}
+				points.material = new ShaderMaterial({
+					vertexShader: vert,
+					fragmentShader: frag,
+					uniforms: {
+						size: {
+							value: 2,
+						},
+					},
+				});
+				// if (points.material instanceof PointsMaterial) {
+				// 	(points.material as PointsMaterial).size = 1;
+				// 	(points.material as PointsMaterial).sizeAttenuation = false;
+				// }
+				// console.log(material);
 
 				const camera = cameraRef.current;
 				const controls = controlsRef.current;
