@@ -138,7 +138,7 @@ function PointCloudPage() {
 					fragmentShader: frag,
 					uniforms: {
 						size: {
-							value: 2,
+							value: 1.5,
 						},
 					},
 				});
