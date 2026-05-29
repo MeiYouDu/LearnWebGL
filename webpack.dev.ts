@@ -37,6 +37,20 @@ export default merge<Config>(common, {
 				},
 			},
 		},
+		proxy: [
+			{
+				context: ["/genie-robot-description"],
+				target: "https://htrs-geniestudio.agibot.com",
+				changeOrigin: true,
+				// pathRewrite: { "^/genie_robot_description": "genie_robot_description" },
+			},
+			{
+				context: ["/genie_robot_description"],
+				target: "https://htrs-geniestudio.agibot.com",
+				changeOrigin: true,
+				pathRewrite: { "^/genie_robot_description": "/genie-robot-description" },
+			},
+		],
 	},
 	module: {
 		rules: [

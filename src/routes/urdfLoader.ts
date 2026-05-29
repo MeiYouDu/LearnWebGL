@@ -1,21 +1,21 @@
 import HydrateFallback from "@/views/hydrateFallback.tsx";
 import type { RouteObject } from "react-router";
 
-const pointCloud: RouteObject = {
-	path: "pointCloud",
-	id: "pointCloud",
+const urdfLoader: RouteObject = {
+	path: "urdfLoader",
+	id: "urdfLoader",
 	hydrateFallbackElement: HydrateFallback,
 	lazy: async () => {
 		return {
 			Component: (
 				await import(
-					/* webpackChunkName: "pcd" */
+					/* webpackChunkName: "urdfLoader" */
 					/* webpackPrefetch: true */
-					"@/views/pointCloud"
+					"@/views/urdfLoader"
 				)
 			).default,
 		};
 	},
 };
 
-export { pointCloud };
+export { urdfLoader };

@@ -83,6 +83,9 @@ importers:
       three-mesh-bvh:
         specifier: ^0.9.3
         version: 0.9.3(three@0.181.2)
+      urdf-loader:
+        specifier: ^0.12.7
+        version: 0.12.7(three@0.181.2)
     devDependencies:
       '@babel/cli':
         specifier: ^7.28.3
@@ -7519,6 +7522,11 @@ packages:
     hasBin: true
     peerDependencies:
       browserslist: '>= 4.21.0'
+
+  urdf-loader@0.12.7:
+    resolution: {integrity: sha512-9RQDhWt4x9K6R3uHjv68NLwX+JDm3A2XjhksrMgq6xl9NJcwqV21+htHU0cbG619hnqH1d4mUMFuqHo22R8DMA==}
+    peerDependencies:
+      three: '>=0.152.0'
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
@@ -16220,6 +16228,10 @@ snapshots:
       browserslist: 4.28.0
       escalade: 3.2.0
       picocolors: 1.1.1
+
+  urdf-loader@0.12.7(three@0.181.2):
+    dependencies:
+      three: 0.181.2
 
   uri-js@4.4.1:
     dependencies:

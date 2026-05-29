@@ -3,10 +3,9 @@ import Root from "@/views/Root";
 import type { RouteObject } from "react-router";
 import { createBrowserRouter } from "react-router";
 import { advanced } from "./advanced";
+import { demo } from "./demo";
 import { fundamentals } from "./fundamentals";
-import { gaussian } from "./gaussian";
 import { lights } from "./light";
-import { pointCloud } from "./pointCloud";
 
 const routes: RouteObject[] = [
 	...fundamentals,
@@ -38,22 +37,7 @@ const routes: RouteObject[] = [
 		hydrateFallbackElement: HydrateFallback,
 	},
 	...advanced,
-	...gaussian,
-	...pointCloud,
-	{
-		path: "/imageProcess",
-		id: "imageProcess",
-		children: [],
-		Component: Root,
-		hydrateFallbackElement: HydrateFallback,
-	},
-	{
-		path: "/geometry",
-		id: "geometry",
-		children: [],
-		Component: Root,
-		hydrateFallbackElement: HydrateFallback,
-	},
+	...demo,
 ];
 
 const router = createBrowserRouter(routes);

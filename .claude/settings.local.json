@@ -9,7 +9,10 @@
 			"Bash(pnpm serve *)",
 			"Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/pointCloud/pcd)",
 			"Bash(xxd)",
-			"Bash(git checkout *)"
+			"Bash(git checkout *)",
+			"Bash(pnpm build *)",
+			"mcp__plugin_everything-claude-code_context7__resolve-library-id",
+			"mcp__plugin_everything-claude-code_context7__query-docs"
 		]
 	}
 }
