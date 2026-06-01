@@ -1,18 +1,17 @@
-import { Button, Input, message, Space } from "antd";
-import { useLayoutEffect, useRef, useState } from "react";
+import { Button, Input, message, Slider, Space } from "antd";
+import { useEffect, useRef, useState } from "react";
 import {
 	AmbientLight,
 	AxesHelper,
 	DirectionalLight,
 	GridHelper,
 	LoadingManager,
-	Object3D,
 	PerspectiveCamera,
 	Scene,
 	WebGLRenderer,
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import URDFLoader from "urdf-loader";
+import URDFLoader, { URDFRobot } from "urdf-loader";
 
 function URDFLoaderPage() {
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -20,14 +19,25 @@ function URDFLoaderPage() {
 	const cameraRef = useRef<PerspectiveCamera | null>(null);
 	const rendererRef = useRef<WebGLRenderer | null>(null);
 	const controlsRef = useRef<OrbitControls | null>(null);
-	const robotRef = useRef<Object3D | null>(null);
+
+	const robotRef = useRef<URDFRobot>(null);
 	const resizeObserverRef = useRef<ResizeObserver | null>(null);
 	const disposedRef = useRef(false);
+	const currentFrameRef = useRef(0);
+	const totalFramesRef = useRef(0);
+	const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+	const stateDataRef = useRef<{
+		action: Array<Array<number>>;
+		joint_names: Array<string>;
+	} | null>(null);
 
-	const [url, setUrl] = useState("");
+	const [url, setUrl] = useState(
+		"http://localhost:2000/genie-robot-description/urdf/G2_t2_crsB/G2_t2_crsB_omnipicker.urdf",
+	);
 	const [loading, setLoading] = useState(false);
+	const [currentFrame, setCurrentFrame] = useState(0);
 
-	useLayoutEffect(() => {
+	useEffect(() => {
 		disposedRef.current = false;
 
 		const container = containerRef.current;
@@ -82,12 +92,12 @@ function URDFLoaderPage() {
 			renderer.setSize(container.offsetWidth, container.offsetHeight);
 		});
 		resizeObserverRef.current.observe(container);
-
 		return () => {
 			disposedRef.current = true;
 			renderer.setAnimationLoop(null);
 			controls.dispose();
 			resizeObserverRef.current?.disconnect();
+			if (timerRef.current) clearInterval(timerRef.current);
 			if (rendererRef.current) {
 				container.removeChild(renderer.domElement);
 				rendererRef.current.dispose();
@@ -97,7 +107,18 @@ function URDFLoaderPage() {
 		};
 	}, []);
 
-	const handleLoad = () => {
+	const applyFrame = (frame: number) => {
+		const robot = robotRef.current;
+		const state = stateDataRef.current;
+		if (!robot || !state) return;
+		const data: Record<string, number> = {};
+		state.joint_names.forEach((name, i) => {
+			data[name] = state.action[frame][i];
+		});
+		robot.setJointValues(data);
+	};
+
+	const handleLoad = async () => {
 		const trimmedUrl = url.trim();
 		if (!trimmedUrl) {
 			message.warning("请输入 URDF 文件 URL");
@@ -112,57 +133,52 @@ function URDFLoaderPage() {
 
 		setLoading(true);
 
-		const manager = new LoadingManager();
-		const loader = new URDFLoader(manager);
-		loader
-			.loadAsync(trimmedUrl)
-			.then((robot) => {
-				if (disposedRef.current) return;
+		try {
+			const manager = new LoadingManager();
+			const loader = new URDFLoader(manager);
+			const state = (await (await fetch("/assets/state.json", { method: "get" })).json()) as {
+				action: Array<Array<number>>;
+				joint_names: Array<string>;
+			};
+			stateDataRef.current = state;
+			const actionLength = state.action.length;
+			totalFramesRef.current = actionLength;
+			currentFrameRef.current = 0;
+			setCurrentFrame(0);
 
-				if (robotRef.current) {
-					scene.remove(robotRef.current);
+			const robot = await loader.loadAsync(trimmedUrl);
+
+			if (disposedRef.current) return;
+
+			if (robotRef.current) {
+				scene.remove(robotRef.current);
+			}
+
+			robotRef.current = robot;
+			robot.rotation.x = -Math.PI / 2; // ROS Z-up → Three.js Y-up
+			scene.add(robot);
+
+			if (timerRef.current) clearInterval(timerRef.current);
+			timerRef.current = setInterval(() => {
+				if (currentFrameRef.current >= actionLength) {
+					currentFrameRef.current = 0;
 				}
+				applyFrame(currentFrameRef.current);
+				setCurrentFrame(currentFrameRef.current);
+				currentFrameRef.current++;
+			}, 16);
+		} catch (err: unknown) {
+			console.error("URDF load failed:", err);
+			message.error(`加载失败: ${err instanceof Error ? err.message : "未知错误"}`);
+		} finally {
+			setLoading(false);
+		}
+	};
 
-				robotRef.current = robot;
-				scene.add(robot);
-
-				// robot.traverse((child) => {
-				// 	if ((child as Mesh).isMesh) {
-				// 		const mesh = child as Mesh;
-				// 		mesh.castShadow = true;
-				// 		mesh.receiveShadow = true;
-				// 	}
-				// });
-
-				// const box = new Box3().setFromObject(robot);
-				// const center = new Vector3();
-				// box.getCenter(center);
-				// const size = new Vector3();
-				// box.getSize(size);
-				// const maxDim = Math.max(size.x, size.y, size.z);
-
-				// const camera = cameraRef.current;
-				// const controls = controlsRef.current;
-				// if (camera && controls) {
-				// 	const dist = maxDim * 2;
-				// 	camera.position.set(
-				// 		center.x + dist * 0.5,
-				// 		center.y + dist * 0.3,
-				// 		center.z + dist,
-				// 	);
-				// 	controls.target.copy(center);
-				// 	controls.update();
-				// }
-
-				// message.success("URDF 加载成功");
-			})
-			.catch((err: unknown) => {
-				console.error("URDF load failed:", err);
-				message.error(`加载失败: ${err instanceof Error ? err.message : "未知错误"}`);
-			})
-			.finally(() => {
-				setLoading(false);
-			});
+	const handleSliderChange = (value: number) => {
+		currentFrameRef.current = value;
+		setCurrentFrame(value);
+		applyFrame(value);
 	};
 
 	return (
@@ -182,6 +198,21 @@ function URDFLoaderPage() {
 				</Space.Compact>
 			</div>
 			<div ref={containerRef} className="h-full w-full" />
+			{totalFramesRef.current > 0 && (
+				<div className="absolute bottom-4 left-4 right-4 z-10 flex items-center gap-3 rounded-lg bg-white/80 px-4 py-2">
+					<span className="whitespace-nowrap text-xs text-gray-500 min-w-32">
+						帧 {currentFrame} / {totalFramesRef.current}
+					</span>
+					<Slider
+						className="flex-1"
+						min={0}
+						max={totalFramesRef.current - 1}
+						value={currentFrame}
+						onChange={handleSliderChange}
+						tooltip={{ formatter: (v) => `帧 ${v}` }}
+					/>
+				</div>
+			)}
 		</div>
 	);
 }

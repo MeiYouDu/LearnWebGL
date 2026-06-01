@@ -36,6 +36,7 @@ export default ts.config(
 			"addons",
 			"tsconfig.json",
 			"tsconfig-for-webpack-config.json",
+			"src/assets/**/*.json",
 		],
 	},
 	{
