@@ -157,7 +157,7 @@ function URDFLoaderPage() {
 			robotRef.current = robot;
 			robot.rotation.x = -Math.PI / 2; // ROS Z-up → Three.js Y-up
 			scene.add(robot);
-
+			console.log(state);
 			if (timerRef.current) clearInterval(timerRef.current);
 			timerRef.current = setInterval(() => {
 				if (currentFrameRef.current >= actionLength) {
