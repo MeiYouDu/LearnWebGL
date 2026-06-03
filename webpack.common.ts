@@ -146,8 +146,8 @@ const config: Configuration = {
 		new CopyWebpackPlugin({
 			patterns: [
 				{
-					from: resolve(__dirname, "src/assets/state.json"),
-					to: "assets/state.json",
+					from: resolve(__dirname, "src/assets/data"),
+					to: "assets/data",
 				},
 				// {
 				// 	from: resolve(

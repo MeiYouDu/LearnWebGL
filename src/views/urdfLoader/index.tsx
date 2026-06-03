@@ -13,6 +13,14 @@ import {
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
+interface DATA {
+	action: Array<Array<number>>;
+	joint_names: Array<string>;
+	frames: Array<{
+		timestamp: number;
+		joint_position: Array<number>;
+	}>;
+}
 function URDFLoaderPage() {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const sceneRef = useRef<Scene | null>(null);
@@ -26,10 +34,7 @@ function URDFLoaderPage() {
 	const currentFrameRef = useRef(0);
 	const totalFramesRef = useRef(0);
 	const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
-	const stateDataRef = useRef<{
-		action: Array<Array<number>>;
-		joint_names: Array<string>;
-	} | null>(null);
+	const stateDataRef = useRef<DATA | null>(null);
 
 	const [url, setUrl] = useState(
 		"http://localhost:2000/genie-robot-description/urdf/G2_t2_crsB/G2_t2_crsB_omnipicker.urdf",
@@ -113,7 +118,7 @@ function URDFLoaderPage() {
 		if (!robot || !state) return;
 		const data: Record<string, number> = {};
 		state.joint_names.forEach((name, i) => {
-			data[name] = state.action[frame][i];
+			data[name] = state.frames[frame].joint_position[i];
 		});
 		robot.setJointValues(data);
 	};
@@ -136,12 +141,11 @@ function URDFLoaderPage() {
 		try {
 			const manager = new LoadingManager();
 			const loader = new URDFLoader(manager);
-			const state = (await (await fetch("/assets/state.json", { method: "get" })).json()) as {
-				action: Array<Array<number>>;
-				joint_names: Array<string>;
-			};
+			const state = (await (
+				await fetch("/assets/data/trajectory.json", { method: "get" })
+			).json()) as DATA;
 			stateDataRef.current = state;
-			const actionLength = state.action.length;
+			const actionLength = state.frames.length;
 			totalFramesRef.current = actionLength;
 			currentFrameRef.current = 0;
 			setCurrentFrame(0);
