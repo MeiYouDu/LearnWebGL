@@ -3,6 +3,7 @@ import js from "@eslint/js";
 import jsonc from "eslint-plugin-jsonc";
 import prettier from "eslint-plugin-prettier/recommended";
 import reactPlugin from "eslint-plugin-react";
+import reactCompiler from "eslint-plugin-react-compiler";
 import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
 import ts from "typescript-eslint";
@@ -52,7 +53,9 @@ export default ts.config(
 	reactPlugin.configs.flat.recommended,
 	reactPlugin.configs.flat["jsx-runtime"],
 	reactHooks.configs.flat.recommended,
+	reactCompiler.configs.recommended,
 	...jsonc.configs["flat/recommended-with-json"],
+	jsonc.configs["flat/prettier"],
 	prettier,
 	{
 		files: ["**/*.ts"],

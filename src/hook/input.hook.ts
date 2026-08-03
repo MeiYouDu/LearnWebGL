@@ -35,6 +35,7 @@ function useInput(canvas: RefObject<HTMLCanvasElement | null>): ReturnType {
 		initCameraFront = vec3.copy(vec3.create(), cameraFront);
 	function keydownHandle(ev: KeyboardEvent) {
 		const left = vec3.cross(vec3.create(), cameraFront, cameraUp);
+		// eslint-disable-next-line react-compiler/react-compiler
 		if (ev.code === "KeyW") dPos = vec3.scale(dPos, cameraFront, speed * deltaTime * 0.1);
 		if (ev.code === "KeyS") dPos = vec3.scale(dPos, cameraFront, -speed * deltaTime * 0.1);
 		if (ev.code === "KeyA") vec3.scale(dPos, left, -speed * deltaTime * 0.1);

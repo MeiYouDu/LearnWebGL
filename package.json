@@ -125,6 +125,7 @@
 		"cesium": "1.120.0",
 		"core-js": "^3.45.1",
 		"dayjs": "^1.11.13",
+		"eslint-plugin-react-compiler": "19.1.0-rc.2",
 		"gl-matrix": "^3.4.3",
 		"highlight.js": "^11.11.1",
 		"lodash": "^4.17.21",
