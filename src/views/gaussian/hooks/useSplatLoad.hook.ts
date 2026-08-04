@@ -1,9 +1,9 @@
-import { PackedSplats, SplatLoader } from "@sparkjsdev/spark";
+import { ExtSplats, PackedSplats, SplatLoader } from "@sparkjsdev/spark";
 import { useEffect, useRef } from "react";
 import { LoadingManager } from "three";
 
 interface ReturnType {
-	load(url: string): Promise<PackedSplats> | undefined;
+	load(url: string): Promise<ExtSplats | PackedSplats> | undefined;
 }
 
 function useSplatLoadHook(): ReturnType {

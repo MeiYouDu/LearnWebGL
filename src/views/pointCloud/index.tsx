@@ -11,8 +11,8 @@ import {
 	Vector3,
 	WebGLRenderer,
 } from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { PCDLoader } from "three/examples/jsm/loaders/PCDLoader";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { PCDLoader } from "three/examples/jsm/loaders/PCDLoader.js";
 import frag from "./shader.frag";
 import vert from "./shader.vert";
 

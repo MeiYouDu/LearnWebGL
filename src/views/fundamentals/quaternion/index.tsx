@@ -215,7 +215,8 @@ export default function CanvasComponent() {
 					<span className="w-16">yaw:</span>
 					<Slider
 						className="w-[calc(100%-64px)]"
-						defaultValue={angleRef.current[2]}
+						// angleRef 初始为 0，非受控 Slider 的 defaultValue 仅首次挂载生效
+						defaultValue={0}
 						min={-180}
 						max={180}
 						onChange={(value) => angleChangeHandle(value, 2)}
@@ -225,7 +226,7 @@ export default function CanvasComponent() {
 					<span className="w-16">pitch:</span>
 					<Slider
 						className="w-[calc(100%-64px)]"
-						defaultValue={angleRef.current[0]}
+						defaultValue={0}
 						min={-180}
 						max={180}
 						onChange={(value) => angleChangeHandle(value, 0)}
@@ -235,7 +236,7 @@ export default function CanvasComponent() {
 					<span className="w-16">roll:</span>
 					<Slider
 						className="w-[calc(100%-64px)]"
-						defaultValue={angleRef.current[1]}
+						defaultValue={0}
 						min={-180}
 						max={180}
 						onChange={(value) => angleChangeHandle(value, 1)}

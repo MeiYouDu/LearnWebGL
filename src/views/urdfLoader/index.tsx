@@ -10,7 +10,7 @@ import {
 	Scene,
 	WebGLRenderer,
 } from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
 interface DATA {
@@ -32,7 +32,6 @@ function URDFLoaderPage() {
 	const resizeObserverRef = useRef<ResizeObserver | null>(null);
 	const disposedRef = useRef(false);
 	const currentFrameRef = useRef(0);
-	const totalFramesRef = useRef(0);
 	const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 	const stateDataRef = useRef<DATA | null>(null);
 
@@ -41,6 +40,7 @@ function URDFLoaderPage() {
 	);
 	const [loading, setLoading] = useState(false);
 	const [currentFrame, setCurrentFrame] = useState(0);
+	const [totalFrames, setTotalFrames] = useState(0);
 
 	useEffect(() => {
 		disposedRef.current = false;
@@ -146,7 +146,7 @@ function URDFLoaderPage() {
 			).json()) as DATA;
 			stateDataRef.current = state;
 			const actionLength = state.frames.length;
-			totalFramesRef.current = actionLength;
+			setTotalFrames(actionLength);
 			currentFrameRef.current = 0;
 			setCurrentFrame(0);
 
@@ -202,15 +202,15 @@ function URDFLoaderPage() {
 				</Space.Compact>
 			</div>
 			<div ref={containerRef} className="h-full w-full" />
-			{totalFramesRef.current > 0 && (
+			{totalFrames > 0 && (
 				<div className="absolute bottom-4 left-4 right-4 z-10 flex items-center gap-3 rounded-lg bg-white/80 px-4 py-2">
 					<span className="whitespace-nowrap text-xs text-gray-500 min-w-32">
-						帧 {currentFrame} / {totalFramesRef.current}
+						帧 {currentFrame} / {totalFrames}
 					</span>
 					<Slider
 						className="flex-1"
 						min={0}
-						max={totalFramesRef.current - 1}
+						max={totalFrames - 1}
 						value={currentFrame}
 						onChange={handleSliderChange}
 						tooltip={{ formatter: (v) => `帧 ${v}` }}

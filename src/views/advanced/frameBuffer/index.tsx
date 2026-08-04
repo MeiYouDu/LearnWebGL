@@ -443,6 +443,8 @@ export default function CanvasComponent() {
 					}}></Switch>
 				<Select
 					defaultValue={currEffect}
+					// effects 在挂载后构建且不再变化，render 读取安全
+					// eslint-disable-next-line react-hooks/refs
 					options={effects.current.map((item) => {
 						return {
 							label: item.name,

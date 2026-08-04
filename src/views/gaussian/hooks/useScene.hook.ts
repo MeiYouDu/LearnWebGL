@@ -1,6 +1,7 @@
 import { SceneManager } from "@/views/gaussian/helper/sceneManager.ts";
 import { Splat } from "@/views/gaussian/helper/splat.ts";
 import { useSplatLoadHook } from "@/views/gaussian/hooks/useSplatLoad.hook.ts";
+import { PackedSplats } from "@sparkjsdev/spark";
 import { useHover } from "ahooks";
 import { RefObject, useEffect, useRef } from "react";
 
@@ -47,7 +48,7 @@ function useSceneHook(): ReturnType {
 			try {
 				const data = await load("/assets/model/converted_file.ksplat");
 				if (!data) return;
-				splatRef.current?.add(data);
+				splatRef.current?.add(data as PackedSplats);
 			} catch (e) {
 				console.log(e);
 			}

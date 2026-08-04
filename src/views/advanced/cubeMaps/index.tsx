@@ -40,7 +40,7 @@ import { UploadChangeParam } from "antd/es/upload";
 import { mat4, vec3 } from "gl-matrix";
 import { useEffect, useRef, useState } from "react";
 import { Mesh, Texture } from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import lightFrag from "./light.frag";
 import frag from "./texture.frag";
 import vert from "./texture.vert";
@@ -549,6 +549,8 @@ export default function CanvasComponent() {
 					}}></Switch>
 				<Select
 					defaultValue={currEffect}
+					// effects 在挂载后构建且不再变化，render 读取安全
+					// eslint-disable-next-line react-hooks/refs
 					options={effects.current.map((item) => {
 						return {
 							label: item.name,

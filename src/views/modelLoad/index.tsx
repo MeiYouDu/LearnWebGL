@@ -17,7 +17,7 @@ import { mat4, vec3 } from "gl-matrix";
 import { cos, sin } from "mathjs";
 import { useEffect, useRef } from "react";
 import { Mesh, Texture } from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import frag from "./fragment.frag";
 
 export default function CanvasComponent() {

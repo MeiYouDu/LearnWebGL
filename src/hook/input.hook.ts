@@ -35,7 +35,8 @@ function useInput(canvas: RefObject<HTMLCanvasElement | null>): ReturnType {
 		initCameraFront = vec3.copy(vec3.create(), cameraFront);
 	function keydownHandle(ev: KeyboardEvent) {
 		const left = vec3.cross(vec3.create(), cameraFront, cameraUp);
-		// eslint-disable-next-line react-compiler/react-compiler
+		// 命令式输入状态机：闭包变量由事件回调驱动，不走 React state
+		// eslint-disable-next-line react-compiler/react-compiler, react-hooks/immutability
 		if (ev.code === "KeyW") dPos = vec3.scale(dPos, cameraFront, speed * deltaTime * 0.1);
 		if (ev.code === "KeyS") dPos = vec3.scale(dPos, cameraFront, -speed * deltaTime * 0.1);
 		if (ev.code === "KeyA") vec3.scale(dPos, left, -speed * deltaTime * 0.1);
@@ -85,6 +86,8 @@ function useInput(canvas: RefObject<HTMLCanvasElement | null>): ReturnType {
 		mouseMoveEvent = ev;
 	}
 
+	// 事件回调会在渲染之外修改 mouseMoveEvent 等闭包变量（命令式输入状态机）
+	// eslint-disable-next-line react-hooks/immutability
 	useEffect(() => {
 		document.addEventListener("keydown", keydownHandle);
 		document.addEventListener("keyup", keyupHandle);
