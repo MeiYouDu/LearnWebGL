@@ -1,8 +1,8 @@
 import { Configuration, DefinePlugin } from "webpack";
 import type { Configuration as ServerConfiguration } from "webpack-dev-server";
 import { merge } from "webpack-merge";
-import { EXCLUDECSS } from "./constant.ts";
-import common from "./webpack.common.ts";
+import { EXCLUDECSS } from "./constant";
+import common from "./webpack.common";
 
 interface Config extends Configuration {
 	devServer?: ServerConfiguration;
