@@ -190,6 +190,7 @@ function SparkDemo() {
 					fileName: file.name,
 					lod: true,
 				})) as PackedSplats;
+				console.log(data);
 				// 清理旧资源
 				splatMeshRef.current?.dispose();
 				splatMeshRef.current?.removeFromParent();
