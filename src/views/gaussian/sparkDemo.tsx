@@ -9,17 +9,22 @@ import {
 	SplatLoader,
 	SplatMesh,
 } from "@sparkjsdev/spark";
-import { Button, message, Spin, Switch, Upload } from "antd";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Button, message, Switch, Upload } from "antd";
+import { useCallback, useEffect, useRef } from "react";
 import {
 	Box3,
 	BufferGeometry,
 	Color,
 	Float32BufferAttribute,
+	Mesh,
+	MeshBasicMaterial,
 	PerspectiveCamera,
 	Points,
 	PointsMaterial,
+	Raycaster,
 	Scene,
+	SphereGeometry,
+	Vector2,
 	Vector3,
 	WebGLRenderer,
 } from "three";
@@ -67,8 +72,8 @@ function SparkDemo() {
 	const splatMeshRef = useRef<SplatMesh>(null);
 	const pointsRef = useRef<Points>(null);
 	const dataRef = useRef<PackedSplats>(null);
+	const markerRef = useRef<Mesh>(null);
 	const isPointsModeRef = useRef(true);
-	const [loading, setLoading] = useState(false);
 
 	/** 初始化 three + spark 渲染管线（SparkRenderer 驱动 LOD 与 splat 排序） */
 	useEffect(() => {
@@ -78,7 +83,8 @@ function SparkDemo() {
 		const scene = new Scene();
 		scene.background = new Color(0x1a1a2e);
 		const camera = new PerspectiveCamera(75, 1, 0.1, 1000);
-		const sparkRenderer = new SparkRenderer({ renderer });
+		// lodRaycast 调大：拾取用的 LoD splat 集合更密，物体边缘覆盖更完整，减少穿透
+		const sparkRenderer = new SparkRenderer({ renderer, lodRaycast: 50000 });
 		scene.add(sparkRenderer);
 		const controls = new SparkControls({ canvas });
 		const loader = new SplatLoader();
@@ -98,18 +104,66 @@ function SparkDemo() {
 		}
 		resize();
 		window.addEventListener("resize", resize);
+
+		// 点击拾取：SplatMesh 实现了 three.js Raycaster 兼容的 raycast（官方推荐做法），
+		// 命中 point 为世界坐标，直接在命中处放置标记小球
+		const marker = new Mesh(
+			new SphereGeometry(0.01),
+			new MeshBasicMaterial({ color: 0xff5533 }),
+		);
+		marker.visible = false;
+		scene.add(marker);
+		markerRef.current = marker;
+		const raycaster = new Raycaster();
+		let pointerDownPos: Vector2 | null = null;
+		const onPointerDown = (event: PointerEvent) => {
+			pointerDownPos = new Vector2(event.clientX, event.clientY);
+		};
+		const onClick = (event: MouseEvent) => {
+			// 拖拽旋转相机后松开也会触发 click，位移小于阈值才视为点击
+			if (
+				pointerDownPos &&
+				pointerDownPos.distanceTo(new Vector2(event.clientX, event.clientY)) > 5
+			) {
+				return;
+			}
+			const mesh = splatMeshRef.current;
+			if (!mesh) return;
+			// 阈值调小，让物体边缘的半透明 splat 也参与拾取，避免射线穿透到物体后面
+			mesh.minRaycastOpacity = 0.005;
+			// canvas 在 antd Layout 中不在 viewport 原点，需用 rect 换算 canvas 内坐标
+			const rect = canvas.getBoundingClientRect();
+			const ndc = new Vector2(
+				((event.clientX - rect.left) / rect.width) * 2 - 1,
+				-((event.clientY - rect.top) / rect.height) * 2 + 1,
+			);
+			raycaster.setFromCamera(ndc, camera);
+			const hits = raycaster.intersectObject(mesh);
+			if (hits.length > 0) {
+				marker.position.copy(hits[0].point);
+				marker.visible = true;
+			}
+		};
+		canvas.addEventListener("pointerdown", onPointerDown);
+		canvas.addEventListener("click", onClick);
+
 		renderer.setAnimationLoop(() => {
 			controls.update(camera);
 			renderer.render(scene, camera);
 		});
 		return () => {
 			window.removeEventListener("resize", resize);
+			canvas.removeEventListener("pointerdown", onPointerDown);
+			canvas.removeEventListener("click", onClick);
 			renderer.setAnimationLoop(null);
 			controls.fpsMovement.enable = false;
 			controls.pointerControls.enable = false;
 			splatMeshRef.current?.dispose();
 			pointsRef.current?.geometry.dispose();
 			(pointsRef.current?.material as PointsMaterial | undefined)?.dispose();
+			marker.geometry.dispose();
+			marker.material.dispose();
+			markerRef.current = null;
 			sparkRenderer.dispose();
 			renderer.dispose();
 		};
@@ -130,24 +184,21 @@ function SparkDemo() {
 			bounds.expandByPoint(center);
 		});
 		if (bounds.isEmpty()) return;
-		const center = bounds.getCenter(new Vector3());
+		const center = new Vector3();
 		const size = bounds.getSize(new Vector3());
 		const isZUp = size.z < size.y;
 		const maxDim = Math.max(size.x, size.y, size.z);
-		const distance = (maxDim / (2 * Math.tan((camera.fov * Math.PI) / 180 / 2))) * 1.6;
-		const tilt = (25 * Math.PI) / 180;
+		// 标记小球半径按模型尺寸适配（约 2% 最大边长）
+		const marker = markerRef.current;
+		if (marker) marker.scale.setScalar(maxDim * 0.02);
 		if (isZUp) {
 			camera.up.set(0, 0, 1);
 			// 从 +Y 侧面看，视线沿 -Y 略俯视（Z 方向抬高）
-			camera.position.set(
-				center.x,
-				center.y + distance * Math.cos(tilt),
-				center.z + distance * Math.sin(tilt),
-			);
+			camera.position.set(center.x, center.y, center.z);
 			camera.lookAt(center);
 		} else {
-			camera.up.set(0, 1, 0);
-			camera.position.set(center.x, center.y, center.z + distance);
+			camera.up.set(0, -1, 0);
+			camera.position.set(center.x, center.y, center.z);
 			camera.lookAt(center);
 		}
 	}
@@ -178,7 +229,6 @@ function SparkDemo() {
 		async (file: File) => {
 			const loader = splatLoaderRef.current;
 			if (!loader) return;
-			setLoading(true);
 			try {
 				const fileBytes = new Uint8Array(await file.arrayBuffer());
 				const fileType =
@@ -190,7 +240,6 @@ function SparkDemo() {
 					fileName: file.name,
 					lod: true,
 				})) as PackedSplats;
-				console.log(data);
 				// 清理旧资源
 				splatMeshRef.current?.dispose();
 				splatMeshRef.current?.removeFromParent();
@@ -208,8 +257,6 @@ function SparkDemo() {
 				message.success("加载成功");
 			} catch (error: unknown) {
 				message.error(error instanceof Error ? error.message : "文件加载失败");
-			} finally {
-				setLoading(false);
 			}
 		},
 		[applyMode],
@@ -235,11 +282,9 @@ function SparkDemo() {
 					</Button>
 				</Upload>
 			</div>
-			<Spin spinning={loading} tip="解码与 LOD 构建中，大文件需要较长时间...">
-				<div className={"relative h-full w-full"}>
-					<canvas className={"h-full w-full"} ref={canvasRef}></canvas>
-				</div>
-			</Spin>
+			<div className={"relative h-full w-full"}>
+				<canvas className={"h-full w-full"} ref={canvasRef}></canvas>
+			</div>
 		</div>
 	);
 }
