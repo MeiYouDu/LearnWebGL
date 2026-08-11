@@ -80,11 +80,6 @@ class PostProcessingMaterial extends Material {
 			this.rbo,
 		);
 		gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-		const res = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
-		if (res !== gl.FRAMEBUFFER_COMPLETE) {
-			console.error("framebuffer is not complete");
-			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-		}
 		this.texture = gl.createTexture();
 		gl.activeTexture(gl.TEXTURE0);
 		gl.bindTexture(gl.TEXTURE_2D, this.texture);
@@ -120,6 +115,11 @@ class PostProcessingMaterial extends Material {
 			this.texture,
 			0,
 		);
+		const res = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+		if (res !== gl.FRAMEBUFFER_COMPLETE) {
+			console.error("framebuffer is not complete");
+			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+		}
 	}
 
 	// public render(scene: Scene, instance: GeometryInstance): void {
