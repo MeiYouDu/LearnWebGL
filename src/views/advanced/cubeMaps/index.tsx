@@ -10,6 +10,8 @@ import right from "@/assets/textures/skybox/right.jpg";
 import top from "@/assets/textures/skybox/top.jpg";
 import windowImage from "@/assets/textures/window.png";
 import {
+	AmbientReflectMapMaterial,
+	AmbientRefractMapMaterial,
 	BlinnPhongMaterial,
 	blinnPhongVert,
 	Camera,
@@ -390,6 +392,32 @@ export default function CanvasComponent() {
 			attributes: boxAttribute,
 			material: boxMaterial,
 		});
+		const reflectBoxGeometry = new Geometry({
+			attributes: boxAttribute,
+			material: new AmbientReflectMapMaterial({
+				cubeMapTextures: [
+					{ image: right, width: 2048, height: 2048 },
+					{ image: left, width: 2048, height: 2048 },
+					{ image: top, width: 2048, height: 2048 },
+					{ image: bottom, width: 2048, height: 2048 },
+					{ image: front, width: 2048, height: 2048 },
+					{ image: back, width: 2048, height: 2048 },
+				],
+			}),
+		});
+		const refractBoxGeometry = new Geometry({
+			attributes: boxAttribute,
+			material: new AmbientRefractMapMaterial({
+				cubeMapTextures: [
+					{ image: right, width: 2048, height: 2048 },
+					{ image: left, width: 2048, height: 2048 },
+					{ image: top, width: 2048, height: 2048 },
+					{ image: bottom, width: 2048, height: 2048 },
+					{ image: front, width: 2048, height: 2048 },
+					{ image: back, width: 2048, height: 2048 },
+				],
+			}),
+		});
 		const glassGeometry = new Geometry({
 			attributes: glassAttribute,
 			material: glassMaterial,
@@ -413,11 +441,19 @@ export default function CanvasComponent() {
 		const skyBoxInstance = new GeometryInstance({
 			geometry: skyBox,
 		});
-		const boxGeometryInstance2 = new GeometryInstance({
-			geometry: boxGeometry,
+		const reflectBoxGeometryInstance = new GeometryInstance({
+			geometry: reflectBoxGeometry,
 			matrix: mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), vec3.fromValues(2, 0, 2)),
+				mat4.fromScaling(mat4.create(), vec3.fromValues(2.0, 2.0, 2.0)),
+			),
+		});
+		const refractBoxGeometryInstance = new GeometryInstance({
+			geometry: refractBoxGeometry,
+			matrix: mat4.multiply(
+				mat4.create(),
+				mat4.fromTranslation(mat4.create(), vec3.fromValues(4, 4, 4)),
 				mat4.fromScaling(mat4.create(), vec3.fromValues(2.0, 2.0, 2.0)),
 			),
 		});
@@ -488,10 +524,11 @@ export default function CanvasComponent() {
 
 		scene.add(defaultEffect);
 		scene.add(skyBoxInstance);
-		scene.add(groundGeometryInstance);
+		// scene.add(groundGeometryInstance);
 		scene.add(lightGeometryInstance);
 		scene.add(boxGeometryInstance);
-		scene.add(boxGeometryInstance2);
+		scene.add(reflectBoxGeometryInstance);
+		scene.add(refractBoxGeometryInstance);
 		scene.add(outline1);
 		scene.add(outline2);
 		scene.add(windowInstance);
