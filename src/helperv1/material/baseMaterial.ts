@@ -272,6 +272,7 @@ class Material extends Base {
 		});
 		this.uniformsSetter?.(gl, this);
 		this.setVec2(vec2.fromValues(gl.canvas.width, gl.canvas.height), "resolution");
+		this.setVec3(scene.camera.position, "cameraPos");
 		this.setMatrix4(instance.matrix, "model");
 		this.setMatrix4(scene.camera.viewMatrix, "view");
 		this.setMatrix4(scene.camera.projectionMatrix, "projection");
