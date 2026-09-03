@@ -55,9 +55,11 @@ class CubeMapMaterial extends Material {
 		if (!gl) return;
 		if (!this.cubeMapTextures) throw new Error("cubeMapTextures is required");
 		this.texture = gl.createTexture();
-		gl.activeTexture(gl.TEXTURE0 + 1);
+		const index = 1,
+			name = "cubeMap";
+		gl.activeTexture(gl.TEXTURE0 + index);
 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
-		this.setInt(1, "cubeMap");
+		this.setInt(index, name);
 		this.cubeMapTextures.forEach((item, index) => {
 			const imgInstance = new Image(item.width, item.height);
 			imgInstance.addEventListener("load", () => {
@@ -78,9 +80,10 @@ class CubeMapMaterial extends Material {
 			});
 			imgInstance.src = item.image;
 		});
-		this.textureInstances[1] = {
+		this.textureInstances[index] = {
 			texture: this.texture,
 			type: gl.TEXTURE_CUBE_MAP,
+			name,
 		};
 		// gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);

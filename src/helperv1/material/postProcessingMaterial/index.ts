@@ -102,11 +102,13 @@ class PostProcessingMaterial extends Material {
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		this.setInt(0, "postProcessingTexture");
-		// this.textureInstances.length = 0;
-		this.textureInstances[0] = {
+		const index = 0,
+			name = "postProcessingTexture";
+		this.setInt(index, name);
+		this.textureInstances[index] = {
 			texture: this.texture,
 			type: gl.TEXTURE_2D,
+			name,
 		};
 		gl.framebufferTexture2D(
 			gl.FRAMEBUFFER,

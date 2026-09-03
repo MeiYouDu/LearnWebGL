@@ -1,6 +1,7 @@
 import { merge } from "lodash";
-import { CubeMapMaterialOptions, PNTAttribPointer, Scene, Shader } from "../..";
+import { CubeMapMaterialOptions, PNTAttribPointer, Shader } from "../../";
 import { Material } from "../baseMaterial";
+import { CubeMapMaterial } from "../cubeMapMaterial";
 import ambientVert from "./ambientMap.vert";
 import reflectFrag from "./reflect.frag";
 import refractFrag from "./refract.frag";
@@ -19,7 +20,7 @@ interface AmbientRefractMapMaterialOptions extends CubeMapMaterialOptions {
 /**
  * 环境反射贴图
  */
-class AmbientReflectMapMaterial extends Material {
+class AmbientReflectMapMaterial extends CubeMapMaterial {
 	constructor(options?: Partial<AmbientRefractMapMaterialOptions>) {
 		const mergedOptions = merge(
 			{
@@ -49,47 +50,6 @@ class AmbientReflectMapMaterial extends Material {
 		// 恢复默认
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 		return this;
-	}
-
-	public setScene(scene: Scene): void {
-		super.setScene(scene);
-		const gl = this.getGl();
-		if (!gl) return;
-		if (!this.cubeMapTextures) throw new Error("cubeMapTextures is required");
-		this.texture = gl.createTexture();
-		gl.activeTexture(gl.TEXTURE0 + 1);
-		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
-		this.setInt(1, "cubeMap");
-		this.cubeMapTextures.forEach((item, index) => {
-			const imgInstance = new Image(item.width, item.height);
-			imgInstance.addEventListener("load", () => {
-				if (!this.texture) return;
-				gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture as WebGLTexture);
-				gl.texImage2D(
-					gl.TEXTURE_CUBE_MAP_POSITIVE_X + index,
-					0,
-					gl.RGBA,
-					item.width,
-					item.height,
-					0,
-					gl.RGBA,
-					gl.UNSIGNED_BYTE,
-					imgInstance,
-				);
-				imgInstance.remove();
-			});
-			imgInstance.src = item.image;
-		});
-		this.textureInstances[1] = {
-			texture: this.texture,
-			type: gl.TEXTURE_CUBE_MAP,
-		};
-		// gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
 	}
 }
 /**
@@ -125,47 +85,6 @@ class AmbientRefractMapMaterial extends Material {
 		// 恢复默认
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 		return this;
-	}
-
-	public setScene(scene: Scene): void {
-		super.setScene(scene);
-		const gl = this.getGl();
-		if (!gl) return;
-		if (!this.cubeMapTextures) throw new Error("cubeMapTextures is required");
-		this.texture = gl.createTexture();
-		gl.activeTexture(gl.TEXTURE0 + 1);
-		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
-		this.setInt(1, "cubeMap");
-		this.cubeMapTextures.forEach((item, index) => {
-			const imgInstance = new Image(item.width, item.height);
-			imgInstance.addEventListener("load", () => {
-				if (!this.texture) return;
-				gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture as WebGLTexture);
-				gl.texImage2D(
-					gl.TEXTURE_CUBE_MAP_POSITIVE_X + index,
-					0,
-					gl.RGBA,
-					item.width,
-					item.height,
-					0,
-					gl.RGBA,
-					gl.UNSIGNED_BYTE,
-					imgInstance,
-				);
-				imgInstance.remove();
-			});
-			imgInstance.src = item.image;
-		});
-		this.textureInstances[1] = {
-			texture: this.texture,
-			type: gl.TEXTURE_CUBE_MAP,
-		};
-		// gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
 	}
 }
 

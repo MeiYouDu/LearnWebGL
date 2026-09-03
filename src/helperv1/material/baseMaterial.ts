@@ -77,6 +77,7 @@ class Material extends Base {
 	public culling = false;
 	protected textureInstances: Array<{
 		texture: WebGLTexture;
+		name: string;
 		type: Pick<WebGL2RenderingContext, "TEXTURE_CUBE_MAP" | "TEXTURE_2D">[keyof Pick<
 			WebGL2RenderingContext,
 			"TEXTURE_CUBE_MAP" | "TEXTURE_2D"
@@ -118,6 +119,7 @@ class Material extends Base {
 			this.textureInstances[textureUnit] = {
 				texture,
 				type: gl.TEXTURE_2D,
+				name: textureLocationName || `texture${textureUnit}`,
 			};
 		} else {
 			const imgInstance = new Image(width, height);
@@ -144,6 +146,7 @@ class Material extends Base {
 				this.textureInstances[textureUnit] = {
 					texture,
 					type: gl.TEXTURE_2D,
+					name: textureLocationName || `texture${textureUnit}`,
 				};
 			});
 			imgInstance.src = image;
@@ -160,8 +163,9 @@ class Material extends Base {
 			const gl = this.getGl();
 			if (!gl) return;
 			const length = this.textures?.length ?? -1;
+			const index = length + 1;
 			const defaultTexture: WebGLTexture = gl.createTexture();
-			gl.activeTexture(gl.TEXTURE0 + length + 1);
+			gl.activeTexture(gl.TEXTURE0 + index);
 			gl.bindTexture(gl.TEXTURE_2D, defaultTexture);
 			gl.texImage2D(
 				gl.TEXTURE_2D,
@@ -175,15 +179,23 @@ class Material extends Base {
 				new Uint8Array([255, 255, 255, 255]),
 			);
 			this.setTextureParams(gl);
-			this.textureInstances[0] = {
-				texture: defaultTexture,
-				type: gl.TEXTURE_2D,
-			};
 			if (!hasDiffuse) {
-				this.setInt(length + 1, "material.diffuse");
+				const name = "material.diffuse";
+				this.textureInstances[index] = {
+					texture: defaultTexture,
+					type: gl.TEXTURE_2D,
+					name,
+				};
+				this.setInt(index, name);
 			}
 			if (!hasSpecular) {
-				this.setInt(length + 1, "material.specular");
+				const name = "material.specular";
+				this.textureInstances[index] = {
+					texture: defaultTexture,
+					type: gl.TEXTURE_2D,
+					name,
+				};
+				this.setInt(index, name);
 			}
 		}
 	}
@@ -267,6 +279,7 @@ class Material extends Base {
 		if (!gl) throw new Error("gl is undefined");
 		this.shader.render(scene);
 		this.textureInstances.forEach((item, index) => {
+			this.setInt(index, item.name ?? `${index}`);
 			gl.activeTexture(gl.TEXTURE0 + index);
 			gl.bindTexture(item.type, item.texture);
 		});
