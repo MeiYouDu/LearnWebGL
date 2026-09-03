@@ -31,6 +31,22 @@ const routes: RouteObject[] = [
 					};
 				},
 			},
+			{
+				path: "reflect",
+				id: "reflect",
+				hydrateFallbackElement: HydrateFallback,
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "reflect" */
+								/* webpackPrefetch: true */
+								"@/views/modelLoad/reflect"
+							)
+						).default,
+					};
+				},
+			},
 		],
 
 		Component: Root,
