@@ -1,5 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
-import { FPSControl, PostProcessingGeometry, PostProcessingMaterial } from "./";
+import { FPSControl, PostProcessingMaterial } from "./";
 import { Camera } from "./camera/camera.ts";
 import { GeometryInstance } from "./geometry/geometryInstance.ts";
 
@@ -129,13 +129,10 @@ class Scene {
 		const blend: GeometryInstance[] = [];
 		const postProcess: Array<GeometryInstance> = [];
 		this.geometryMap.forEach((item) => {
-			if (
-				item.geometry instanceof PostProcessingGeometry &&
-				item.geometry.material instanceof PostProcessingMaterial
-			) {
+			if (item.material instanceof PostProcessingMaterial) {
 				return postProcess.push(item);
 			}
-			if (item.geometry.material.blend) {
+			if (item.material.blend) {
 				blend.push(item);
 			} else {
 				noBlend.push(item);
@@ -149,15 +146,15 @@ class Scene {
 		});
 		postProcess.forEach((item) => {
 			// 如果存在后处理几何体几何体则先执行绑定 FBO
-			if (item.geometry.material instanceof PostProcessingMaterial) {
-				item.geometry.material.bind();
+			if (item.material instanceof PostProcessingMaterial) {
+				item.material.bind();
 			}
 		});
 		// 放到 bind 后面，bind 中可能切换framebuffer
 		this.clearScreen(gl);
 		// FBO 绑定之后正常绘制
 		noBlend.forEach((item) => {
-			if (item.geometry.material.culling) {
+			if (item.material.culling) {
 				gl.enable(gl.CULL_FACE);
 			} else {
 				gl.disable(gl.CULL_FACE);
@@ -165,7 +162,7 @@ class Scene {
 			item.render(this);
 		});
 		blend.forEach((item) => {
-			if (item.geometry.material.culling) {
+			if (item.material.culling) {
 				gl.enable(gl.CULL_FACE);
 			} else {
 				gl.disable(gl.CULL_FACE);

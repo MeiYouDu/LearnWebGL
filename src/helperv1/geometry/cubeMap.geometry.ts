@@ -1,4 +1,5 @@
 import { merge } from "lodash";
+import { PAttribPointer } from "../utils";
 import { Geometry, GeometryOptions } from "./geometry";
 
 /**
@@ -28,6 +29,7 @@ class CubeMapGeometry extends Geometry {
 		const mergedOptions = merge(
 			{
 				attributes,
+				vertexAttribPointer: PAttribPointer,
 			},
 			options,
 		);

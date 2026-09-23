@@ -71,6 +71,14 @@ class Shader extends Base {
 		if (this.program) gl.useProgram(this.program);
 	}
 
+	/**
+	 * 获取 attribute location
+	 * @param name
+	 */
+	public getAttribLocation(name: string): number | undefined {
+		if (this.program) return this.getGl()?.getAttribLocation(this.program, name);
+	}
+
 	public setScene(scene: Scene): void {
 		super.setScene(scene);
 		this.render(scene);

@@ -5,4 +5,5 @@ export * from "./geometry";
 export * from "./material";
 export * from "./scene";
 export * from "./shader";
+export * from "./texture";
 export * from "./utils";

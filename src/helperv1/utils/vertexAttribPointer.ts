@@ -1,16 +1,16 @@
-import { Material } from "../material";
+import { Shader } from "../shader";
 
 /**
  * position normal texture
  * @param gl
- * @param material
+ * @param shader
  * @returns
  */
-function PNTAttribPointer(gl: WebGL2RenderingContext, material: Material): number {
+function PNTAttribPointer(gl: WebGL2RenderingContext, shader: Shader): number {
 	const stride = 8;
-	const positionAttrLocation = material.getAttribLocation("position");
-	const normalAttrLocation = material.getAttribLocation("normal");
-	const texCoordAttrLocation = material.getAttribLocation("texCoord");
+	const positionAttrLocation = shader.getAttribLocation("position");
+	const normalAttrLocation = shader.getAttribLocation("normal");
+	const texCoordAttrLocation = shader.getAttribLocation("texCoord");
 
 	if (typeof positionAttrLocation === "number" && positionAttrLocation >= 0) {
 		gl.vertexAttribPointer(positionAttrLocation, 3, gl.FLOAT, false, stride * 4, 0);
@@ -29,12 +29,12 @@ function PNTAttribPointer(gl: WebGL2RenderingContext, material: Material): numbe
 /**
  * position
  * @param gl
- * @param material
+ * @param shader
  * @returns
  */
-function PAttribPointer(gl: WebGL2RenderingContext, material: Material): number {
+function PAttribPointer(gl: WebGL2RenderingContext, shader: Shader): number {
 	const stride = 3;
-	const positionAttrLocation = material.getAttribLocation("position");
+	const positionAttrLocation = shader.getAttribLocation("position");
 
 	if (typeof positionAttrLocation === "number" && positionAttrLocation >= 0) {
 		gl.vertexAttribPointer(positionAttrLocation, 3, gl.FLOAT, false, stride * 4, 0);
@@ -45,13 +45,13 @@ function PAttribPointer(gl: WebGL2RenderingContext, material: Material): number 
 /**
  * position normal
  * @param gl
- * @param material
+ * @param shader
  * @returns
  */
-function PNAttribPointer(gl: WebGL2RenderingContext, material: Material): number {
+function PNAttribPointer(gl: WebGL2RenderingContext, shader: Shader): number {
 	const stride = 6;
-	const positionAttrLocation = material.getAttribLocation("position");
-	const normalAttrLocation = material.getAttribLocation("normal");
+	const positionAttrLocation = shader.getAttribLocation("position");
+	const normalAttrLocation = shader.getAttribLocation("normal");
 
 	if (typeof positionAttrLocation === "number" && positionAttrLocation >= 0) {
 		gl.vertexAttribPointer(positionAttrLocation, 3, gl.FLOAT, false, stride * 4, 0);
@@ -66,13 +66,13 @@ function PNAttribPointer(gl: WebGL2RenderingContext, material: Material): number
 /**
  * position texture
  * @param gl
- * @param material
+ * @param shader
  * @returns
  */
-function PTAttribPointer(gl: WebGL2RenderingContext, material: Material): number {
+function PTAttribPointer(gl: WebGL2RenderingContext, shader: Shader): number {
 	const stride = 5;
-	const positionAttrLocation = material.getAttribLocation("position");
-	const texCoordAttrLocation = material.getAttribLocation("texCoord");
+	const positionAttrLocation = shader.getAttribLocation("position");
+	const texCoordAttrLocation = shader.getAttribLocation("texCoord");
 
 	if (typeof positionAttrLocation === "number" && positionAttrLocation >= 0) {
 		gl.vertexAttribPointer(positionAttrLocation, 3, gl.FLOAT, false, stride * 4, 0);
@@ -87,13 +87,13 @@ function PTAttribPointer(gl: WebGL2RenderingContext, material: Material): number
 /**
  * 后处理专用attribute Pointer
  * @param gl
- * @param material
+ * @param shader
  * @returns
  */
-function postProcessingAttribPointer(gl: WebGL2RenderingContext, material: Material): number {
+function postProcessingAttribPointer(gl: WebGL2RenderingContext, shader: Shader): number {
 	const stride = 4;
-	const positionAttrLocation = material.getAttribLocation("position");
-	const texCoordAttrLocation = material.getAttribLocation("texCoord");
+	const positionAttrLocation = shader.getAttribLocation("position");
+	const texCoordAttrLocation = shader.getAttribLocation("texCoord");
 
 	if (typeof positionAttrLocation === "number" && positionAttrLocation >= 0) {
 		gl.vertexAttribPointer(positionAttrLocation, 2, gl.FLOAT, false, stride * 4, 0);

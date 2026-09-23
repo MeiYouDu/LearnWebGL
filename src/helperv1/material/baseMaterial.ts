@@ -3,27 +3,26 @@ import { Base } from "../base";
 import { GeometryInstance } from "../geometry/geometryInstance";
 import { Scene } from "../scene";
 import { Shader } from "../shader";
+import { Texture } from "../texture";
 
-interface Texture {
-	image: string | ImageBitmap;
-	width: number;
-	height: number;
+/**
+ * 材质纹理绑定
+ */
+interface MaterialTexture {
+	texture: Texture;
 	/**
-	 * @deprecated
+	 * sampler 名，缺省 `texture${unit}`
 	 */
-	textureUnit?: number;
-	textureLocationName?: string;
+	name?: string;
+	/**
+	 * 纹理单元，缺省数组下标
+	 */
+	unit?: number;
 }
 
 interface MaterialOptions {
-	textures?: Array<Texture>;
+	textures?: Array<MaterialTexture>;
 	shader: Shader;
-	/**
-	 * attribute解析方式
-	 * @param gl
-	 */
-	vertexAttribPointer?(gl: WebGL2RenderingContext, shader: Material): number;
-
 	/**
 	 * 每一帧都会调用
 	 * @param gl
@@ -55,14 +54,13 @@ interface MaterialOptions {
 /**
  * 材质类
  *
- * 包含 着色器、纹理、顶点解析方式、uniform
+ * 组合 着色器、纹理、渲染状态、uniform
  */
 class Material extends Base {
 	constructor(options: MaterialOptions) {
 		super();
-		this.textures = options.textures;
+		this.textures = options.textures ?? [];
 		this.shader = options.shader;
-		this.vertexAttribPointer = options.vertexAttribPointer;
 		this.uniformsSetter = options.uniformsSetter;
 		this.beforeDraw = options.beforeDraw ?? this.beforeDraw;
 		this.afterDraw = options.afterDraw ?? this.afterDraw;
@@ -70,138 +68,46 @@ class Material extends Base {
 		this.culling = options.culling ?? this.culling;
 	}
 	public shader: Shader;
-	public textures: MaterialOptions["textures"];
-	public vertexAttribPointer: MaterialOptions["vertexAttribPointer"];
+	public textures: Array<MaterialTexture>;
 	public uniformsSetter: MaterialOptions["uniformsSetter"];
 	public blend = false;
 	public culling = false;
-	protected textureInstances: Array<{
-		texture: WebGLTexture;
-		name: string;
-		type: Pick<WebGL2RenderingContext, "TEXTURE_CUBE_MAP" | "TEXTURE_2D">[keyof Pick<
-			WebGL2RenderingContext,
-			"TEXTURE_CUBE_MAP" | "TEXTURE_2D"
-		>];
-	}> = [];
-	protected setTextureParams(gl: WebGL2RenderingContext) {
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-	}
-	protected resolveTexture(
-		gl: WebGL2RenderingContext,
-		shaderInstance: Shader,
-		image: Texture["image"],
-		width: number,
-		height: number,
-		textureUnit: number,
-		textureLocationName?: string,
-	) {
-		if (image instanceof ImageBitmap) {
-			const texture = gl.createTexture();
-			gl.activeTexture(gl.TEXTURE0 + textureUnit);
-			gl.bindTexture(gl.TEXTURE_2D, texture);
-			this.setInt(textureUnit, textureLocationName || `texture${textureUnit}`);
-			this.setTextureParams(gl);
-			gl.texImage2D(
-				gl.TEXTURE_2D,
-				0,
-				gl.RGBA,
-				width,
-				height,
-				0,
-				gl.RGBA,
-				gl.UNSIGNED_BYTE,
-				image,
-			);
-			gl.generateMipmap(gl.TEXTURE_2D);
-			this.textureInstances[textureUnit] = {
-				texture,
-				type: gl.TEXTURE_2D,
-				name: textureLocationName || `texture${textureUnit}`,
-			};
-		} else {
-			const imgInstance = new Image(width, height);
-			imgInstance.addEventListener("load", () => {
-				shaderInstance.use(gl);
-				const texture = gl.createTexture();
-				gl.activeTexture(gl.TEXTURE0 + textureUnit);
-				gl.bindTexture(gl.TEXTURE_2D, texture);
-				this.setInt(textureUnit, textureLocationName || `texture${textureUnit}`);
-				this.setTextureParams(gl);
-				gl.texImage2D(
-					gl.TEXTURE_2D,
-					0,
-					gl.RGBA,
-					width,
-					height,
-					0,
-					gl.RGBA,
-					gl.UNSIGNED_BYTE,
-					imgInstance,
-				);
-				gl.generateMipmap(gl.TEXTURE_2D);
-				imgInstance.remove();
-				this.textureInstances[textureUnit] = {
-					texture,
-					type: gl.TEXTURE_2D,
-					name: textureLocationName || `texture${textureUnit}`,
-				};
-			});
-			imgInstance.src = image;
-		}
-	}
-	protected setDefaultTexture() {
-		const hasSpecular = this.textures?.find((item) =>
-			item.textureLocationName?.includes("specular"),
-		);
-		const hasDiffuse = this.textures?.find((item) =>
-			item.textureLocationName?.includes("diffuse"),
-		);
-		if (!hasDiffuse || !hasSpecular) {
-			const gl = this.getGl();
-			if (!gl) return;
-			const length = this.textures?.length ?? -1;
-			const index = length + 1;
-			const defaultTexture: WebGLTexture = gl.createTexture();
-			gl.activeTexture(gl.TEXTURE0 + index);
-			gl.bindTexture(gl.TEXTURE_2D, defaultTexture);
-			gl.texImage2D(
-				gl.TEXTURE_2D,
-				0,
-				gl.RGBA,
-				1,
-				1,
-				0,
-				gl.RGBA,
-				gl.UNSIGNED_BYTE,
-				new Uint8Array([255, 255, 255, 255]),
-			);
-			this.setTextureParams(gl);
-			if (!hasDiffuse) {
-				const name = "material.diffuse";
-				this.textureInstances[index] = {
-					texture: defaultTexture,
-					type: gl.TEXTURE_2D,
-					name,
-				};
-				this.setInt(index, name);
-			}
-			if (!hasSpecular) {
-				const name = "material.specular";
-				this.textureInstances[index] = {
-					texture: defaultTexture,
-					type: gl.TEXTURE_2D,
-					name,
-				};
-				this.setInt(index, name);
-			}
-		}
-	}
+	/**
+	 * 自建的兜底纹理（1×1 白色），remove 时释放
+	 */
+	protected defaultTextures: Array<{ texture: Texture; unit: number }> = [];
 
-	public getAttribLocation(name: string): number | undefined {
-		if (this.shader.program) return this.getGl()?.getAttribLocation(this.shader.program, name);
+	/**
+	 * 兜底纹理：shader 需要 material.diffuse / material.specular 但材质未提供对应纹理时，
+	 * 用 1×1 白色纹理占位，避免采样到未绑定的纹理单元
+	 */
+	protected createDefaultTextures(scene: Scene) {
+		if (this.defaultTextures.length) return;
+		const gl = this.getGl();
+		const program = this.shader.program;
+		if (!gl || !program) return;
+		const hasDiffuse = this.textures.some((binding) =>
+			(binding.name ?? "").includes("diffuse"),
+		);
+		const hasSpecular = this.textures.some((binding) =>
+			(binding.name ?? "").includes("specular"),
+		);
+		if (hasDiffuse && hasSpecular) return;
+		// 只兜底 shader 里真实存在的 sampler，避免创建无用纹理
+		const names = [
+			!hasDiffuse ? "material.diffuse" : undefined,
+			!hasSpecular ? "material.specular" : undefined,
+		].filter((name): name is string => !!name && !!gl.getUniformLocation(program, name));
+		if (!names.length) return;
+		const unit = this.textures.length;
+		const texture = new Texture({
+			data: { pixels: new Uint8Array([255, 255, 255, 255]), width: 1, height: 1 },
+			filter: { min: gl.LINEAR, mag: gl.LINEAR },
+			generateMipmap: false,
+		});
+		texture.setScene(scene);
+		names.forEach((name) => this.setInt(unit, name));
+		this.defaultTextures.push({ texture, unit });
 	}
 
 	public setMatrix4(matrix4: mat4, name: string) {
@@ -278,10 +184,13 @@ class Material extends Base {
 		const gl = scene.gl.deref();
 		if (!gl) throw new Error("gl is undefined");
 		this.shader.render(scene);
-		this.textureInstances.forEach((item, index) => {
-			this.setInt(index, item.name ?? `${index}`);
-			gl.activeTexture(gl.TEXTURE0 + index);
-			gl.bindTexture(item.type, item.texture);
+		this.textures.forEach((binding, index) => {
+			const unit = binding.unit ?? index;
+			this.setInt(unit, binding.name ?? `texture${unit}`);
+			binding.texture.bind(gl, unit);
+		});
+		this.defaultTextures.forEach((binding) => {
+			binding.texture.bind(gl, binding.unit);
 		});
 		this.uniformsSetter?.(gl, this);
 		this.setVec2(vec2.fromValues(gl.canvas.width, gl.canvas.height), "resolution");
@@ -293,39 +202,27 @@ class Material extends Base {
 	public unBindTexture(scene: Scene) {
 		const gl = scene.gl.deref();
 		if (!gl) throw new Error("gl is undefined");
-		this.shader.render(scene);
-		this.textureInstances.forEach((item, index) => {
-			gl.activeTexture(gl.TEXTURE0 + index);
-			gl.bindTexture(item.type, null);
+		this.textures.forEach((binding, index) => {
+			binding.texture.unbind(gl, binding.unit ?? index);
+		});
+		this.defaultTextures.forEach((binding) => {
+			binding.texture.unbind(gl, binding.unit);
 		});
 	}
 
 	public setScene(scene: Scene): void {
 		super.setScene(scene);
 		this.shader.setScene(scene);
-		const gl = this.getGl();
-		if (!gl) return;
-		this.setDefaultTexture();
-		this.textures?.forEach((texture, index) => {
-			this.resolveTexture(
-				gl,
-				this.shader,
-				texture.image,
-				texture.width,
-				texture.height,
-				index,
-				texture.textureLocationName,
-			);
-		});
+		this.textures.forEach((binding) => binding.texture.setScene(scene));
+		this.createDefaultTextures(scene);
 	}
 
 	public remove() {
 		const gl = this.getGl();
 		if (!gl) return this;
-		this.textureInstances.forEach((instance) => {
-			gl.deleteTexture(instance.texture);
-		});
-		this.textureInstances.length = 0;
+		// 外部传入的纹理生命周期归创建者，这里只释放自建的兜底纹理
+		this.defaultTextures.forEach((binding) => binding.texture.remove());
+		this.defaultTextures.length = 0;
 		this.shader.remove();
 		return this;
 	}
@@ -341,4 +238,4 @@ class Material extends Base {
 	}
 }
 export { Material };
-export type { MaterialOptions, Texture };
+export type { MaterialOptions, MaterialTexture };

@@ -1,5 +1,6 @@
 import { merge } from "lodash";
-import { postProcessingAttribPointer, Scene, Shader } from "../..";
+import { Scene, Shader } from "../..";
+import { Texture } from "../../texture";
 import { Material, MaterialOptions } from "../baseMaterial";
 import blur from "./blur.frag";
 import edge from "./edge.frag";
@@ -14,14 +15,16 @@ class PostProcessingMaterial extends Material {
 		const mergedOptions = merge(
 			{
 				shader: new Shader(vert, frag),
-				vertexAttribPointer: postProcessingAttribPointer,
 			},
 			options,
 		);
 		super(mergedOptions);
 	}
 
-	private texture?: WebGLTexture;
+	/**
+	 * 帧缓冲颜色纹理
+	 */
+	private colorTexture?: Texture;
 	/**
 	 * 帧缓冲
 	 */
@@ -30,6 +33,7 @@ class PostProcessingMaterial extends Material {
 	 * 渲染缓冲对象
 	 */
 	private rbo?: WebGLRenderbuffer;
+
 	public bind() {
 		const gl = this.getGl();
 		if (!gl) return;
@@ -38,13 +42,22 @@ class PostProcessingMaterial extends Material {
 		}
 	}
 
+	/**
+	 * 绘制前：切回默认帧缓冲并清屏
+	 */
+	public beforeDraw(scene: Scene, material: Material) {
+		void scene;
+		void material;
+		const gl = this.getGl();
+		if (!gl) return;
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+		gl.clearColor(0, 0, 0, 1);
+		gl.clear(gl.COLOR_BUFFER_BIT);
+	}
+
 	public remove(): this {
 		const gl = this.getGl();
 		if (!gl) return this;
-		if (this.texture) {
-			gl.deleteTexture(this.texture);
-			this.texture = undefined;
-		}
 		if (this.fbo) {
 			gl.deleteFramebuffer(this.fbo);
 			this.fbo = undefined;
@@ -53,6 +66,8 @@ class PostProcessingMaterial extends Material {
 			gl.deleteRenderbuffer(this.rbo);
 			this.rbo = undefined;
 		}
+		this.colorTexture?.remove();
+		this.colorTexture = undefined;
 		super.remove();
 		// 恢复默认
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -60,12 +75,25 @@ class PostProcessingMaterial extends Material {
 	}
 
 	public setScene(scene: Scene): void {
-		super.setScene(scene);
-		const gl = this.getGl();
+		const gl = scene.gl.deref();
 		if (!gl) return;
 		this.fbo = gl.createFramebuffer();
 		this.rbo = gl.createRenderbuffer();
-		this.bind();
+		const colorTexture = new Texture({
+			data: {
+				pixels: null,
+				width: gl.canvas.width,
+				height: gl.canvas.height,
+				internalFormat: gl.RGB,
+				format: gl.RGB,
+			},
+			filter: { min: gl.LINEAR, mag: gl.LINEAR },
+			wrap: { s: gl.CLAMP_TO_EDGE, t: gl.CLAMP_TO_EDGE },
+			generateMipmap: false,
+		});
+		this.colorTexture = colorTexture;
+		this.textures = [{ texture: colorTexture, name: "postProcessingTexture", unit: 0 }];
+		gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
 		gl.bindRenderbuffer(gl.RENDERBUFFER, this.rbo);
 		gl.renderbufferStorage(
 			gl.RENDERBUFFER,
@@ -80,41 +108,13 @@ class PostProcessingMaterial extends Material {
 			this.rbo,
 		);
 		gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-		this.texture = gl.createTexture();
-		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, this.texture);
-		gl.texImage2D(
-			gl.TEXTURE_2D,
-			0,
-			gl.RGB,
-			gl.canvas.width,
-			gl.canvas.height,
-			0,
-			gl.RGB,
-			gl.UNSIGNED_BYTE,
-			null,
-		);
-		/**
-		 *  缺失的多级渐远纹理（Mipmaps）当你渲染场景到 Framebuffer 的纹理时，你只是在往该纹理的 Level 0（原始大小）写入数据。LINEAR_MIPMAP_LINEAR 告诉 WebGL：“请根据物体距离，在多层不同尺寸的贴图之间进行线性插值。”但是，你并没有调用 gl.generateMipmap(gl.TEXTURE_2D)。结果：WebGL 发现除了 Level 0 以外，其他的 Level 1, Level 2... 全是空的。它认为这个纹理是“不完整的”，为了安全起见，采样结果直接返回 (0, 0, 0, 1) 透明黑。2. 非 2 的幂限制 (仅限 WebGL 1.0)如果你的画布尺寸（比如 1920x1080）不是 $2^n$（如 1024 或 2048）：在 WebGL 1.0 中，非 2 幂（NPOT）纹理严禁生成和使用 Mipmaps。一旦你开启了 Mipmap 过滤，WebGL 会立即判定该纹理无效。
-		 */
-		// gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		const index = 0,
-			name = "postProcessingTexture";
-		this.setInt(index, name);
-		this.textureInstances[index] = {
-			texture: this.texture,
-			type: gl.TEXTURE_2D,
-			name,
-		};
+		// 先上传颜色纹理，再挂到 FBO 上
+		super.setScene(scene);
 		gl.framebufferTexture2D(
 			gl.FRAMEBUFFER,
 			gl.COLOR_ATTACHMENT0,
 			gl.TEXTURE_2D,
-			this.texture,
+			colorTexture.texture ?? null,
 			0,
 		);
 		const res = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
@@ -123,14 +123,6 @@ class PostProcessingMaterial extends Material {
 			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 		}
 	}
-
-	// public render(scene: Scene, instance: GeometryInstance): void {
-	// 	super.render(scene, instance);
-	// 	const gl = this.getGl();
-	// 	if (!gl) return;
-	// 	gl.activeTexture(gl.TEXTURE0);
-	// 	gl.bindTexture(gl.TEXTURE_2D, this.texture ?? null);
-	// }
 }
 
 export {

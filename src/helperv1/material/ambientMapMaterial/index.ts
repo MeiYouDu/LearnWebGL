@@ -1,6 +1,5 @@
 import { merge } from "lodash";
-import { CubeMapMaterialOptions, PNTAttribPointer, Shader } from "../../";
-import { Material } from "../baseMaterial";
+import { CubeMapMaterialOptions, Shader } from "../../";
 import { CubeMapMaterial } from "../cubeMapMaterial";
 import ambientVert from "./ambientMap.vert";
 import reflectFrag from "./reflect.frag";
@@ -25,7 +24,6 @@ class AmbientReflectMapMaterial extends CubeMapMaterial {
 		const mergedOptions = merge(
 			{
 				shader: new Shader(ambientVert, reflectFrag),
-				vertexAttribPointer: PNTAttribPointer,
 			},
 			options,
 		);
@@ -35,32 +33,16 @@ class AmbientReflectMapMaterial extends CubeMapMaterial {
 		this.cubeMapTextures = options?.cubeMapTextures;
 	}
 
-	protected texture?: WebGLTexture;
-
 	protected cubeMapTextures?: AmbientRefractMapMaterialOptions["cubeMapTextures"];
-
-	public remove(): this {
-		const gl = this.getGl();
-		if (!gl) return this;
-		if (this.texture) {
-			gl.deleteTexture(this.texture);
-			this.texture = undefined;
-		}
-		super.remove();
-		// 恢复默认
-		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-		return this;
-	}
 }
 /**
  * 环境折射贴图
  */
-class AmbientRefractMapMaterial extends Material {
+class AmbientRefractMapMaterial extends CubeMapMaterial {
 	constructor(options?: Partial<AmbientRefractMapMaterialOptions>) {
 		const mergedOptions = merge(
 			{
 				shader: new Shader(ambientVert, refractFrag),
-				vertexAttribPointer: PNTAttribPointer,
 			},
 			options,
 		);
@@ -70,22 +52,7 @@ class AmbientRefractMapMaterial extends Material {
 		this.cubeMapTextures = options?.cubeMapTextures;
 	}
 
-	protected texture?: WebGLTexture;
-
 	protected cubeMapTextures?: AmbientRefractMapMaterialOptions["cubeMapTextures"];
-
-	public remove(): this {
-		const gl = this.getGl();
-		if (!gl) return this;
-		if (this.texture) {
-			gl.deleteTexture(this.texture);
-			this.texture = undefined;
-		}
-		super.remove();
-		// 恢复默认
-		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-		return this;
-	}
 }
 
 export {

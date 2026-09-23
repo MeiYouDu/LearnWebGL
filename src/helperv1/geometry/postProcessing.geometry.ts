@@ -1,6 +1,6 @@
 import { merge } from "lodash";
 import { PostProcessingMaterial } from "../material";
-import { Scene } from "../scene";
+import { postProcessingAttribPointer } from "../utils";
 import { Geometry, GeometryOptions } from "./geometry";
 import { GeometryInstance } from "./geometryInstance";
 
@@ -20,20 +20,11 @@ class PostProcessingGeometry extends Geometry {
 		const mergedOptions = merge(
 			{
 				attributes,
-				material: new PostProcessingMaterial(),
+				vertexAttribPointer: postProcessingAttribPointer,
 			},
 			options,
 		);
 		super(mergedOptions);
-	}
-
-	public render(scene: Scene, instance: GeometryInstance): void {
-		const gl = this.getGl();
-		if (!gl) return;
-		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-		gl.clearColor(0, 0, 0, 1);
-		gl.clear(gl.COLOR_BUFFER_BIT);
-		super.render(scene, instance);
 	}
 }
 
@@ -41,6 +32,7 @@ class PostProcessingGeometryInstance extends GeometryInstance {
 	constructor() {
 		super({
 			geometry: new PostProcessingGeometry(),
+			material: new PostProcessingMaterial(),
 		});
 	}
 }
