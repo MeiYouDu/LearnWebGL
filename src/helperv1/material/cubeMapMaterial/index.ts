@@ -33,15 +33,27 @@ class CubeMapMaterial extends Material {
 		this.cubeMapTextures = options?.cubeMapTextures;
 		// 6 张面统一转换成 Texture，纹理上传/绑定由 Texture 负责
 		if (this.cubeMapTextures) {
-			const texture = new Texture({
+			this.cubeMapTexture = new Texture({
 				target: "CUBE_MAP",
 				image: this.cubeMapTextures.map((item) => item.image),
 			});
-			this.textures = [{ texture, name: "cubeMap", unit: 1 }];
+			this.textures = [{ texture: this.cubeMapTexture, name: "cubeMap", unit: 1 }];
 		}
 	}
 
 	protected cubeMapTextures?: CubeMapMaterialOptions["cubeMapTextures"];
+	/**
+	 * 构造时自建的立方体贴图纹理，属于材质自身资源
+	 */
+	private cubeMapTexture?: Texture;
+
+	public remove() {
+		// 立方体贴图是材质自建资源，随材质一起释放；
+		// 外部传入的 this.textures 生命周期归创建方，不在此处理。
+		this.cubeMapTexture?.remove();
+		this.cubeMapTexture = undefined;
+		return super.remove();
+	}
 }
 
 export { frag as CubeMapFrag, CubeMapMaterial, vert as CubeMapVert };

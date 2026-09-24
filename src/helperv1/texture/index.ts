@@ -135,6 +135,9 @@ class Texture extends Base {
 		target: number,
 		image: ImageBitmap | HTMLImageElement,
 	) {
+		// 图片异步加载完成后，纹理可能已被 remove（例如场景卸载），此时不再上传，
+		// 避免对已删除的纹理调用 texImage2D/generateMipmap 触发 INVALID_OPERATION。
+		if (!this.texture) return;
 		const { width, height } = this.getImageSize(image);
 		gl.bindTexture(target, this.texture ?? null);
 		gl.texImage2D(target, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);

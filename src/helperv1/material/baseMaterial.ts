@@ -220,7 +220,10 @@ class Material extends Base {
 	public remove() {
 		const gl = this.getGl();
 		if (!gl) return this;
-		// 外部传入的纹理生命周期归创建者，这里只释放自建的兜底纹理
+		// 只释放材质自身创建的资源：兜底纹理与 shader。
+		// this.textures 是外部传入的 Texture，生命周期归创建方（用例层），
+		// 材质不代为释放，以免共享纹理被提前销毁。
+		// 子类自建的纹理（如 CubeMapMaterial 的立方体贴图）由子类自己释放。
 		this.defaultTextures.forEach((binding) => binding.texture.remove());
 		this.defaultTextures.length = 0;
 		this.shader.remove();
