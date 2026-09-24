@@ -1,4 +1,4 @@
-import { Material, MaterialOptions, PNTAttribPointer, Shader } from "@/helperv1";
+import { Material, MaterialOptions, Shader } from "@/helperv1";
 import { merge } from "lodash";
 import frag from "./depth.frag";
 import vert from "./depth.vert";
@@ -8,7 +8,6 @@ class DepthMaterial extends Material {
 		const mergedOptions = merge(
 			{
 				shader: new Shader(vert, frag),
-				vertexAttribPointer: PNTAttribPointer,
 			},
 			options,
 		);

@@ -1,5 +1,12 @@
 // CanvasComponent.tsx
-import { Camera, FPSControl, Geometry, GeometryInstance, Scene } from "@/helperv1";
+import {
+	Camera,
+	FPSControl,
+	Geometry,
+	GeometryInstance,
+	PNTAttribPointer,
+	Scene,
+} from "@/helperv1";
 import { mat4, vec3 } from "gl-matrix";
 import { useEffect, useRef } from "react";
 import { DepthMaterial } from "./depthMaterial";
@@ -77,10 +84,11 @@ export default function CanvasComponent() {
 		// geometry & instances
 		const boxGeometry = new Geometry({
 			attributes: attribute,
-			material,
+			vertexAttribPointer: PNTAttribPointer,
 		});
 		const boxGeometryInstance = new GeometryInstance({
 			geometry: boxGeometry,
+			material,
 			matrix: mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, 0)),
@@ -89,6 +97,7 @@ export default function CanvasComponent() {
 		});
 		const boxGeometryInstance2 = new GeometryInstance({
 			geometry: boxGeometry,
+			material,
 			matrix: mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), vec3.fromValues(50.0, 200.0, 3.0)),

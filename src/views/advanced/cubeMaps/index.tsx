@@ -21,6 +21,7 @@ import {
 	Geometry,
 	GeometryInstance,
 	Material,
+	MaterialTexture,
 	PNTAttribPointer,
 	postProcessBlurFrag,
 	postProcessDefaultFrag,
@@ -82,45 +83,39 @@ const glassAttribute = new Float32Array([
 type EffectType = "default" | "inversion" | "sharpen" | "blur" | "edge" | "gray";
 
 const inversionEffect = new GeometryInstance({
-	geometry: new PostProcessingGeometry({
-		material: new PostProcessingMaterial({
-			shader: new Shader(postProcessDefaultVert, postProcessInversionFrag),
-		}),
+	geometry: new PostProcessingGeometry(),
+	material: new PostProcessingMaterial({
+		shader: new Shader(postProcessDefaultVert, postProcessInversionFrag),
 	}),
 });
 const kernelEffect = new GeometryInstance({
-	geometry: new PostProcessingGeometry({
-		material: new PostProcessingMaterial({
-			shader: new Shader(postProcessDefaultVert, postProcessSharpenFrag),
-		}),
+	geometry: new PostProcessingGeometry(),
+	material: new PostProcessingMaterial({
+		shader: new Shader(postProcessDefaultVert, postProcessSharpenFrag),
 	}),
 });
 const blurEffect = new GeometryInstance({
-	geometry: new PostProcessingGeometry({
-		material: new PostProcessingMaterial({
-			shader: new Shader(postProcessDefaultVert, postProcessBlurFrag),
-		}),
+	geometry: new PostProcessingGeometry(),
+	material: new PostProcessingMaterial({
+		shader: new Shader(postProcessDefaultVert, postProcessBlurFrag),
 	}),
 });
 const edgeEffect = new GeometryInstance({
-	geometry: new PostProcessingGeometry({
-		material: new PostProcessingMaterial({
-			shader: new Shader(postProcessDefaultVert, postProcessEdgeFrag),
-		}),
+	geometry: new PostProcessingGeometry(),
+	material: new PostProcessingMaterial({
+		shader: new Shader(postProcessDefaultVert, postProcessEdgeFrag),
 	}),
 });
 const grayEffect = new GeometryInstance({
-	geometry: new PostProcessingGeometry({
-		material: new PostProcessingMaterial({
-			shader: new Shader(postProcessDefaultVert, postProcessGrayFrag),
-		}),
+	geometry: new PostProcessingGeometry(),
+	material: new PostProcessingMaterial({
+		shader: new Shader(postProcessDefaultVert, postProcessGrayFrag),
 	}),
 });
 const defaultEffect = new GeometryInstance({
-	geometry: new PostProcessingGeometry({
-		material: new PostProcessingMaterial({
-			shader: new Shader(postProcessDefaultVert, postProcessDefaultFrag),
-		}),
+	geometry: new PostProcessingGeometry(),
+	material: new PostProcessingMaterial({
+		shader: new Shader(postProcessDefaultVert, postProcessDefaultFrag),
 	}),
 });
 // 思路
@@ -136,6 +131,7 @@ export default function CanvasComponent() {
 	const [enableCullFace] = useState(true);
 	const [backCull] = useState(true);
 	const needCullMaterial = useRef<Array<Material>>([]);
+	const dynamicTexturesRef = useRef<TextureStruct[]>([]);
 	const loader = useRef(new GLTFLoader());
 	const [currEffect, setCurrEffect] = useState<EffectType>("default");
 	let angle = 0;
@@ -199,24 +195,23 @@ export default function CanvasComponent() {
 			let textureUnit = 10;
 			gltf.scene.traverse((obj) => {
 				if (obj instanceof Mesh) {
-					const textures: TextureStruct[] = [];
+					const textures: MaterialTexture[] = [];
 					if ("material" in obj && obj.material) {
 						const map = obj.material.map;
 						if (map instanceof Texture) {
+							const diffuseTexture = new TextureStruct({ image: map.source.data });
+							const specularTexture = new TextureStruct({ image: map.source.data });
+							dynamicTexturesRef.current.push(diffuseTexture, specularTexture);
 							textures.push(
 								{
-									image: map.source.data,
-									width: map.width,
-									height: map.height,
-									textureUnit: ++textureUnit,
-									textureLocationName: "material.diffuse",
+									texture: diffuseTexture,
+									unit: ++textureUnit,
+									name: "material.diffuse",
 								},
 								{
-									image: map.source.data,
-									width: map.width,
-									height: map.height,
-									textureUnit: ++textureUnit,
-									textureLocationName: "material.specular",
+									texture: specularTexture,
+									unit: ++textureUnit,
+									name: "material.specular",
 								},
 							);
 						}
@@ -245,14 +240,15 @@ export default function CanvasComponent() {
 						uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
 					});
 					const boxGeometry = new Geometry({
-						material,
 						attributes: attribute,
 						indices: obj.geometry.index.array,
+						vertexAttribPointer: PNTAttribPointer,
 					});
 					const matrix = mat4.fromValues(...obj.matrixWorld.elements);
 					const boxGeometryInstance = new GeometryInstance({
 						geometry: boxGeometry,
 						matrix,
+						material,
 					});
 
 					scene.add(boxGeometryInstance);
@@ -286,152 +282,152 @@ export default function CanvasComponent() {
 		}
 		scene.camera.position = vec3.fromValues(0, 0, 50);
 
+		const boxDiffuseTexture = new TextureStruct({ image: boxImage });
+		const boxSpecularTexture = new TextureStruct({ image: boxImage });
 		const boxMaterial = new Material({
 			shader: new Shader(vert, frag),
 			textures: [
 				{
-					image: boxImage,
-					width: 1024,
-					height: 1024,
-					textureUnit: 7,
-					textureLocationName: "material.diffuse",
+					texture: boxDiffuseTexture,
+					unit: 7,
+					name: "material.diffuse",
 				},
 				{
-					image: boxImage,
-					width: 256,
-					height: 256,
-					textureUnit: 5,
-					textureLocationName: "material.specular",
+					texture: boxSpecularTexture,
+					unit: 5,
+					name: "material.specular",
 				},
 			],
-			vertexAttribPointer: PNTAttribPointer,
 			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
 			culling: true,
 		});
 		needCullMaterial.current.push(boxMaterial);
 		const lightMaterial = new Material({
 			shader: new Shader(vert, lightFrag),
-			vertexAttribPointer: PNTAttribPointer,
 		});
+		const glassDiffuseTexture = new TextureStruct({ image: glassImage });
 		const glassMaterial = new Material({
 			shader: new Shader(vert, frag),
 			textures: [
 				{
-					image: glassImage,
-					width: 512,
-					height: 512,
-					textureUnit: 8,
-					textureLocationName: "material.diffuse",
+					texture: glassDiffuseTexture,
+					unit: 8,
+					name: "material.diffuse",
 				},
 			],
-			vertexAttribPointer: PTAttribPointer,
 			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
 			blend: true,
 		});
+		const groundDiffuseTexture = new TextureStruct({ image: groundImage });
+		const groundSpecularTexture = new TextureStruct({ image: groundImage });
 		const groundMaterial = new Material({
 			shader: new Shader(vert, frag),
 			textures: [
 				{
-					image: groundImage,
-					width: 1024,
-					height: 1024,
-					textureUnit: 2,
-					textureLocationName: "material.diffuse",
+					texture: groundDiffuseTexture,
+					unit: 2,
+					name: "material.diffuse",
 				},
 				{
-					image: groundImage,
-					width: 1024,
-					height: 1024,
-					textureUnit: 6,
-					textureLocationName: "material.specular",
+					texture: groundSpecularTexture,
+					unit: 6,
+					name: "material.specular",
 				},
 			],
-			vertexAttribPointer: PNTAttribPointer,
 			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
 		});
+		const windowDiffuseTexture = new TextureStruct({ image: windowImage });
+		const windowSpecularTexture = new TextureStruct({ image: windowImage });
 		const windowMaterial = new Material({
 			shader: new Shader(vert, frag),
 			textures: [
 				{
-					image: windowImage,
-					width: 256,
-					height: 256,
-					textureUnit: 3,
-					textureLocationName: "material.diffuse",
+					texture: windowDiffuseTexture,
+					unit: 3,
+					name: "material.diffuse",
 				},
 				{
-					image: windowImage,
-					width: 256,
-					height: 256,
-					textureUnit: 4,
-					textureLocationName: "material.specular",
+					texture: windowSpecularTexture,
+					unit: 4,
+					name: "material.specular",
 				},
 			],
-			vertexAttribPointer: PTAttribPointer,
 			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
 			blend: true,
 		});
-		const skyBox = new CubeMapGeometry({
-			material: new CubeMapMaterial({
-				cubeMapTextures: [
-					{ image: right, width: 2048, height: 2048 },
-					{ image: left, width: 2048, height: 2048 },
-					{ image: top, width: 2048, height: 2048 },
-					{ image: bottom, width: 2048, height: 2048 },
-					{ image: front, width: 2048, height: 2048 },
-					{ image: back, width: 2048, height: 2048 },
-				],
-			}),
+		// 用例层自建的纹理，需在卸载时显式释放
+		const ownedTextures: TextureStruct[] = [
+			boxDiffuseTexture,
+			boxSpecularTexture,
+			glassDiffuseTexture,
+			groundDiffuseTexture,
+			groundSpecularTexture,
+			windowDiffuseTexture,
+			windowSpecularTexture,
+		];
+		const skyBoxMaterial = new CubeMapMaterial({
+			cubeMapTextures: [
+				{ image: right },
+				{ image: left },
+				{ image: top },
+				{ image: bottom },
+				{ image: front },
+				{ image: back },
+			],
+		});
+		const skyBox = new CubeMapGeometry();
+		const reflectBoxMaterial = new AmbientReflectMapMaterial({
+			cubeMapTextures: [
+				{ image: right },
+				{ image: left },
+				{ image: top },
+				{ image: bottom },
+				{ image: front },
+				{ image: back },
+			],
+		});
+		const refractBoxMaterial = new AmbientRefractMapMaterial({
+			cubeMapTextures: [
+				{ image: right },
+				{ image: left },
+				{ image: top },
+				{ image: bottom },
+				{ image: front },
+				{ image: back },
+			],
 		});
 		const lightGeometry = new Geometry({
 			attributes: boxAttribute,
-			material: lightMaterial,
+			vertexAttribPointer: PNTAttribPointer,
 		});
 		// geometry & instances
 		const boxGeometry = new Geometry({
 			attributes: boxAttribute,
-			material: boxMaterial,
+			vertexAttribPointer: PNTAttribPointer,
 		});
 		const reflectBoxGeometry = new Geometry({
 			attributes: boxAttribute,
-			material: new AmbientReflectMapMaterial({
-				cubeMapTextures: [
-					{ image: right, width: 2048, height: 2048 },
-					{ image: left, width: 2048, height: 2048 },
-					{ image: top, width: 2048, height: 2048 },
-					{ image: bottom, width: 2048, height: 2048 },
-					{ image: front, width: 2048, height: 2048 },
-					{ image: back, width: 2048, height: 2048 },
-				],
-			}),
+			vertexAttribPointer: PNTAttribPointer,
 		});
 		const refractBoxGeometry = new Geometry({
 			attributes: boxAttribute,
-			material: new AmbientRefractMapMaterial({
-				cubeMapTextures: [
-					{ image: right, width: 2048, height: 2048 },
-					{ image: left, width: 2048, height: 2048 },
-					{ image: top, width: 2048, height: 2048 },
-					{ image: bottom, width: 2048, height: 2048 },
-					{ image: front, width: 2048, height: 2048 },
-					{ image: back, width: 2048, height: 2048 },
-				],
-			}),
+			vertexAttribPointer: PNTAttribPointer,
 		});
 		const glassGeometry = new Geometry({
 			attributes: glassAttribute,
-			material: glassMaterial,
+			vertexAttribPointer: PTAttribPointer,
 		});
 		const windowGeometry = new Geometry({
 			attributes: glassAttribute,
-			material: windowMaterial,
+			vertexAttribPointer: PTAttribPointer,
 		});
 		const groundGeometry = new Geometry({
 			attributes: boxAttribute,
-			material: groundMaterial,
+			vertexAttribPointer: PNTAttribPointer,
 		});
 		const boxGeometryInstance = new GeometryInstance({
 			geometry: boxGeometry,
+			material: boxMaterial,
 			matrix: mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), vec3.fromValues(-2, 0, 2)),
@@ -440,9 +436,11 @@ export default function CanvasComponent() {
 		});
 		const skyBoxInstance = new GeometryInstance({
 			geometry: skyBox,
+			material: skyBoxMaterial,
 		});
 		const reflectBoxGeometryInstance = new GeometryInstance({
 			geometry: reflectBoxGeometry,
+			material: reflectBoxMaterial,
 			matrix: mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), vec3.fromValues(2, 0, 2)),
@@ -451,6 +449,7 @@ export default function CanvasComponent() {
 		});
 		const refractBoxGeometryInstance = new GeometryInstance({
 			geometry: refractBoxGeometry,
+			material: refractBoxMaterial,
 			matrix: mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), vec3.fromValues(4, 4, 4)),
@@ -459,6 +458,7 @@ export default function CanvasComponent() {
 		});
 		const outline1 = new GeometryInstance({
 			geometry: glassGeometry,
+			material: glassMaterial,
 			matrix: mat4.mul(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), vec3.fromValues(-2.0, 0, 0.0)),
@@ -471,6 +471,7 @@ export default function CanvasComponent() {
 		});
 		const outline2 = new GeometryInstance({
 			geometry: glassGeometry,
+			material: glassMaterial,
 			matrix: mat4.mul(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), vec3.fromValues(2.0, 0, -2.0)),
@@ -483,6 +484,7 @@ export default function CanvasComponent() {
 		});
 		const windowInstance = new GeometryInstance({
 			geometry: windowGeometry,
+			material: windowMaterial,
 			matrix: mat4.mul(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), vec3.fromValues(3.0, 0.0, -4)),
@@ -495,6 +497,7 @@ export default function CanvasComponent() {
 		});
 		const windowInstance2 = new GeometryInstance({
 			geometry: windowGeometry,
+			material: windowMaterial,
 			matrix: mat4.mul(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), vec3.fromValues(4.0, 0.0, -6.0)),
@@ -507,6 +510,7 @@ export default function CanvasComponent() {
 		});
 		const groundGeometryInstance = new GeometryInstance({
 			geometry: groundGeometry,
+			material: groundMaterial,
 			matrix: mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), vec3.fromValues(0, -1, 0)),
@@ -515,6 +519,7 @@ export default function CanvasComponent() {
 		});
 		const lightGeometryInstance = new GeometryInstance({
 			geometry: lightGeometry,
+			material: lightMaterial,
 			matrix: mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), lightPos),
@@ -553,6 +558,9 @@ export default function CanvasComponent() {
 			} finally {
 				sceneRef.current = null;
 			}
+			ownedTextures.forEach((t) => t.remove());
+			dynamicTexturesRef.current.forEach((t) => t.remove());
+			dynamicTexturesRef.current.length = 0;
 		};
 	}, []); // 仅挂载一次
 

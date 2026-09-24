@@ -5,6 +5,8 @@ import {
 	FPSControl,
 	Geometry,
 	GeometryInstance,
+	MaterialTexture,
+	PNTAttribPointer,
 	Scene,
 	Shader,
 	Texture as TextureStruct,
@@ -24,6 +26,7 @@ export default function CanvasComponent() {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const sceneRef = useRef<Scene | null>(null);
 	const loader = useRef(new GLTFLoader());
+	const dynamicTexturesRef = useRef<TextureStruct[]>([]);
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -45,6 +48,8 @@ export default function CanvasComponent() {
 		return () => {
 			try {
 				sceneRef.current?.dispatch?.();
+				dynamicTexturesRef.current.forEach((t) => t.remove());
+				dynamicTexturesRef.current.length = 0;
 			} catch (e) {
 				console.log(e);
 			} finally {
@@ -68,16 +73,16 @@ export default function CanvasComponent() {
 			let textureUnit = 3;
 			gltf.scene.traverse((obj) => {
 				if (obj instanceof Mesh) {
-					const textures: TextureStruct[] = [];
+					const textures: MaterialTexture[] = [];
 					if ("material" in obj && obj.material) {
 						const map = obj.material.map;
 						if (map instanceof Texture) {
+							const dynamicTexture = new TextureStruct({ image: map.source.data });
+							dynamicTexturesRef.current.push(dynamicTexture);
 							textures.push({
-								image: map.source.data,
-								width: map.width,
-								height: map.height,
-								textureUnit: textureUnit++,
-								textureLocationName: "material.diffuse",
+								texture: dynamicTexture,
+								unit: textureUnit++,
+								name: "material.diffuse",
 							});
 						}
 					}
@@ -124,14 +129,15 @@ export default function CanvasComponent() {
 						},
 					});
 					const boxGeometry = new Geometry({
-						material,
 						attributes: attribute,
 						indices: obj.geometry.index.array,
+						vertexAttribPointer: PNTAttribPointer,
 					});
 					const matrix = mat4.fromValues(...obj.matrixWorld.elements);
 					const boxGeometryInstance = new GeometryInstance({
 						geometry: boxGeometry,
 						matrix,
+						material,
 					});
 
 					scene.add(boxGeometryInstance);

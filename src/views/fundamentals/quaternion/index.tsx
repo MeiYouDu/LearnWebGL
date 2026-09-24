@@ -9,6 +9,7 @@ import {
 	PNTAttribPointer,
 	Scene,
 	Shader,
+	Texture,
 } from "@/helperv1";
 import { Slider, Switch } from "antd";
 import { mat4, quat, vec3 } from "gl-matrix";
@@ -66,7 +67,12 @@ export default function CanvasComponent() {
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
-		const camera = new Camera();
+		// 相机置于 -Y 方向、朝 +Y 看向原点，up 取 +Z（与 blend 用例一致），
+		// 否则默认 front(0,0,-1) 会让原点处的立方体落在视野之外
+		const camera = new Camera({
+			front: vec3.fromValues(0, 1, 0),
+			up: vec3.fromValues(0, 0, 1),
+		});
 		// create scene (保持与原来一致)
 		const scene = new Scene({
 			canvas,
@@ -90,32 +96,30 @@ export default function CanvasComponent() {
 		scene.camera.position = vec3.fromValues(0, -8, 0);
 		const angle = 0;
 		const lightPos = vec3.fromValues(Math.cos(angle) * 20, Math.sin(angle) * 20, 0);
+		const diffuseTexture = new Texture({ image: boxImage });
+		const specularTexture = new Texture({ image: boxImage });
+		const ownedTextures: Texture[] = [diffuseTexture, specularTexture];
 		const boxMaterial = new Material({
 			shader: new Shader(vert, frag),
 			textures: [
 				{
-					image: boxImage,
-					width: 1024,
-					height: 1024,
-					textureUnit: 0,
-					textureLocationName: "material.diffuse",
+					texture: diffuseTexture,
+					unit: 0,
+					name: "material.diffuse",
 				},
 				{
-					image: boxImage,
-					width: 256,
-					height: 256,
-					textureUnit: 5,
-					textureLocationName: "material.specular",
+					texture: specularTexture,
+					unit: 5,
+					name: "material.specular",
 				},
 			],
-			vertexAttribPointer: PNTAttribPointer,
 			uniformsSetter: (...[, material]) => uniformsSetter(material, lightPos),
 			culling: true,
 		});
 		// geometry & instances
 		const boxGeometry = new Geometry({
 			attributes: boxAttribute,
-			material: boxMaterial,
+			vertexAttribPointer: PNTAttribPointer,
 		});
 		const boxGeometryInstance = new GeometryInstance({
 			geometry: boxGeometry,
@@ -124,6 +128,7 @@ export default function CanvasComponent() {
 				mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, 0)),
 				mat4.fromScaling(mat4.create(), vec3.fromValues(2.0, 2.0, 2.0)),
 			),
+			material: boxMaterial,
 		});
 		geometry.current = boxGeometryInstance;
 		scene.add(boxGeometryInstance);
@@ -136,6 +141,7 @@ export default function CanvasComponent() {
 			clearInterval(intervalRef.current);
 			try {
 				sceneRef.current?.dispatch?.();
+				ownedTextures.forEach((t) => t.remove());
 			} catch (e) {
 				console.log(e);
 			} finally {

@@ -13,6 +13,7 @@ import {
 	FPSControl,
 	Geometry,
 	GeometryInstance,
+	PNTAttribPointer,
 	reflectFrag,
 	refractFrag,
 	Scene,
@@ -51,21 +52,21 @@ export default function CanvasComponent() {
 		});
 		sceneRef.current = scene;
 
-		const skyBox = new CubeMapGeometry({
-			material: new CubeMapMaterial({
-				cubeMapTextures: [
-					{ image: right, width: 2048, height: 2048 },
-					{ image: left, width: 2048, height: 2048 },
-					{ image: top, width: 2048, height: 2048 },
-					{ image: bottom, width: 2048, height: 2048 },
-					{ image: front, width: 2048, height: 2048 },
-					{ image: back, width: 2048, height: 2048 },
-				],
-			}),
+		const cubeMapMaterial = new CubeMapMaterial({
+			cubeMapTextures: [
+				{ image: right },
+				{ image: left },
+				{ image: top },
+				{ image: bottom },
+				{ image: front },
+				{ image: back },
+			],
 		});
+		const skyBox = new CubeMapGeometry();
 		scene.add(
 			new GeometryInstance({
 				geometry: skyBox,
+				material: cubeMapMaterial,
 			}),
 		);
 
@@ -95,12 +96,12 @@ export default function CanvasComponent() {
 			const material = new AmbientReflectMapMaterial({
 				shader: reflectShader.current,
 				cubeMapTextures: [
-					{ image: right, width: 2048, height: 2048 },
-					{ image: left, width: 2048, height: 2048 },
-					{ image: top, width: 2048, height: 2048 },
-					{ image: bottom, width: 2048, height: 2048 },
-					{ image: front, width: 2048, height: 2048 },
-					{ image: back, width: 2048, height: 2048 },
+					{ image: right },
+					{ image: left },
+					{ image: top },
+					{ image: bottom },
+					{ image: front },
+					{ image: back },
 				],
 			});
 			gltf.scene.traverse((obj) => {
@@ -126,14 +127,15 @@ export default function CanvasComponent() {
 					// 反射材质：cameraPos 必须在 uniformsSetter 中设置，否则反射方向错误
 
 					const geometry = new Geometry({
-						material,
 						attributes: attribute,
 						...(obj.geometry.index ? { indices: obj.geometry.index.array } : {}),
+						vertexAttribPointer: PNTAttribPointer,
 					});
 					const matrix = mat4.fromValues(...obj.matrixWorld.elements);
 					const geometryInstance = new GeometryInstance({
 						geometry,
 						matrix,
+						material,
 					});
 
 					instancesRef.current.push(geometryInstance);
@@ -147,9 +149,7 @@ export default function CanvasComponent() {
 		setIsReflect(checked);
 		// 切换 shader：Shader.render 惰性编译，首次切换后自动编译新 program
 		instancesRef.current.forEach((instance) => {
-			instance.geometry.material.shader = checked
-				? reflectShader.current
-				: refractShader.current;
+			instance.material.shader = checked ? reflectShader.current : refractShader.current;
 		});
 	}
 

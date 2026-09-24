@@ -6,9 +6,11 @@ import {
 	FPSControl,
 	Geometry,
 	GeometryInstance,
+	PNTAttribPointer,
 	Scene,
 	Shader,
 	SpotLightMaterial,
+	Texture,
 } from "@/helperv1";
 import vert from "@/helperv1/material/spotLightMaterial/spotLight.vert";
 import { mat4, vec3 } from "gl-matrix";
@@ -68,15 +70,14 @@ export default function CanvasComponent() {
 		// initial angle & light pos
 		const angle = Date.now() * 0.001;
 		const lightPos = vec3.fromValues(0, 0, 20);
+		const boxDiffuseTexture = new Texture({ image: boxImage });
 		const boxMaterial = new SpotLightMaterial({
 			shader: new Shader(vert, frag),
 			textures: [
 				{
-					image: boxImage,
-					width: 1024,
-					height: 1024,
-					textureUnit: 0,
-					textureLocationName: "material.diffuse",
+					texture: boxDiffuseTexture,
+					unit: 0,
+					name: "material.diffuse",
 				},
 			],
 			uniformsSetter(gl: WebGL2RenderingContext, shaderInner) {
@@ -112,15 +113,14 @@ export default function CanvasComponent() {
 				// gl.stencilFunc(gl.ALWAYS, 1, 0xff);
 			},
 		});
+		const groundDiffuseTexture = new Texture({ image: groundImage });
 		const groundMaterial = new SpotLightMaterial({
 			shader: new Shader(vert, frag),
 			textures: [
 				{
-					image: groundImage,
-					width: 1024,
-					height: 1024,
-					textureUnit: 1,
-					textureLocationName: "material.diffuse",
+					texture: groundDiffuseTexture,
+					unit: 1,
+					name: "material.diffuse",
 				},
 			],
 			uniformsSetter(glInner: WebGL2RenderingContext, shaderInner) {
@@ -139,21 +139,23 @@ export default function CanvasComponent() {
 				shaderInner.setFloat(64.0, "material.shininess");
 			},
 		});
+		const ownedTextures: Texture[] = [boxDiffuseTexture, groundDiffuseTexture];
 		// geometry & instances
 		const boxGeometry = new Geometry({
 			attributes: attribute,
-			material: boxMaterial,
+			vertexAttribPointer: PNTAttribPointer,
 		});
 		const boxOutline = new Geometry({
 			attributes: attribute,
-			material: outlineMaterial,
+			vertexAttribPointer: PNTAttribPointer,
 		});
 		const groundGeometry = new Geometry({
 			attributes: attribute,
-			material: groundMaterial,
+			vertexAttribPointer: PNTAttribPointer,
 		});
 		const boxGeometryInstance = new GeometryInstance({
 			geometry: boxGeometry,
+			material: boxMaterial,
 			matrix: mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, 0)),
@@ -162,6 +164,7 @@ export default function CanvasComponent() {
 		});
 		const boxGeometryInstance2 = new GeometryInstance({
 			geometry: boxGeometry,
+			material: boxMaterial,
 			matrix: mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), vec3.fromValues(10.0, 15.0, 3.0)),
@@ -170,6 +173,7 @@ export default function CanvasComponent() {
 		});
 		const outline1 = new GeometryInstance({
 			geometry: boxOutline,
+			material: outlineMaterial,
 			matrix: mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, 0)),
@@ -178,6 +182,7 @@ export default function CanvasComponent() {
 		});
 		const outline2 = new GeometryInstance({
 			geometry: boxOutline,
+			material: outlineMaterial,
 			matrix: mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), vec3.fromValues(10.0, 15.0, 3.0)),
@@ -186,6 +191,7 @@ export default function CanvasComponent() {
 		});
 		const groundGeometryInstance = new GeometryInstance({
 			geometry: groundGeometry,
+			material: groundMaterial,
 			matrix: mat4.multiply(
 				mat4.create(),
 				mat4.fromTranslation(mat4.create(), vec3.fromValues(0, 0, -5)),
@@ -207,6 +213,7 @@ export default function CanvasComponent() {
 			} finally {
 				sceneRef.current = null;
 			}
+			ownedTextures.forEach((t) => t.remove());
 		};
 	}, []); // 仅挂载一次
 
