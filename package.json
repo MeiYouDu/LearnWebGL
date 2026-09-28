@@ -26,7 +26,8 @@
 		"serve": "npx cross-env TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\" npx webpack serve -c ./webpack.dev.ts --env development --config-node-env development",
 		"build": "npx cross-env TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\" npx webpack -c ./webpack.prod.ts --env production --config-node-env production",
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"lint-fix": "eslint ./ --fix -c eslint.config.mjs --cache-location node_modules/.cache/eslint-webpack-plugin/.eslintcache --concurrency auto"
+		"lint-fix": "eslint ./ --fix -c eslint.config.mjs --cache-location node_modules/.cache/eslint-webpack-plugin/.eslintcache --concurrency auto",
+		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.29.7",
