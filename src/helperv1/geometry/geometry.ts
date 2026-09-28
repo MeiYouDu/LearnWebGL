@@ -52,6 +52,9 @@ class Geometry extends Base {
 		 * 顶点数组对象(顶点属性)
 		 */
 		this.vao = gl.createVertexArray();
+		// 新建 VAO 属性未配置，必须失效 shader/stride 缓存，否则再次绘制会跳过 vertexAttribPointer
+		this.lastShader = undefined;
+		this.stride = 1;
 		// 先绑定 vao，再绑定vbo 和 ebo
 		gl.bindVertexArray(this.vao);
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);

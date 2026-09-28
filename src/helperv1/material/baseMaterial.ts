@@ -99,7 +99,10 @@ class Material extends Base {
 			!hasSpecular ? "material.specular" : undefined,
 		].filter((name): name is string => !!name && !!gl.getUniformLocation(program, name));
 		if (!names.length) return;
-		const unit = this.textures.length;
+		// 取第一个未被自身纹理占用的单元，避免与显式 unit 撞车后覆盖真实纹理
+		const usedUnits = new Set(this.textures.map((binding, index) => binding.unit ?? index));
+		let unit = this.textures.length;
+		while (usedUnits.has(unit)) unit += 1;
 		const texture = new Texture({
 			data: { pixels: new Uint8Array([255, 255, 255, 255]), width: 1, height: 1 },
 			filter: { min: gl.LINEAR, mag: gl.LINEAR },
