@@ -1,4 +1,4 @@
-// quaternion 教学 demo：万向锁对比（左：欧拉角 / 右：四元数）
+// quaternion 教学 demo：万向锁对比（左上：欧拉角 / 左下：固定世界轴增量（无锁）/ 右：四元数）
 import boxImage from "@/assets/textures/marble.jpg";
 import {
 	Camera,
@@ -70,6 +70,23 @@ const AXIS_X_LOCAL = mat4.fromScaling(mat4.create(), vec3.fromValues(1.2, 0.03, 
 const AXIS_Y_LOCAL = mat4.fromScaling(mat4.create(), vec3.fromValues(0.03, 1.2, 0.03));
 const AXIS_Z_LOCAL = mat4.fromScaling(mat4.create(), vec3.fromValues(0.03, 0.03, 1.2));
 
+// 下格「固定世界轴 · 增量」的世界三脚架：同款细棒几何、更长以与物体轴区分。
+// 注意物体轴（1.2，半长 0.6）整根埋在 scale 2 的立方体（半宽 1.0）内部，被不透明立方体遮挡，
+// 世界三脚架必须长过立方体半宽才露得出来（这里 3.2，两端各露出立方体面 0.6）；数值可调，最终视觉交 designer。
+const WORLD_AXIS_LENGTH = 3.2;
+const AXIS_X_WORLD = mat4.fromScaling(
+	mat4.create(),
+	vec3.fromValues(WORLD_AXIS_LENGTH, 0.03, 0.03),
+);
+const AXIS_Y_WORLD = mat4.fromScaling(
+	mat4.create(),
+	vec3.fromValues(0.03, WORLD_AXIS_LENGTH, 0.03),
+);
+const AXIS_Z_WORLD = mat4.fromScaling(
+	mat4.create(),
+	vec3.fromValues(0.03, 0.03, WORLD_AXIS_LENGTH),
+);
+
 // 万向节三环 base 朝向：圆环几何初始在 XY 平面、法线 +Z，用 base 把环摆成物理万向节姿态。
 // 该基底下 pitch=±90° 时外环与中环平面严格共面（对任意 yaw/roll 成立），
 // 且内环的转轴会变为世界竖直轴、与外环转轴重合 —— 即锁。
@@ -96,6 +113,24 @@ const SLIDER_ACCENT: Record<"yaw" | "pitch" | "roll", string> = {
 	roll: "#ff9933",
 };
 const SLIDER_LOCK_ACCENT = "#ff4033";
+
+// 下格「固定世界轴 · 增量」：轴固定于世界系、每步增量左乘，状态是单一姿态四元数。
+// 轴映射与上格零姿态时三轴含义一致（右手法则），此后永不移动：
+// yaw→世界 Z、pitch→世界 X、roll→世界 Y。
+const BL_AXES: Record<"yaw" | "pitch" | "roll", vec3> = {
+	yaw: vec3.fromValues(0, 0, 1),
+	pitch: vec3.fromValues(1, 0, 0),
+	roll: vec3.fromValues(0, 1, 0),
+};
+// 松手回中动画时长（毫秒）
+const BL_RETURN_MS = 180;
+// 下格状态行文案（初稿，designer 后续统一）
+const BL_STATUS_TITLE = "三轴固定于世界 · 自由度恒 3";
+const BL_STATUS_DETAIL =
+	"轴永不随转动移动 + 每步增量 ⇒ 任意姿态下三个控制始终独立（对照上格：轴随转动链式移动，pitch=90° 处两轴重合）";
+
+type BlAxisKey = "yaw" | "pitch" | "roll";
+const BL_KEYS: readonly BlAxisKey[] = ["yaw", "pitch", "roll"];
 
 const DEFAULT_CAPTION =
 	"万向锁来自『用三个有序角表示姿态』：把同样的三个角塞进四元数乘法，pitch=90° 照样退化。四元数的做法是绕开有序角——轴角直接合成（拖拽 / slerp）。";
@@ -173,6 +208,7 @@ const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2,
 export default function QuaternionDemo() {
 	const leftCanvasRef = useRef<HTMLCanvasElement | null>(null);
 	const rightCanvasRef = useRef<HTMLCanvasElement | null>(null);
+	const bottomCanvasRef = useRef<HTMLCanvasElement | null>(null);
 	const quatTextRef = useRef<HTMLSpanElement | null>(null);
 
 	// 场景初始化在 effect 内完成，UI 通过 ref 调用其中暴露的函数
@@ -183,11 +219,24 @@ export default function QuaternionDemo() {
 	const toggleAutoRollRef = useRef<() => void>(() => {});
 	const resetQuatRef = useRef<() => void>(() => {});
 	const startMorphRef = useRef<() => void>(() => {});
+	// 下格（固定世界轴 · 增量）：施加增量 / 复位姿态
+	const applyIncrementRef = useRef<(key: BlAxisKey, deg: number) => void>(() => {});
+	const resetIncrementRef = useRef<() => void>(() => {});
 
 	const [angles, setAngles] = useState({ yaw: 0, pitch: 0, roll: 0 });
 	const [eulerSubTitle, setEulerSubTitle] = useState("");
 	const [autoRollRunning, setAutoRollRunning] = useState(false);
 	const [caption, setCaption] = useState(DEFAULT_CAPTION);
+	// 下格滑块值：只是「增量手势」的载体，不代表姿态角；唯一的姿态状态是场景里的四元数
+	const [increment, setIncrement] = useState<Record<BlAxisKey, number>>({
+		yaw: 0,
+		pitch: 0,
+		roll: 0,
+	});
+	// 上一次滑块值 = 增量基准；松手回中过程中同步写，动画结束恒为 0
+	const lastIncrementRef = useRef<Record<BlAxisKey, number>>({ yaw: 0, pitch: 0, roll: 0 });
+	// 每根滑块的回中动画 rAF id（0 = 无动画）
+	const returnRafRef = useRef<Record<BlAxisKey, number>>({ yaw: 0, pitch: 0, roll: 0 });
 
 	// 角度变化时同步左面板场景（滑块 / 演示 / 插值都通过它驱动）
 	useEffect(() => {
@@ -206,10 +255,80 @@ export default function QuaternionDemo() {
 		};
 	}
 
+	// 取消某根滑块正在进行的回中动画（重复调用安全）
+	function cancelReturnToZero(key: BlAxisKey) {
+		const raf = returnRafRef.current[key];
+		if (raf) {
+			cancelAnimationFrame(raf);
+			returnRafRef.current[key] = 0;
+		}
+	}
+
+	// 下格拖动 = 增量手势：只把 Δ 交给场景绕固定世界轴左乘，绝不从三个值重建姿态
+	function handleIncrementChange(key: BlAxisKey) {
+		return (value: number) => {
+			// 回中动画进行中用户再次抓住滑块：先取消动画，避免程序写值与拖拽值互相打架造成跳变
+			cancelReturnToZero(key);
+			const delta = value - lastIncrementRef.current[key];
+			lastIncrementRef.current[key] = value;
+			setIncrement((prev) => ({ ...prev, [key]: value }));
+			applyIncrementRef.current(key, delta);
+		};
+	}
+
+	// 松手回中：只是程序把滑块值写回 0（平滑 ease-out），不施加任何旋转；
+	// 过程中同步增量基准，结束时基准 = 0，下次拖动从 0 起算
+	function handleIncrementRelease(key: BlAxisKey) {
+		return () => {
+			cancelReturnToZero(key);
+			const from = lastIncrementRef.current[key];
+			if (!from) return;
+			const start = performance.now();
+			const tick = (now: number) => {
+				const t = Math.min(1, (now - start) / BL_RETURN_MS);
+				const value = from * Math.pow(1 - t, 3);
+				lastIncrementRef.current[key] = value;
+				setIncrement((prev) => ({ ...prev, [key]: value }));
+				if (t < 1) {
+					returnRafRef.current[key] = requestAnimationFrame(tick);
+				} else {
+					returnRafRef.current[key] = 0;
+					lastIncrementRef.current[key] = 0;
+					setIncrement((prev) => ({ ...prev, [key]: 0 }));
+				}
+			};
+			returnRafRef.current[key] = requestAnimationFrame(tick);
+		};
+	}
+
+	function handleIncrementReset() {
+		BL_KEYS.forEach(cancelReturnToZero);
+		// 复位：姿态回单位 + 三根滑块归 0（增量基准一并对齐）
+		lastIncrementRef.current = { yaw: 0, pitch: 0, roll: 0 };
+		setIncrement({ yaw: 0, pitch: 0, roll: 0 });
+		resetIncrementRef.current();
+	}
+
+	// 拖动中带符号（+36°），静止显示 0°
+	const formatIncrement = (value: number) => `${value > 0 ? "+" : ""}${Math.round(value)}°`;
+
+	// 卸载时取消仍在进行的回中动画（幂等）
+	useEffect(
+		() => () => {
+			BL_KEYS.forEach((key) => {
+				const raf = returnRafRef.current[key];
+				if (raf) cancelAnimationFrame(raf);
+				returnRafRef.current[key] = 0;
+			});
+		},
+		[],
+	);
+
 	useEffect(() => {
 		const leftCanvas = leftCanvasRef.current;
 		const rightCanvas = rightCanvasRef.current;
-		if (!leftCanvas || !rightCanvas) return;
+		const bottomCanvas = bottomCanvasRef.current;
+		if (!leftCanvas || !rightCanvas || !bottomCanvas) return;
 
 		// 固定机位相机：3/4 视角，世界 Z 向上；front = normalize(原点 - position)
 		const makeCamera = () => {
@@ -229,8 +348,14 @@ export default function QuaternionDemo() {
 			control: new StaticControl({ camera: makeCamera() }),
 			alpha: true,
 		});
+		// 左列下格：固定世界轴 · 增量（无锁），同为固定机位
+		const bottomScene = new Scene({
+			canvas: bottomCanvas,
+			control: new StaticControl({ camera: makeCamera() }),
+			alpha: true,
+		});
 		// 沿用现有 gl.enable(BLEND) 写法
-		[leftScene, rightScene].forEach((scene) => {
+		[leftScene, rightScene, bottomScene].forEach((scene) => {
 			const gl = scene.gl.deref();
 			if (!gl) return;
 			gl.enable(gl.BLEND);
@@ -240,12 +365,21 @@ export default function QuaternionDemo() {
 		const lightPos = vec3.fromValues(4, -8, 10);
 		const materialAmbient = vec3.fromValues(1.0, 0.5, 0.31);
 
-		// 每个面板独立创建 Texture / Material（两个 WebGL context 不能共享）
+		// 每个面板独立创建 Texture / Material（三个 WebGL context 不能共享）
 		const leftDiffuse = new Texture({ image: boxImage });
 		const leftSpecular = new Texture({ image: boxImage });
 		const rightDiffuse = new Texture({ image: boxImage });
 		const rightSpecular = new Texture({ image: boxImage });
-		const ownedTextures: Texture[] = [leftDiffuse, leftSpecular, rightDiffuse, rightSpecular];
+		const bottomDiffuse = new Texture({ image: boxImage });
+		const bottomSpecular = new Texture({ image: boxImage });
+		const ownedTextures: Texture[] = [
+			leftDiffuse,
+			leftSpecular,
+			rightDiffuse,
+			rightSpecular,
+			bottomDiffuse,
+			bottomSpecular,
+		];
 
 		const makeBoxMaterial = (diffuse: Texture, specular: Texture) =>
 			new Material({
@@ -290,6 +424,14 @@ export default function QuaternionDemo() {
 			vertexAttribPointer: PNAttribPointer,
 		});
 		const rightAxisGeometry = new Geometry({
+			attributes: axisBox.attributes,
+			vertexAttribPointer: PNAttribPointer,
+		});
+		const bottomBoxGeometry = new Geometry({
+			attributes: boxAttribute,
+			vertexAttribPointer: PNTAttribPointer,
+		});
+		const bottomAxisGeometry = new Geometry({
 			attributes: axisBox.attributes,
 			vertexAttribPointer: PNAttribPointer,
 		});
@@ -359,6 +501,36 @@ export default function QuaternionDemo() {
 			material: makeSolidMaterial(AXIS_Z_COLOR),
 		});
 
+		// 下格：立方体 + 物体自身三色轴（随姿态转）+ 固定世界三脚架（永不移动）
+		const bottomCube = new GeometryInstance({
+			geometry: bottomBoxGeometry,
+			material: makeBoxMaterial(bottomDiffuse, bottomSpecular),
+		});
+		const bottomAxisX = new GeometryInstance({
+			geometry: bottomAxisGeometry,
+			material: makeSolidMaterial(AXIS_X_COLOR),
+		});
+		const bottomAxisY = new GeometryInstance({
+			geometry: bottomAxisGeometry,
+			material: makeSolidMaterial(AXIS_Y_COLOR),
+		});
+		const bottomAxisZ = new GeometryInstance({
+			geometry: bottomAxisGeometry,
+			material: makeSolidMaterial(AXIS_Z_COLOR),
+		});
+		const worldAxisX = new GeometryInstance({
+			geometry: bottomAxisGeometry,
+			material: makeSolidMaterial(AXIS_X_COLOR),
+		});
+		const worldAxisY = new GeometryInstance({
+			geometry: bottomAxisGeometry,
+			material: makeSolidMaterial(AXIS_Y_COLOR),
+		});
+		const worldAxisZ = new GeometryInstance({
+			geometry: bottomAxisGeometry,
+			material: makeSolidMaterial(AXIS_Z_COLOR),
+		});
+
 		leftScene.add(leftCube);
 		leftScene.add(leftAxisX);
 		leftScene.add(leftAxisY);
@@ -370,6 +542,13 @@ export default function QuaternionDemo() {
 		rightScene.add(rightAxisX);
 		rightScene.add(rightAxisY);
 		rightScene.add(rightAxisZ);
+		bottomScene.add(bottomCube);
+		bottomScene.add(bottomAxisX);
+		bottomScene.add(bottomAxisY);
+		bottomScene.add(bottomAxisZ);
+		bottomScene.add(worldAxisX);
+		bottomScene.add(worldAxisY);
+		bottomScene.add(worldAxisZ);
 
 		// 左面板：R = Rz(yaw)·Rx(pitch)·Ry(roll)，锁发生在 pitch=±90°
 		const updateLeft = (yaw: number, pitch: number, roll: number) => {
@@ -421,6 +600,39 @@ export default function QuaternionDemo() {
 			updateQuatText(q);
 		};
 		applyRightQuat(currentQuat);
+
+		// 下格：状态是单一姿态四元数（初始 = 单位姿态），与上格「三个绝对角 → 重建姿态」相反
+		const incrementQuat = quat.create();
+		const applyIncrementQuat = () => {
+			const rotation = mat4.fromQuat(mat4.create(), incrementQuat);
+			const objectMatrix = mat4.multiply(mat4.create(), rotation, CUBE_SCALE);
+			bottomCube.matrix = objectMatrix;
+			bottomAxisX.matrix = mat4.multiply(mat4.create(), objectMatrix, AXIS_X_LOCAL);
+			bottomAxisY.matrix = mat4.multiply(mat4.create(), objectMatrix, AXIS_Y_LOCAL);
+			bottomAxisZ.matrix = mat4.multiply(mat4.create(), objectMatrix, AXIS_Z_LOCAL);
+		};
+		// 世界三脚架：矩阵只设一次，永不随物体转动更新（不乘物体旋转）
+		worldAxisX.matrix = mat4.clone(AXIS_X_WORLD);
+		worldAxisY.matrix = mat4.clone(AXIS_Y_WORLD);
+		worldAxisZ.matrix = mat4.clone(AXIS_Z_WORLD);
+		applyIncrementQuat();
+
+		// 唯一的旋转写入点：把增量绕「固定于世界系」的轴左乘到当前姿态
+		// （左乘 = 绕世界轴旋转；绝不出现 Rz(yaw)·Rx(pitch)·Ry(roll) 这类绝对角重建）
+		const applyIncrement = (key: BlAxisKey, deg: number) => {
+			if (!deg) return;
+			const delta = quat.setAxisAngle(quat.create(), BL_AXES[key], (deg * Math.PI) / 180);
+			quat.multiply(incrementQuat, delta, incrementQuat);
+			quat.normalize(incrementQuat, incrementQuat);
+			applyIncrementQuat();
+		};
+		applyIncrementRef.current = applyIncrement;
+
+		const resetIncrement = () => {
+			quat.identity(incrementQuat);
+			applyIncrementQuat();
+		};
+		resetIncrementRef.current = resetIncrement;
 
 		// 同一时间只允许一个演示：这里统一停止全部 rAF 并复位文案
 		let leftRaf = 0;
@@ -621,6 +833,7 @@ export default function QuaternionDemo() {
 			try {
 				leftScene.dispatch();
 				rightScene.dispatch();
+				bottomScene.dispatch();
 			} catch (e) {
 				console.log(e);
 			} finally {
@@ -690,84 +903,140 @@ export default function QuaternionDemo() {
 				}
 			`}</style>
 
-			{/* 左：欧拉角（警示色系，锁定即转红） */}
-			<div className="relative h-full w-1/2 border-r border-white/20">
-				<canvas ref={leftCanvasRef} className="block h-full w-full" />
-				<div
-					className={`quat-panel quat-card absolute left-4 top-4 flex w-80 flex-col gap-3 rounded-2xl border p-4 text-white backdrop-blur-md transition-all duration-300 ${
-						locked
-							? "border-red-500/40 shadow-[0_0_0_1px_rgba(239,68,68,0.35),0_10px_40px_rgba(127,29,29,0.5)]"
-							: "border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.55)]"
-					}`}>
-					<div className="flex items-center gap-2">
-						<span
-							className={`h-2 w-2 shrink-0 rounded-full transition-colors duration-300 ${
-								locked
-									? "quat-pulse bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.9)]"
-									: "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]"
-							}`}
-						/>
-						<h2 className="text-sm font-semibold tracking-wide">
-							欧拉角 <span className="font-normal text-white/45">Euler</span>
-						</h2>
+			{/* 左列：上格欧拉角（警示色系，锁定即转红）+ 下格固定世界轴增量（无锁） */}
+			<div className="relative flex h-full w-1/2 flex-col border-r border-white/20">
+				{/* 上格：欧拉角万向锁对照组（逻辑与改造前一致，仅半高后收紧间距） */}
+				<div className="relative h-1/2 w-full border-b border-white/10">
+					<canvas ref={leftCanvasRef} className="block h-full w-full" />
+					<div
+						className={`quat-panel quat-card absolute left-4 top-4 flex w-80 flex-col gap-2 rounded-2xl border p-3 text-white backdrop-blur-md transition-all duration-300 ${
+							locked
+								? "border-red-500/40 shadow-[0_0_0_1px_rgba(239,68,68,0.35),0_10px_40px_rgba(127,29,29,0.5)]"
+								: "border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.55)]"
+						}`}>
+						<div className="flex items-center gap-2">
+							<span
+								className={`h-2 w-2 shrink-0 rounded-full transition-colors duration-300 ${
+									locked
+										? "quat-pulse bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.9)]"
+										: "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]"
+								}`}
+							/>
+							<h2 className="text-sm font-semibold tracking-wide">
+								欧拉角 <span className="font-normal text-white/45">Euler</span>
+							</h2>
+						</div>
+						{(["yaw", "pitch", "roll"] as const).map((key) => {
+							const accent =
+								locked && key !== "roll" ? SLIDER_LOCK_ACCENT : SLIDER_ACCENT[key];
+							return (
+								<div key={key} className="flex items-center gap-2">
+									<span className="w-12 shrink-0 text-[11px] font-medium tracking-wider text-white/55">
+										{key}
+									</span>
+									{/* tooltip 的 Portal 一旦挂载，受控值被脚本/拖拽以 rAF 频率更新时会触发 rc-trigger 更新回环崩溃；数值标签已常显，故禁用 */}
+									<Slider
+										className="flex-1"
+										min={-180}
+										max={180}
+										step={1}
+										value={angles[key]}
+										onChange={handleEulerChange(key)}
+										tooltip={{ open: false }}
+										railStyle={{ background: "rgba(255,255,255,0.14)" }}
+										trackStyle={{ background: accent }}
+									/>
+									<span
+										className="w-12 shrink-0 text-right font-mono text-xs tabular-nums transition-colors duration-300"
+										style={{ color: accent }}>
+										{angles[key].toFixed(0)}°
+									</span>
+								</div>
+							);
+						})}
+						<div className="mt-0.5 flex gap-2">
+							<Button
+								size="small"
+								color="orange"
+								variant="solid"
+								className="!font-semibold !text-amber-950"
+								onClick={() => startEulerDemoRef.current()}>
+								▶ 演示万向锁
+							</Button>
+							<Button size="small" ghost onClick={() => resetEulerRef.current()}>
+								复位
+							</Button>
+						</div>
+						{/* 常驻占位，避免副标题出现 / 消失时卡片高度跳动 */}
+						<div className="min-h-4 text-xs font-medium leading-4 text-sky-300">
+							{eulerSubTitle}
+						</div>
+						{locked ? (
+							<div className="quat-fade-in rounded-lg border border-red-400/40 bg-red-500/15 p-2.5 text-xs text-red-50 backdrop-blur-sm">
+								<div className="flex items-center gap-1.5 font-semibold text-red-200">
+									<span className="h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.9)]" />
+									万向锁：自由度 3 → 2
+								</div>
+								<div className="mt-1 leading-relaxed text-red-100/85">
+									外环与中环已合成同一平面；内环转轴与外环重合（都绕世界竖直轴）——yaw
+									与 roll 等效
+								</div>
+							</div>
+						) : null}
 					</div>
-					{(["yaw", "pitch", "roll"] as const).map((key) => {
-						const accent =
-							locked && key !== "roll" ? SLIDER_LOCK_ACCENT : SLIDER_ACCENT[key];
-						return (
-							<div key={key} className="flex items-center gap-2">
+				</div>
+
+				{/* 下格：固定世界轴 · 增量驱动（无锁） */}
+				<div className="relative h-1/2 w-full">
+					<canvas ref={bottomCanvasRef} className="block h-full w-full" />
+					<div className="quat-panel quat-card absolute left-4 top-4 flex w-80 flex-col gap-2 rounded-2xl border border-emerald-400/20 p-3 text-white shadow-[0_10px_40px_rgba(0,0,0,0.55)] backdrop-blur-md">
+						<div className="flex items-center gap-2">
+							<span className="h-2 w-2 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)]" />
+							<h2 className="text-sm font-semibold tracking-wide">
+								固定世界轴 · 增量
+								<span className="font-normal text-white/45">（无锁）</span>
+							</h2>
+						</div>
+						{BL_KEYS.map((key) => (
+							<div
+								key={key}
+								className="flex items-center gap-2"
+								// 回中动画进行中再次抓住滑块：先取消动画，避免程序写值与拖拽值打架造成跳变
+								onPointerDown={() => cancelReturnToZero(key)}>
 								<span className="w-12 shrink-0 text-[11px] font-medium tracking-wider text-white/55">
 									{key}
 								</span>
-								{/* tooltip 的 Portal 一旦挂载，受控值被脚本/拖拽以 rAF 频率更新时会触发 rc-trigger 更新回环崩溃；数值标签已常显，故禁用 */}
+								{/* 同左格：tooltip 的 Portal 一旦挂载，受控值被「回中动画」以 rAF 频率外部写入时会触发 rc-trigger 更新回环崩溃；数值标签已常显，故禁用 */}
 								<Slider
 									className="flex-1"
-									min={-180}
-									max={180}
+									min={-90}
+									max={90}
 									step={1}
-									value={angles[key]}
-									onChange={handleEulerChange(key)}
+									value={increment[key]}
+									onChange={handleIncrementChange(key)}
+									onChangeComplete={handleIncrementRelease(key)}
 									tooltip={{ open: false }}
 									railStyle={{ background: "rgba(255,255,255,0.14)" }}
-									trackStyle={{ background: accent }}
+									trackStyle={{ background: SLIDER_ACCENT[key] }}
 								/>
 								<span
-									className="w-12 shrink-0 text-right font-mono text-xs tabular-nums transition-colors duration-300"
-									style={{ color: accent }}>
-									{angles[key].toFixed(0)}°
+									className="w-12 shrink-0 text-right font-mono text-xs tabular-nums"
+									style={{ color: SLIDER_ACCENT[key] }}>
+									{formatIncrement(increment[key])}
 								</span>
 							</div>
-						);
-					})}
-					<div className="mt-0.5 flex gap-2">
-						<Button
-							size="small"
-							color="orange"
-							variant="solid"
-							className="!font-semibold !text-amber-950"
-							onClick={() => startEulerDemoRef.current()}>
-							▶ 演示万向锁
-						</Button>
-						<Button size="small" ghost onClick={() => resetEulerRef.current()}>
-							复位
-						</Button>
-					</div>
-					{/* 常驻占位，避免副标题出现 / 消失时卡片高度跳动 */}
-					<div className="min-h-4 text-xs font-medium leading-4 text-sky-300">
-						{eulerSubTitle}
-					</div>
-					{locked ? (
-						<div className="quat-fade-in rounded-lg border border-red-400/40 bg-red-500/15 p-2.5 text-xs text-red-50 backdrop-blur-sm">
-							<div className="flex items-center gap-1.5 font-semibold text-red-200">
-								<span className="h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.9)]" />
-								万向锁：自由度 3 → 2
-							</div>
-							<div className="mt-1 leading-relaxed text-red-100/85">
-								外环与中环已合成同一平面；内环转轴与外环重合（都绕世界竖直轴）——yaw
-								与 roll 等效
-							</div>
+						))}
+						<div className="mt-0.5 flex items-center gap-2">
+							<Button size="small" ghost onClick={handleIncrementReset}>
+								复位
+							</Button>
+							<span className="text-[11px] text-white/40">拖动 = 增量，松手回中</span>
 						</div>
-					) : null}
+						<div className="rounded-lg border border-white/10 bg-white/[0.04] p-2.5 text-xs leading-relaxed">
+							<div className="font-semibold text-emerald-200">{BL_STATUS_TITLE}</div>
+							<div className="mt-1 text-white/60">{BL_STATUS_DETAIL}</div>
+						</div>
+					</div>
 				</div>
 			</div>
 

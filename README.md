@@ -32,7 +32,7 @@ pnpm build       # 生产构建
 | coordinateSystem | 坐标系变换（model / view / projection） |
 | camera | 相机控制 |
 | bezierLine | 贝塞尔曲线 |
-| quaternion | 万向锁对比：欧拉角有序角 vs 四元数轴角（拖拽 / slerp） |
+| quaternion | 万向锁对比：欧拉角有序角 vs 四元数轴角（拖拽 / slerp）＋固定世界轴增量（无锁对照） |
 
 ### 光照
 
