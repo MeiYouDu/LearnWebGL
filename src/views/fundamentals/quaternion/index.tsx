@@ -114,7 +114,7 @@ const SLIDER_ACCENT: Record<"yaw" | "pitch" | "roll", string> = {
 };
 const SLIDER_LOCK_ACCENT = "#ff4033";
 
-// 下格「固定世界轴 · 增量」：轴固定于世界系、每步增量左乘，状态是单一姿态四元数。
+// 下格「固定世界轴 · 增量」：轴固定于世界系、每步增量左乘，状态是单一旋转矩阵（无锁与存储形式无关）。
 // 轴映射与上格零姿态时三轴含义一致（右手法则），此后永不移动：
 // yaw→世界 Z、pitch→世界 X、roll→世界 Y。
 const BL_AXES: Record<"yaw" | "pitch" | "roll", vec3> = {
@@ -227,7 +227,7 @@ export default function QuaternionDemo() {
 	const [eulerSubTitle, setEulerSubTitle] = useState("");
 	const [autoRollRunning, setAutoRollRunning] = useState(false);
 	const [caption, setCaption] = useState(DEFAULT_CAPTION);
-	// 下格滑块值：只是「增量手势」的载体，不代表姿态角；唯一的姿态状态是场景里的四元数
+	// 下格滑块值：只是「增量手势」的载体，不代表姿态角；唯一的姿态状态是场景里的旋转矩阵
 	const [increment, setIncrement] = useState<Record<BlAxisKey, number>>({
 		yaw: 0,
 		pitch: 0,
@@ -601,11 +601,11 @@ export default function QuaternionDemo() {
 		};
 		applyRightQuat(currentQuat);
 
-		// 下格：状态是单一姿态四元数（初始 = 单位姿态），与上格「三个绝对角 → 重建姿态」相反
-		const incrementQuat = quat.create();
-		const applyIncrementQuat = () => {
-			const rotation = mat4.fromQuat(mat4.create(), incrementQuat);
-			const objectMatrix = mat4.multiply(mat4.create(), rotation, CUBE_SCALE);
+		// 下格：状态是单一旋转矩阵（初始 = 单位姿态），与上格「三个绝对角 → 重建姿态」相反。
+		// 四元数换成矩阵不改变结论：锁属于「三个有序角」，无锁属于「增量直接左乘合成」
+		const incrementMatrix = mat4.create(); // mat4.create() 即单位矩阵
+		const applyIncrementMatrix = () => {
+			const objectMatrix = mat4.multiply(mat4.create(), incrementMatrix, CUBE_SCALE);
 			bottomCube.matrix = objectMatrix;
 			bottomAxisX.matrix = mat4.multiply(mat4.create(), objectMatrix, AXIS_X_LOCAL);
 			bottomAxisY.matrix = mat4.multiply(mat4.create(), objectMatrix, AXIS_Y_LOCAL);
@@ -615,22 +615,22 @@ export default function QuaternionDemo() {
 		worldAxisX.matrix = mat4.clone(AXIS_X_WORLD);
 		worldAxisY.matrix = mat4.clone(AXIS_Y_WORLD);
 		worldAxisZ.matrix = mat4.clone(AXIS_Z_WORLD);
-		applyIncrementQuat();
+		applyIncrementMatrix();
 
-		// 唯一的旋转写入点：把增量绕「固定于世界系」的轴左乘到当前姿态
+		// 唯一的旋转写入点：把增量绕「固定于世界系」的轴左乘到当前姿态（M ← Δ·M）
 		// （左乘 = 绕世界轴旋转；绝不出现 Rz(yaw)·Rx(pitch)·Ry(roll) 这类绝对角重建）
+		// 注：矩阵连乘会累积浮点误差（正交性缓慢漂移）；本 demo 用量下可忽略，工程上需周期性重正交化
 		const applyIncrement = (key: BlAxisKey, deg: number) => {
 			if (!deg) return;
-			const delta = quat.setAxisAngle(quat.create(), BL_AXES[key], (deg * Math.PI) / 180);
-			quat.multiply(incrementQuat, delta, incrementQuat);
-			quat.normalize(incrementQuat, incrementQuat);
-			applyIncrementQuat();
+			const delta = mat4.fromRotation(mat4.create(), (deg * Math.PI) / 180, BL_AXES[key]);
+			mat4.multiply(incrementMatrix, delta, incrementMatrix);
+			applyIncrementMatrix();
 		};
 		applyIncrementRef.current = applyIncrement;
 
 		const resetIncrement = () => {
-			quat.identity(incrementQuat);
-			applyIncrementQuat();
+			mat4.identity(incrementMatrix);
+			applyIncrementMatrix();
 		};
 		resetIncrementRef.current = resetIncrement;
 
