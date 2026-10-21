@@ -27,6 +27,10 @@ class Geometry extends Base {
 	}
 	protected stride: number = 1;
 	/**
+	 * 绘制拓扑，默认三角形；子类可覆盖（如 PolylineGeometry 用 LINES）
+	 */
+	protected shapeType: GLenum = WebGL2RenderingContext.TRIANGLES;
+	/**
 	 * 上次配置属性解析用的 shader（program 变化时才需要重新配置 VAO）
 	 */
 	protected lastShader?: Shader;
@@ -89,9 +93,9 @@ class Geometry extends Base {
 			this.lastShader = shader;
 		}
 		if (this.indices) {
-			gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_INT, 0);
+			gl.drawElements(this.shapeType, this.indices.length, gl.UNSIGNED_INT, 0);
 		} else {
-			gl.drawArrays(gl.TRIANGLES, 0, this.attributes.length / this.stride);
+			gl.drawArrays(this.shapeType, 0, this.attributes.length / this.stride);
 		}
 	}
 	public remove() {
