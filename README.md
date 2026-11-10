@@ -45,6 +45,7 @@ pnpm build       # 生产构建
 | pointLight | 点光源 |
 | spotLight | 聚光灯 |
 | multipleLight | 多光源混合 |
+| normalVisualization | 法线可视化：把顶点法线展开成线段，可调长度 / 采样步长 / 按方向着色 |
 
 ### 高级
 

@@ -59,6 +59,22 @@ const lights: RouteObject[] = [
 				},
 			},
 			{
+				path: "normalVisualization",
+				id: "normalVisualization",
+				hydrateFallbackElement: HydrateFallback,
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "normalVisualization" */
+								/* webpackPrefetch: true */
+								"@/views/light/normalVisualization/index"
+							)
+						).default,
+					};
+				},
+			},
+			{
 				path: "lightCaster",
 				id: "lightCaster",
 				children: [
