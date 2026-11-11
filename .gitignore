@@ -149,6 +149,7 @@ temp
 *.gz
 .nx/cache
 
-model
+*.ksplat
+*.spz
 .omo
 .cortexkit
