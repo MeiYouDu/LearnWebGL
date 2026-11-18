@@ -57,6 +57,7 @@ pnpm build       # 生产构建
 | faceCulling | 面剔除 |
 | frameBuffer | 帧缓冲 + 后处理（反色/锐化/模糊/边缘检测/灰度） |
 | cubeMaps | 天空盒 + GLTF 模型加载 |
+| instancing | 实例化渲染：InstancedGeometry + 实例矩阵 attribute + drawElementsInstanced |
 
 ### 模型加载
 

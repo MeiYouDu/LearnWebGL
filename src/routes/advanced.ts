@@ -111,6 +111,23 @@ const advanced: RouteObject[] = [
 					};
 				},
 			},
+			{
+				path: "instancing",
+				id: "instancing",
+				index: true,
+				hydrateFallbackElement: HydrateFallback,
+				lazy: async () => {
+					return {
+						Component: (
+							await import(
+								/* webpackChunkName: "instancing" */
+								/* webpackPrefetch: true */
+								"@/views/advanced/instancing"
+							)
+						).default,
+					};
+				},
+			},
 		],
 	},
 ];

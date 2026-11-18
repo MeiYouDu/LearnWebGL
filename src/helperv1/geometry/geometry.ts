@@ -87,11 +87,46 @@ class Geometry extends Base {
 	public draw(gl: WebGL2RenderingContext, shader: Shader): void {
 		if (!this.vao || !this.vbo) return;
 		if (this.lastShader !== shader) {
-			// vertexAttribPointer 记录的是调用时绑定在 GL_ARRAY_BUFFER 上的 buffer
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
-			this.stride = this.vertexAttribPointer?.(gl, shader) ?? 1;
+			// 属性解析写入当前 VAO，必须先绑定；子类可在 configureAttributes 里追加实例属性
+			gl.bindVertexArray(this.vao);
+			this.stride = this.configureAttributes(gl, shader);
 			this.lastShader = shader;
 		}
+		// 每帧上传动态数据（普通几何体无操作，实例化几何体在此更新实例矩阵）
+		this.updateInstanceData(gl);
+		this.drawCall(gl);
+	}
+	/**
+	 * 配置顶点属性解析
+	 *
+	 * 默认绑定顶点 VBO 并调用构造时传入的 vertexAttribPointer；
+	 * 子类可重写并在 super 之后追加自己的属性（如实例矩阵）
+	 * @param gl
+	 * @param shader
+	 * @returns stride（顶点占用的 float 数）
+	 */
+	protected configureAttributes(gl: WebGL2RenderingContext, shader: Shader): number {
+		if (!this.vbo) return 1;
+		// vertexAttribPointer 记录的是调用时绑定在 GL_ARRAY_BUFFER 上的 buffer
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
+		return this.vertexAttribPointer?.(gl, shader) ?? 1;
+	}
+	/**
+	 * 每帧更新顶点/实例数据
+	 *
+	 * 默认无操作；实例化几何体在此上传实例矩阵
+	 * @param gl
+	 */
+	protected updateInstanceData(gl: WebGL2RenderingContext): void {
+		void gl;
+	}
+	/**
+	 * 实际绘制调用
+	 *
+	 * 默认 drawElements / drawArrays；实例化几何体重写为 instanced 版本
+	 * @param gl
+	 */
+	protected drawCall(gl: WebGL2RenderingContext): void {
 		if (this.indices) {
 			gl.drawElements(this.shapeType, this.indices.length, gl.UNSIGNED_INT, 0);
 		} else {
