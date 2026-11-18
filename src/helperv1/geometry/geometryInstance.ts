@@ -46,7 +46,6 @@ class GeometryInstance extends Base {
 	public render(scene: Scene) {
 		const gl = this.getGl();
 		if (!gl) return;
-		this.geometry.bind(gl);
 		this.material.beforeDraw(scene, this.material);
 		this.material.render(scene, this);
 		// 绘制时按当前 shader 配置属性解析（同一 VAO 可被不同材质复用）

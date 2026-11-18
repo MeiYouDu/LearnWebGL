@@ -79,16 +79,17 @@ class Geometry extends Base {
 	/**
 	 * 绘制
 	 *
-	 * 属性解析（location）延迟到绘制时、按当前 shader 配置；
+	 * 每帧绑定自身 VAO，不依赖调用方的绑定顺序；
+	 * 属性解析（location）延迟到绘制时、按当前 shader 配置，
 	 * program 变化时才重新调用 vertexAttribPointer（同一 VAO 可被不同材质复用）
 	 * @param gl
 	 * @param shader 当前绘制使用的 shader
 	 */
 	public draw(gl: WebGL2RenderingContext, shader: Shader): void {
 		if (!this.vao || !this.vbo) return;
+		// 属性解析与绘制都作用于当前 VAO，统一在这里绑定
+		gl.bindVertexArray(this.vao);
 		if (this.lastShader !== shader) {
-			// 属性解析写入当前 VAO，必须先绑定；子类可在 configureAttributes 里追加实例属性
-			gl.bindVertexArray(this.vao);
 			this.stride = this.configureAttributes(gl, shader);
 			this.lastShader = shader;
 		}
