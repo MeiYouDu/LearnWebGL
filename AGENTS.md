@@ -32,6 +32,9 @@ pnpm lint-fix     # eslint ./ --fix（仓库根，覆盖 .ts/.md/.glsl）
 - 改完先 `pnpm build`：webpack 内置 fork-ts-checker 做类型检查 + eslint 插件，production 下 eslint `failOnError`。
 - 改了页面交互或 WebGL 初始化后 `pnpm serve`，在浏览器确认：路由能进、canvas 非空白、控制器可移动/旋转/缩放、切换路由后控制台无 WebGL/context/listener 报错。
 - 提交：husky `pre-commit` 跑 lint-staged（eslint + stylelint），`commit-msg` 跑 commitlint，遵循 Conventional Commits（如 `feat: 新增 xxx 用例`）。
+- 提交信息简明扼要，不写背景或原因赘述：
+  - `feat`：title 一句话概述功能，description 逐条列功能点。
+  - `fix` / `refactor` / `chore`：title + description 只写改了什么。
 
 ## 构建与工程约定
 
